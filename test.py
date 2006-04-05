@@ -28,9 +28,10 @@ from zope.testing import testrunner
 
 defaults = [
     '--path', src,
-    '--package', 'zope.i18nmessageid',
+    '--package', 'zope.security',
     '--tests-pattern', '^tests$',
     ]
 
+# Tests of 'untrusted' stuff require RestrictedPython.
 sys.exit(testrunner.run(defaults))
 
