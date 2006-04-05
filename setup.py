@@ -24,8 +24,8 @@ except ImportError, e:
     from distutils.core import setup, Extension
 
 setup(name='zope.security',
-      version='1.0',
-      url='http://svn.zope.org/zope.security',
+      version='3.0.0',
+      url='http://svn.zope.org/zope.security/tags/3.0.0',
       license='ZPL 2.1',
       description='Zope3 Security Architecture',
       author='Zope Corporation and Contributors',
@@ -42,7 +42,7 @@ setup(name='zope.security',
       ext_modules=[Extension("zope.security._proxy",
                              [os.path.join('src', 'zope', 'security',
                                            "_proxy.c")
-                              ], include_dirs=['include']),
+                              ], include_dirs=['include/zope.proxy']),
                    Extension("zope.security._zope_security_checker",
                              [os.path.join('src', 'zope', 'security',
                                            "_zope_security_checker.c")

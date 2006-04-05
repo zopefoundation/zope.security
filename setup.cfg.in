@@ -1,4 +1,5 @@
+[development]
+depends = zope.testing
 
-[egg_info]
-tag_build = .dev
-tag_svn_revision = 1
+[easy_install]
+find-links = http://download.zope.org/distribution/3.0.0/
