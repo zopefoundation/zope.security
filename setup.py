@@ -18,13 +18,10 @@ $Id$
 
 import os
 
-try:
-    from setuptools import setup, Extension
-except ImportError, e:
-    from distutils.core import setup, Extension
+from setuptools import setup, find_packages, Extension
 
 setup(name='zope.security',
-      version='3.3-dev',
+      version='3.3dev',
       url='http://svn.zope.org/zope.security',
       license='ZPL 2.1',
       description='Zope3 Security Architecture',
@@ -33,11 +30,8 @@ setup(name='zope.security',
       long_description='The Security framework provides a generic mechanism '
                        'to implement security policies on Python objects.',
       
-      packages=['zope',
-                'zope.security',
-                'zope.security.untrustedpython',
-               ],
-      package_dir = {'': 'src'},
+	  packages=find_packages('src'),
+	  package_dir = {'': 'src'},
 
       ext_modules=[Extension("zope.security._proxy",
                              [os.path.join('src', 'zope', 'security',
