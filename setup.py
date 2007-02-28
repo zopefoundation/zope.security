@@ -51,6 +51,7 @@ setup(name='zope.security',
                         'zope.proxy',
                         'zope.schema',
                         'zope.thread',
+                        'zope.location'
                        ],
       extras_require = {'untrustedpython': ["RestrictedPython"]},
       include_package_data = True,
