@@ -21,7 +21,7 @@ import os
 from setuptools import setup, find_packages, Extension
 
 setup(name='zope.security',
-      version='3.3dev',
+      version='3.4dev',
       url='http://svn.zope.org/zope.security',
       license='ZPL 2.1',
       description='Zope3 Security Architecture',
@@ -52,7 +52,7 @@ setup(name='zope.security',
                         'zope.proxy',
                         'zope.schema',
                         'zope.thread',
-                        'zope.location'
+                        'zope.location',
                        ],
       extras_require = {'untrustedpython': ["RestrictedPython"]},
       include_package_data = True,
