@@ -42,22 +42,20 @@ setup(name='zope.security',
                                            "_zope_security_checker.c")
                               ]),
                    ],
-
       namespace_packages=['zope',],
       install_requires=['setuptools',
                         'pytz',
+                        'zope.component',
+                        'zope.configuration',
                         'zope.exceptions',
+                        'zope.i18nmessageid',
                         'zope.interface',
+                        'zope.location',
                         'zope.proxy',
                         'zope.schema',
                         'zope.thread',
-                        'zope.location',
-                        'zope.i18nmessageid',
-                        'zope.component',
-                        'zope.configuration'
-                       ],
-      extras_require = {'untrustedpython': ["RestrictedPython"]},
+                        ],
       include_package_data = True,
-
+      extras_require = {'untrustedpython': ["RestrictedPython"]},
       zip_safe = False,
       )
