@@ -21,7 +21,7 @@ import os
 from setuptools import setup, find_packages, Extension
 
 setup(name='zope.security',
-      version='3.4dev',
+      version = '3.4.0a1',
       url='http://svn.zope.org/zope.security',
       license='ZPL 2.1',
       description='Zope3 Security Architecture',
