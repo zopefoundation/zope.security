@@ -4,6 +4,9 @@ zope.security package changelog
 3.4.0b1
 -------
 
+- Temporarily fixed the hidden (and accidental) dependency on zope.testing to
+  become optional.
+
 Note: The releases between 3.2.0 and 3.4.0b1 where not tracked as an
 individual package and have been documented in the Zope 3 changelog.
 

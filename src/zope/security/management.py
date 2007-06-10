@@ -36,12 +36,17 @@ def _clear():
     global _defaultPolicy
     _defaultPolicy = ParanoidSecurityPolicy
 
+# XXX This code is used to support automated testing. However, it shouldn't be
+# here and needs to be refactored. The empty addCleanUp-method is a temporary
+# workaround to fix packages that depend on zope.security but don't have a
+# need for zope.testing.
 try:
     from zope.testing.cleanup import addCleanUp
 except ImportError:
-    pass
-else:
-    addCleanUp(_clear)
+    def addCleanUp(arg):
+        pass
+
+addCleanUp(_clear)
 
 #
 #   ISecurityManagement implementation
