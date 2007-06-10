@@ -29,9 +29,9 @@ setup(name='zope.security',
       author_email='zope3-dev@zope.org',
       long_description='The Security framework provides a generic mechanism '
                        'to implement security policies on Python objects.',
-      
-	  packages=find_packages('src'),
-	  package_dir = {'': 'src'},
+
+      packages=find_packages('src'),
+      package_dir = {'': 'src'},
 
       ext_modules=[Extension("zope.security._proxy",
                              [os.path.join('src', 'zope', 'security',
