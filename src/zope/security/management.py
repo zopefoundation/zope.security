@@ -86,17 +86,13 @@ def getInteraction():
 
 def newInteraction(*participations):
     """Start a new interaction."""
-    
-    
+
     if queryInteraction() is not None:
-        stack = queryInteraction()._newInteraction_called_from
         raise AssertionError("newInteraction called"
-                             " while another interaction is active:\n%s"
-                             % "".join(traceback.format_list(stack)))
+                             " while another interaction is active.")
 
     interaction = getSecurityPolicy()(*participations)
 
-    interaction._newInteraction_called_from = traceback.extract_stack()
     thread_local.interaction = interaction
 
 def endInteraction():

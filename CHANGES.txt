@@ -1,6 +1,14 @@
 zope.security package changelog
 ===============================
 
+3.4.0b2 - 2007/06/15
+--------------------
+
+- removed stack extraction in newInteraction. When using eggs this is an
+  extremly expensive function. The publisher is now more than 10 times faster
+  when using eggs and about twice as fast with a zope trunk checkout.
+
+
 3.4.0b1
 -------
 
