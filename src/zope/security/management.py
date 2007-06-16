@@ -19,8 +19,6 @@ $Id$
 # zope.security.simplepolicies needs it
 system_user = object()
 
-import traceback
-
 from zope.interface import moduleProvides
 from zope.security.interfaces import ISecurityManagement
 from zope.security.interfaces import IInteractionManagement
