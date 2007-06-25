@@ -17,12 +17,12 @@ $Id$
 """
 
 from zope.interface import Interface, Attribute, implements
-from zope.interface.common.interfaces import IAttributeError
+from zope.interface.common.interfaces import IException, IAttributeError
 from zope.schema import Text, TextLine
 from zope.i18nmessageid import MessageFactory
 _ = MessageFactory('zope')
 
-class IUnauthorized(Interface):
+class IUnauthorized(IException):
     pass
 
 class Unauthorized(Exception):
@@ -31,7 +31,7 @@ class Unauthorized(Exception):
     implements(IUnauthorized)
 
 
-class IForbidden(Interface):
+class IForbidden(IException):
     pass
 
 class Forbidden(Exception):
