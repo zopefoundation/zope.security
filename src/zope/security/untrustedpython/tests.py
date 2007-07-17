@@ -16,13 +16,18 @@
 $Id$
 """
 import unittest
-from zope.testing import doctestunit
+import re
+from zope.testing import doctestunit,renormalizing
 
 def test_suite():
+    checker = renormalizing.RENormalizing([
+       (re.compile(r"'ImmutableModule' object"),
+ 	           r'object'),
+       ])
     return unittest.TestSuite((
         doctestunit.DocFileSuite('builtins.txt',
                                  'rcompile.txt',
-                                 'interpreter.txt',
+                                 'interpreter.txt',checker=checker
                                  ),
         ))
 

@@ -1,5 +1,8 @@
 zope.security package changelog
 ===============================
+Next release 
+------------
+- zope.security now works on Python 2.5
 
 3.4.0b2 - 2007/06/15
 --------------------
