@@ -1,8 +1,13 @@
 zope.security package changelog
 ===============================
-Next release 
+
+Next release
 ------------
+
 - zope.security now works on Python 2.5
+
+- Fixed inclusion of doctest to use the doctest module from zope.testing. Now
+  tests can be run multiple times without breaking. (#98250)
 
 3.4.0b2 - 2007/06/15
 --------------------

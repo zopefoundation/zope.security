@@ -13,10 +13,10 @@
 ##############################################################################
 """Context Tests
 
-$Id: tests.py 66343 2006-04-03 04:59:49Z philikon $
+$Id$
 """
 import unittest
-import doctest
+from zope.testing import doctest
 
 def test_suite():
     suite = doctest.DocTestSuite()

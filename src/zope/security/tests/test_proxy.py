@@ -17,6 +17,7 @@ $Id$
 """
 
 import unittest
+from zope.testing.doctest import DocTestSuite
 from zope.security.proxy import getChecker, ProxyFactory, removeSecurityProxy
 from zope.proxy import ProxyBase as proxy
 
@@ -437,7 +438,6 @@ def test_using_mapping_slots_hack():
 
 def test_suite():
     suite = unittest.makeSuite(ProxyTests)
-    from doctest import DocTestSuite
     suite.addTest(DocTestSuite())
     suite.addTest(DocTestSuite('zope.security.proxy'))
     return suite
