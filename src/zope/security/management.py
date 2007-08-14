@@ -15,20 +15,22 @@
 
 $Id$
 """
-# Special system user that has all permissions
-# zope.security.simplepolicies needs it
-system_user = object()
 
-from zope.interface import moduleProvides
-from zope.security.interfaces import ISecurityManagement
-from zope.security.interfaces import IInteractionManagement
-from zope.security.interfaces import NoInteraction
+
+import zope.interface
 import zope.thread
 
-thread_local = zope.thread.local()
+import zope.security.interfaces
 
-moduleProvides(ISecurityManagement, IInteractionManagement)
+from zope.security.checker import CheckerPublic
+from zope.security._definitions import thread_local, system_user
+from zope.security.simplepolicies import ParanoidSecurityPolicy
 
+_defaultPolicy = ParanoidSecurityPolicy
+
+zope.interface.moduleProvides(
+    zope.security.interfaces.ISecurityManagement,
+    zope.security.interfaces.IInteractionManagement)
 
 def _clear():
     global _defaultPolicy
@@ -80,7 +82,7 @@ def getInteraction():
     try:
         return thread_local.interaction
     except AttributeError:
-        raise NoInteraction
+        raise zope.security.interfaces.NoInteraction
 
 def newInteraction(*participations):
     """Start a new interaction."""
@@ -140,10 +142,3 @@ def checkPermission(permission, object, interaction=None):
     return interaction.checkPermission(permission, object)
 
 addCleanUp(endInteraction)
-
-
-# circular imports are not fun
-
-from zope.security.checker import CheckerPublic
-from zope.security.simplepolicies import ParanoidSecurityPolicy
-_defaultPolicy = ParanoidSecurityPolicy

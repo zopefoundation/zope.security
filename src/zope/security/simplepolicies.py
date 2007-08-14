@@ -18,7 +18,7 @@ $Id$
 import zope.interface
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IInteraction, ISecurityPolicy
-from zope.security.management import system_user
+from zope.security._definitions import system_user
 
 class ParanoidSecurityPolicy(object):
     zope.interface.implements(IInteraction)

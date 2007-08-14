@@ -44,7 +44,7 @@ from zope.interface.interfaces import IInterface, IDeclaration
 from zope.security.interfaces import IChecker, INameBasedChecker
 from zope.security.interfaces import ISecurityProxyFactory
 from zope.security.interfaces import Unauthorized, ForbiddenAttribute
-from zope.security.management import thread_local
+from zope.security._definitions import thread_local
 from zope.security._proxy import _Proxy as Proxy, getChecker
 
 if os.environ.get('ZOPE_WATCH_CHECKERS'):

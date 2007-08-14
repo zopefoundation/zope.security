@@ -17,9 +17,10 @@ $Id$
 
 """
 
-# TODO: There's a circular import problem with the proxy package.
-# The proxy framework needs some refactoring, but not today.
-import zope.proxy
+import zope.deferredimport
 
-from zope.security.management import checkPermission
-from zope.security.checker import canWrite, canAccess
+zope.deferredimport.define(
+    checkPermission = 'zope.security.management:checkPermission',
+    canWrite = 'zope.security.checker:canWrite',
+    canAccess = 'zope.security.checker:canAccess',
+    )
