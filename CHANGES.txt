@@ -7,6 +7,14 @@ zope.security package changelog
 Bugs fixed:
 -----------
 
+- zope.security.management.system_user had an ugly/brittle id.
+
+3.4.0b3 - 2007/08/14
+--------------------
+
+Bugs fixed:
+-----------
+
 - zope.security.management.system_user wasn't a valid principal
   (didn't provide IPrincipal).
 
