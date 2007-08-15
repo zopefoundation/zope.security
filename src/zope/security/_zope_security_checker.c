@@ -568,7 +568,7 @@ if((str_##S = PyString_InternFromString(#S)) == NULL) return
   if ((Proxy = PyObject_GetAttrString(m, "_Proxy")) == NULL) return;
   Py_DECREF(m);
 
-  if ((m = PyImport_ImportModule("zope.security.management")) == NULL) return;
+  if ((m = PyImport_ImportModule("zope.security._definitions")) == NULL) return;
   thread_local = PyObject_GetAttrString(m, "thread_local");
   if (thread_local == NULL) return;
   Py_DECREF(m);
