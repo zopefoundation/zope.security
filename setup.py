@@ -15,24 +15,45 @@
 
 $Id$
 """
-
 import os
-
 from setuptools import setup, find_packages, Extension
 
+def read(*rnames):
+    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+
 setup(name='zope.security',
-      version = '3.4.0b5',
-      url='http://svn.zope.org/zope.security',
-      license='ZPL 2.1',
-      description='Zope3 Security Architecture',
+      version = '3.4.0',
       author='Zope Corporation and Contributors',
       author_email='zope3-dev@zope.org',
-      long_description='The Security framework provides a generic mechanism '
-                       'to implement security policies on Python objects.',
-
+      description='Zope3 Security Architecture',
+      long_description=(
+          read('README.txt')
+          + '\n\n' +
+          'Detailed Documentation\n' +
+          '======================'
+          + '\n\n' +
+          read('src', 'zope', 'security', 'README.txt')
+          + '\n\n' +
+          read('src', 'zope', 'security', 'untrustedinterpreter.txt')
+          + '\n\n' +
+          read('CHANGES.txt')
+          ),
+      keywords = "security",
+      classifiers = [
+          'Development Status :: 5 - Production/Stable',
+          'Environment :: Web Environment',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: Zope Public License',
+          'Programming Language :: Python',
+          'Natural Language :: English',
+          'Operating System :: OS Independent',
+          'Topic :: Internet :: WWW/HTTP',
+          'Framework :: Zope3'],
+      url='http://cheeseshop.python.org/pypi/zope.security',
+      license='ZPL 2.1',
       packages=find_packages('src'),
       package_dir = {'': 'src'},
-
+      namespace_packages=['zope'],
       ext_modules=[Extension("zope.security._proxy",
                              [os.path.join('src', 'zope', 'security',
                                            "_proxy.c")
@@ -42,20 +63,21 @@ setup(name='zope.security',
                                            "_zope_security_checker.c")
                               ]),
                    ],
-      namespace_packages=['zope',],
       install_requires=['setuptools',
                         'pytz',
                         'zope.component',
                         'zope.configuration',
-                        'zope.deferredimport', 
+                        'zope.deferredimport',
                         'zope.exceptions',
                         'zope.i18nmessageid',
                         'zope.interface',
-                        'zope.location>=3.4.0b1.dev-r75152',
+                        'zope.location',
                         'zope.proxy',
                         'zope.schema',
                         ],
+      extras_require = dict(
+          untrustedpython=["RestrictedPython"]
+          ),
       include_package_data = True,
-      extras_require = {'untrustedpython': ["RestrictedPython"]},
       zip_safe = False,
       )

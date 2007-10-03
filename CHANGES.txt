@@ -1,43 +1,43 @@
-zope.security package changelog
-===============================
+=======
+CHANGES
+=======
+
+
+3.4.0 - 2007/10/02
+------------------
+
+- Updated meta-data.
+
 
 3.4.0b5 - 2007/08/15
 --------------------
 
-Bugs fixed:
------------
+- Bug: Fixed a circular import in the C implementation.
 
-- Fixed a circular import in the C implementation.
 
 3.4.0b4 - 2007/08/14
 --------------------
 
-Bugs fixed:
------------
+- Bug: ``zope.security.management.system_user`` had an ugly/brittle id.
 
-- zope.security.management.system_user had an ugly/brittle id.
 
 3.4.0b3 - 2007/08/14
 --------------------
 
-Bugs fixed:
------------
+- ``zope.security`` now works on Python 2.5
 
-- zope.security.management.system_user wasn't a valid principal
+- Bug: ``zope.security.management.system_user`` wasn't a valid principal
   (didn't provide IPrincipal).
 
-- zope.security now works on Python 2.5
+- Bug: Fixed inclusion of doctest to use the doctest module from
+  ``zope.testing``. Now tests can be run multiple times without
+  breaking. (#98250)
 
-- Fixed inclusion of doctest to use the doctest module from zope.testing. Now
-  tests can be run multiple times without breaking. (#98250)
 
 3.4.0b2 - 2007/06/15
 --------------------
 
-Bugs fixed:
------------
-
-- removed stack extraction in newInteraction. When using eggs this is an
+- Bug: Removed stack extraction in newInteraction. When using eggs this is an
   extremly expensive function. The publisher is now more than 10 times faster
   when using eggs and about twice as fast with a zope trunk checkout.
 
