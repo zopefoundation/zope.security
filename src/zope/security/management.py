@@ -18,7 +18,6 @@ $Id$
 
 
 import zope.interface
-import zope.thread
 
 import zope.security.interfaces
 
