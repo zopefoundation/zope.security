@@ -74,6 +74,7 @@ setup(name='zope.security',
                         'zope.location',
                         'zope.proxy',
                         'zope.schema',
+                        'zope.thread',
                         ],
       extras_require = dict(
           untrustedpython=["RestrictedPython"]

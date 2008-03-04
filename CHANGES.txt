@@ -2,6 +2,10 @@
 CHANGES
 =======
 
+(unreleased)
+------------
+
+- Updated dependencies (added zope.thread explictly).
 
 3.4.0 - 2007/10/02
 ------------------
