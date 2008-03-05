@@ -25,5 +25,5 @@ thread_local = threading.local()
 class system_user(object):
     zope.interface.classProvides(zope.security.interfaces.IPrincipal)
     id = u'zope.security.management.system_user'
-    title = u'Special System User that typically has all permissions'
+    title = u'System'
     description = u''

@@ -119,7 +119,8 @@ class Test(CleanUp, unittest.TestCase):
         self.assertEquals(system_user.id,
                           u'zope.security.management.system_user')
 
-        self.assert_(system_user.title)
+        self.assertEquals(system_user.title, u'System')
+
         for name in 'id', 'title', 'description':
             self.assert_(isinstance(getattr(system_user, name), unicode))
 
