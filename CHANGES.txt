@@ -6,7 +6,6 @@ CHANGES
 3.5.0 - 2008-03-05
 -------------------
 
-- Updated dependencies (added zope.thread explictly).
 - Changed title for ``zope.security.management.system_user`` to be more
   presentable.
 
