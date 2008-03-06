@@ -3,7 +3,7 @@ CHANGES
 =======
 
 
-3.4.1 - 2008-03-05
+3.5.0 - 2008-03-05
 -------------------
 
 - Updated dependencies (added zope.thread explictly).
