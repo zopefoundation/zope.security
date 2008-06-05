@@ -3,6 +3,13 @@ CHANGES
 =======
 
 
+3.5.1 - 2008-06-04
+-------------------
+
+- Add `frozenset`, `set`, `reversed`, and `sorted` to the list of safe
+  builtins.
+
+
 3.5.0 - 2008-03-05
 -------------------
 

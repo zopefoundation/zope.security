@@ -49,16 +49,16 @@ def SafeBuiltins():
         '__debug__', '__name__', '__doc__', 'abs', 'apply', 'bool',
         'buffer', 'callable', 'chr', 'classmethod', 'cmp', 'coerce',
         'complex', 'copyright', 'credits', 'delattr',
-        'dict', 'divmod', 'filter', 'float', 'getattr',
+        'dict', 'divmod', 'filter', 'float', 'frozenset', 'getattr',
         'hasattr', 'hash', 'hex', 'id', 'int', 'isinstance',
         'issubclass', 'iter', 'len', 'license', 'list',
         'long', 'map', 'max', 'min', 'object', 'oct', 'ord', 'pow',
-        'property', 'quit', 'range', 'reduce', 'repr', 'round',
-        'setattr', 'slice', 'staticmethod', 'str', 'super', 'tuple',
-        'type', 'unichr', 'unicode', 'vars', 'xrange', 'zip',
+        'property', 'quit', 'range', 'reduce', 'repr', 'reversed', 'round',
+        'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'super',
+        'tuple', 'type', 'unichr', 'unicode', 'vars', 'xrange', 'zip',
         'True', 'False',
 
-        # TODO: dir segfaults with a seg fault due to a bas tuple
+        # TODO: dir segfaults with a seg fault due to a bad tuple
         # check in merge_class_dict in object.c. The assert macro
         # seems to be doing the wrong think. Basically, if an object
         # has bases, then bases is assumed to be a tuple.
