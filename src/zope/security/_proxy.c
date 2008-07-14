@@ -631,7 +631,7 @@ INPLACE(truediv, PyNumber_InPlaceTrueDivide)
  * Sequence methods.
  */
 
-static int
+static Py_ssize_t
 proxy_length(SecurityProxy *self)
 {
   if (check(self, str_check, str___len__) >= 0)
@@ -644,7 +644,7 @@ static PyObject *proxy_getitem(SecurityProxy *, PyObject *);
 static int proxy_setitem(SecurityProxy *, PyObject *, PyObject *);
 
 static PyObject *
-proxy_igetitem(SecurityProxy *self, int i)
+proxy_igetitem(SecurityProxy *self, Py_ssize_t i)
 {
   PyObject *key = PyInt_FromLong(i);
   PyObject *res = NULL;
@@ -658,7 +658,7 @@ proxy_igetitem(SecurityProxy *self, int i)
 
 
 static int
-proxy_isetitem(SecurityProxy *self, int i, PyObject *value)
+proxy_isetitem(SecurityProxy *self, Py_ssize_t i, PyObject *value)
 {
   PyObject *key = PyInt_FromLong(i);
   int res = -1;
@@ -671,7 +671,7 @@ proxy_isetitem(SecurityProxy *self, int i, PyObject *value)
 }
 
 static PyObject *
-proxy_slice(SecurityProxy *self, int start, int end)
+proxy_slice(SecurityProxy *self, Py_ssize_t start, Py_ssize_t end)
 {
   PyObject *result = NULL;
 
@@ -683,7 +683,7 @@ proxy_slice(SecurityProxy *self, int start, int end)
 }
 
 static int
-proxy_ass_slice(SecurityProxy *self, int i, int j, PyObject *value)
+proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j, PyObject *value)
 {
   if (check(self, str_check, str___setslice__) >= 0)
     return PySequence_SetSlice(self->proxy.proxy_object, i, j, value);
@@ -783,19 +783,19 @@ proxy_as_number = {
 
 static PySequenceMethods
 proxy_as_sequence = {
-  (inquiry)proxy_length,				/* sq_length */
+  (lenfunc)proxy_length,			/* sq_length */
   0,					/* sq_concat */
   0,					/* sq_repeat */
-  (intargfunc)proxy_igetitem,		        /* sq_item */
-  (intintargfunc)proxy_slice,	       	/* sq_slice */
-  (intobjargproc)proxy_isetitem,	/* sq_ass_item */
-  (intintobjargproc)proxy_ass_slice,	/* sq_ass_slice */
+  (ssizeargfunc)proxy_igetitem,		        /* sq_item */
+  (ssizessizeargfunc)proxy_slice,	       	/* sq_slice */
+  (ssizeobjargproc)proxy_isetitem,	/* sq_ass_item */
+  (ssizessizeobjargproc)proxy_ass_slice,	/* sq_ass_slice */
   (objobjproc)proxy_contains,		/* sq_contains */
 };
 
 static PyMappingMethods
 proxy_as_mapping = {
-  (inquiry)proxy_length,				/* mp_length */
+  (lenfunc)proxy_length,				/* mp_length */
   (binaryfunc)proxy_getitem,				/* mp_subscript */
   (objobjargproc)proxy_setitem,				/* mp_ass_subscript */
 };
