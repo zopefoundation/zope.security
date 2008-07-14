@@ -106,8 +106,8 @@ checkPermission(PyObject *permission, PyObject *object, PyObject *name)
 
 /*     def check(self, object, name): */
 
-/* Note that we have an int version gere because we will use it for
-   __setitem__, as describd below */
+/* Note that we have an int version here because we will use it for
+   __setitem__, as described below */
 
 static int
 Checker_check_int(Checker *self, PyObject *object, PyObject *name)
@@ -400,7 +400,7 @@ static PyGetSetDef Checker_getset[] = {
    in the same hack. */
 
 static PyMappingMethods Checker_as_mapping = {
-	/* mp_length        */ (inquiry)NULL,
+	/* mp_length        */ NULL,
 	/* mp_subscript     */ (binaryfunc)Checker_proxy,
 	/* mp_ass_subscript */ (objobjargproc)Checker_check_int,
 };
