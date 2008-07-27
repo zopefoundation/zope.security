@@ -72,7 +72,7 @@ setup(name='zope.security',
                         'zope.i18nmessageid',
                         'zope.interface',
                         'zope.location',
-                        'zope.proxy',
+                        'zope.proxy >= 3.4.2',
                         'zope.schema',
                         ],
       extras_require = dict(
