@@ -76,7 +76,8 @@ setup(name='zope.security',
                         'zope.schema',
                         ],
       extras_require = dict(
-          untrustedpython=["RestrictedPython"]
+          untrustedpython=["RestrictedPython"],
+          test=["RestrictedPython"],
           ),
       include_package_data = True,
       zip_safe = False,
