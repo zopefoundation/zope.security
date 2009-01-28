@@ -7,6 +7,9 @@ CHANGES
 
 - Added support to bootstrap on Jython.
 
+- Moved the `protectclass` module from `zope.app.security` to reduce the
+  number of dependencies on `zope.app.security`.
+
 
 3.5.2 - 2008-07-27
 ------------------
