@@ -27,6 +27,8 @@ from zope.interface import classImplements
 from zope.schema.interfaces import IField
 from zope.configuration.exceptions import ConfigurationError
 
+from zope.security.checker import moduleChecker, Checker, defineChecker
+from zope.security.checker import CheckerPublic
 from zope.security.protectclass import protectLikeUnto, protectName
 from zope.security.protectclass import protectSetAttribute
 
@@ -170,3 +172,57 @@ class ClassDirective(object):
         # same namespace, despite the utilities/content division
         utility(_context, IFactory, factoryObj,
                 permission=PublicPermission, name=id)
+
+
+def protectModule(module, name, permission):
+    """Set up a module checker to require a permission to access a name
+
+    If there isn't a checker for the module, create one.
+    """
+
+    checker = moduleChecker(module)
+    if checker is None:
+        checker = Checker({}, {})
+        defineChecker(module, checker)
+
+    if permission == 'zope.Public':
+        # Translate public permission to CheckerPublic
+        permission = CheckerPublic
+
+    # We know a dictionary get method was used because we set it
+    protections = checker.get_permissions
+    protections[name] = permission
+
+
+def _names(attributes, interfaces):
+    seen = {}
+    for name in attributes:
+        if not name in seen:
+            seen[name] = 1
+            yield name
+    for interface in interfaces:
+        for name in interface:
+            if not name in seen:
+                seen[name] = 1
+                yield name
+
+
+def allow(context, attributes=(), interface=()):
+
+    for name in _names(attributes, interface):
+        context.action(
+            discriminator=('http://namespaces.zope.org/zope:module',
+                           context.module, name),
+            callable = protectModule,
+            args = (context.module, name, 'zope.Public'),
+            )
+
+
+def require(context, permission, attributes=(), interface=()):
+    for name in _names(attributes, interface):
+        context.action(
+            discriminator=('http://namespaces.zope.org/zope:module',
+                           context.module, name),
+            callable = protectModule,
+            args = (context.module, name, permission),
+            )

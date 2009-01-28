@@ -10,6 +10,9 @@ CHANGES
 - Moved the `protectclass` module from `zope.app.security` to this
   package to reduce the number of dependencies on `zope.app.security`.
 
+- Moved the <module> directive implementation from `zope.app.security`
+  to this package.
+
 - Moved the <class> directive implementation from `zope.app.component`
   to this package.
 
