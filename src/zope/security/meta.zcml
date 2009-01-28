@@ -21,4 +21,34 @@
       schema=".zcml.IRedefinePermission"
       handler=".zcml.redefinePermission" />
 
+  <meta:directives namespace="http://namespaces.zope.org/zope">
+
+    <meta:complexDirective
+        name="class"
+        schema=".metadirectives.IClassDirective"
+        handler=".metaconfigure.ClassDirective"
+        >
+
+      <meta:subdirective
+          name="implements"
+          schema=".metadirectives.IImplementsSubdirective"
+          />
+
+      <meta:subdirective
+          name="require"
+          schema=".metadirectives.IRequireSubdirective"
+          />
+
+      <meta:subdirective
+          name="allow"
+          schema=".metadirectives.IAllowSubdirective"
+          />
+
+      <meta:subdirective
+          name="factory"
+          schema=".metadirectives.IFactorySubdirective"
+          />
+
+    </meta:complexDirective>
+  </meta:directives>
 </configure>

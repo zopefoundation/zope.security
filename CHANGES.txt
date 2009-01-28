@@ -7,8 +7,11 @@ CHANGES
 
 - Added support to bootstrap on Jython.
 
-- Moved the `protectclass` module from `zope.app.security` to reduce the
-  number of dependencies on `zope.app.security`.
+- Moved the `protectclass` module from `zope.app.security` to this
+  package to reduce the number of dependencies on `zope.app.security`.
+
+- Moved the <class> directive implementation from `zope.app.component`
+  to this package.
 
 
 3.5.2 - 2008-07-27
@@ -18,14 +21,14 @@ CHANGES
 
 
 3.5.1 - 2008-06-04
--------------------
+------------------
 
 - Add `frozenset`, `set`, `reversed`, and `sorted` to the list of safe
   builtins.
 
 
 3.5.0 - 2008-03-05
--------------------
+------------------
 
 - Changed title for ``zope.security.management.system_user`` to be more
   presentable.

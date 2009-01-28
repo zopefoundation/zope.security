@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2001, 2002 Zope Corporation and Contributors.
+# Copyright (c) 2003 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,22 +11,12 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Preliminaries to hookup a test suite with the external TestModule.
-
-This is necessary because the test framework interferes with seeing changes in
-the running modules via the module namespace.  This enables having some
-subject classes, instances, permissions, etc, that don't live in the test
-modules, themselves.
+"""Customization of zope.i18n for the Zope application server
 
 $Id$
 """
-from zope.interface import Interface
+__docformat__ = 'restructuredtext'
 
-from zope.security.tests import emptymodule as TestModule
-
-class I(Interface):
-    def m1():
-        pass
-    def m2():
-        pass
-
+# import this as _ to create i18n messages in the zope domain
+from zope.i18nmessageid import MessageFactory
+ZopeMessageFactory = MessageFactory('zope')

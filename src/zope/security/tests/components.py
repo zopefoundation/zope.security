@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2001, 2002 Zope Corporation and Contributors.
+# Copyright (c) 2002 Zope Corporation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,22 +11,34 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Preliminaries to hookup a test suite with the external TestModule.
-
-This is necessary because the test framework interferes with seeing changes in
-the running modules via the module namespace.  This enables having some
-subject classes, instances, permissions, etc, that don't live in the test
-modules, themselves.
+"""Components for testing
 
 $Id$
 """
-from zope.interface import Interface
+from zope.interface import Interface, Attribute, implements
+from zope.component import adapts
 
-from zope.security.tests import emptymodule as TestModule
+class IAppb(Interface):
+    a = Attribute('test attribute')
+    def f(): "test func"
 
-class I(Interface):
-    def m1():
+class IApp(IAppb):
+    pass
+
+class IContent(Interface): pass
+
+class Content(object):
+    implements(IContent)
+
+class Comp(object):
+    adapts(IContent)
+    implements(IApp)
+
+    def __init__(self, *args):
+        # Ignore arguments passed to constructor
         pass
-    def m2():
-        pass
 
+    a = 1
+    def f(): pass
+
+comp = Comp()
