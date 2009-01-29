@@ -5,6 +5,9 @@ CHANGES
 3.6.0 - unreleased
 ------------------
 
+- Install decorated security checker support on LocationProxy from the
+  outside.
+
 - Added support to bootstrap on Jython.
 
 - Moved the `protectclass` module from `zope.app.security` to this
