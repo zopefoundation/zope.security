@@ -26,6 +26,7 @@ from zope.security.checker import selectChecker, CombinedChecker
 from zope.security.proxy import Proxy, getChecker
 from zope.interface.declarations import ObjectSpecification
 
+
 class DecoratedSecurityCheckerDescriptor(object):
     """Descriptor for a Decorator that provides a decorated security checker.
 
@@ -194,5 +195,3 @@ class SecurityCheckerDecoratorBase(ProxyBase):
 class DecoratorBase(SpecificationDecoratorBase, SecurityCheckerDecoratorBase):
     """Base class for a proxy that provides both additional interfaces and
     security declarations."""
-
-
