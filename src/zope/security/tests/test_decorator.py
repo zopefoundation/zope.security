@@ -15,15 +15,12 @@
 
 $Id$
 """
+
 import unittest
 from zope.testing import doctest
+
 
 def test_suite():
     suite = doctest.DocTestSuite()
     suite.addTest(doctest.DocTestSuite('zope.security.decorator'))
-    suite.addTest(doctest.DocTestSuite('zope.security.location'))
     return suite
-
-
-if __name__ == '__main__':
-    unittest.main()

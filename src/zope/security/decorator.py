@@ -23,8 +23,16 @@ __docformat__ = "reStructuredText"
 from zope.proxy import getProxiedObject, ProxyBase
 from zope.proxy.decorator import SpecificationDecoratorBase
 from zope.security.checker import selectChecker, CombinedChecker
-from zope.security.proxy import Proxy, getChecker
 from zope.interface.declarations import ObjectSpecification
+import zope.deferredimport
+
+# zope.security.proxy depends on this module because of the re-injection of
+# security compatibility with zope.location. To avoid circular import problems
+# and as those two symbols are only needed at run-time, not module-execution
+# time, we import them deferred.
+zope.deferredimport.define(
+        Proxy='zope.security.proxy:Proxy',
+        getChecker='zope.security.proxy:getChecker')
 
 
 class DecoratedSecurityCheckerDescriptor(object):
@@ -168,8 +176,8 @@ class DecoratedSecurityCheckerDescriptor(object):
             return self
         else:
             proxied_object = getProxiedObject(inst)
-            if type(proxied_object) is Proxy:
-                checker = getChecker(proxied_object)
+            if type(proxied_object) is zope.security.decorator.Proxy:
+                checker = zope.security.decorator.getChecker(proxied_object)
             else:
                 checker = getattr(proxied_object, '__Security_checker__', None)
                 if checker is None:
