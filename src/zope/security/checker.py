@@ -27,7 +27,6 @@ $Id$
 """
 import os
 import sys
-import sets
 import types
 import datetime
 import decimal
@@ -664,8 +663,6 @@ _default_checkers = {
     list: NamesChecker(['__getitem__', '__getslice__', '__len__', '__iter__',
                         '__contains__', 'index', 'count', '__str__',
                         '__add__', '__radd__', ]),
-    sets.Set: _setChecker,
-    sets.ImmutableSet: _setChecker,
     set: _setChecker,
     frozenset: _setChecker,
     decimal.Decimal: NamesChecker(['__nonzero__', '__cmp__', '__eq__',
@@ -718,6 +715,12 @@ _default_checkers = {
     zope.interface.declarations.Implements: _Declaration_checker,
     zope.interface.declarations.Declaration: _Declaration_checker,
 }
+
+if sys.version_info[:2] < (2, 6):
+    import sets
+    _default_checkers[sets.Set] = _setChecker
+    _default_checkers[sets.ImmutableSet] = _setChecker
+
 
 def _clear():
     _checkers.clear()

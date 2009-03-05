@@ -5,9 +5,16 @@ CHANGES
 3.6.1 (unreleased)
 ------------------
 
-- ...
+- Don't define security checkers for deprecated set types from the
+  "sets" module on Python 2.6. It's discouraged to use them and
+  `set` and `frozenset` built-in types should be used instead. 
 
-3.6.0 - 2009-01-31 
+- Change package's mailng list address to zope-dev at zope.org as
+  zope3-dev at zope.org is now retired.
+
+- Remove old zpkg-related files.
+
+3.6.0 (2009-01-31) 
 ------------------
 
 - Install decorated security checker support on LocationProxy from the
@@ -25,45 +32,45 @@ CHANGES
   to this package.
 
 
-3.5.2 - 2008-07-27
+3.5.2 (2008-07-27)
 ------------------
 
 - Made C code compatible with Python 2.5 on 64bit architectures.
 
 
-3.5.1 - 2008-06-04
+3.5.1 (2008-06-04)
 ------------------
 
 - Add `frozenset`, `set`, `reversed`, and `sorted` to the list of safe
   builtins.
 
 
-3.5.0 - 2008-03-05
+3.5.0 (2008-03-05)
 ------------------
 
 - Changed title for ``zope.security.management.system_user`` to be more
   presentable.
 
 
-3.4.0 - 2007/10/02
+3.4.0 (2007-10-02)
 ------------------
 
 - Updated meta-data.
 
 
-3.4.0b5 - 2007/08/15
+3.4.0b5 (2007-08-15)
 --------------------
 
 - Bug: Fixed a circular import in the C implementation.
 
 
-3.4.0b4 - 2007/08/14
+3.4.0b4 (2007-08-14)
 --------------------
 
 - Bug: ``zope.security.management.system_user`` had an ugly/brittle id.
 
 
-3.4.0b3 - 2007/08/14
+3.4.0b3 (2007-08-14)
 --------------------
 
 - ``zope.security`` now works on Python 2.5
@@ -76,7 +83,7 @@ CHANGES
   breaking. (#98250)
 
 
-3.4.0b2 - 2007/06/15
+3.4.0b2 (2007-06-15)
 --------------------
 
 - Bug: Removed stack extraction in newInteraction. When using eggs this is an
@@ -94,7 +101,7 @@ Note: The releases between 3.2.0 and 3.4.0b1 where not tracked as an
 individual package and have been documented in the Zope 3 changelog.
 
 
-3.2.0 - 2006/01/05
+3.2.0 (2006-01-05)
 ------------------
 
 - Corresponds to the verison of the zope.security package shipped as part of
@@ -113,7 +120,7 @@ individual package and have been documented in the Zope 3 changelog.
 - Code style / documentation / test fixes.
 
 
-3.1.0 - 2005/10/03
+3.1.0 (2005-10-03)
 ------------------
 
 - Added support for use of the new Python 2.4 datatypes, 'set' and
@@ -142,7 +149,7 @@ individual package and have been documented in the Zope 3 changelog.
 - Code style / documentation / test fixes.
 
 
-3.0.0 - 2004/11/07
+3.0.0 (2004-11-07)
 ------------------
 
 - Corresponds to the version of the zope.security package shipped as part of

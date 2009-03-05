@@ -24,7 +24,7 @@ def read(*rnames):
 setup(name='zope.security',
       version = '3.6.1dev',
       author='Zope Corporation and Contributors',
-      author_email='zope3-dev@zope.org',
+      author_email='zope-dev@zope.org',
       description='Zope3 Security Architecture',
       long_description=(
           read('README.txt')
@@ -49,7 +49,7 @@ setup(name='zope.security',
           'Operating System :: OS Independent',
           'Topic :: Internet :: WWW/HTTP',
           'Framework :: Zope3'],
-      url='http://cheeseshop.python.org/pypi/zope.security',
+      url='http://pypi.python.org/pypi/zope.security',
       license='ZPL 2.1',
       packages=find_packages('src'),
       package_dir = {'': 'src'},

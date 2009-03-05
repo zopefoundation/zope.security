@@ -18,11 +18,11 @@ zope.security.checkers._default_checkers.
 
 $Id$
 """
+import sys
 import unittest
 from zope.testing.doctestunit import DocTestSuite
 from zope.security.checker import ProxyFactory
 from zope.security.interfaces import ForbiddenAttribute
-import sets
 
 def check_forbidden_get(object, attr):
     try:
@@ -201,18 +201,22 @@ def setUpFrozenSet(test):
     test.globs['set'] = frozenset
 
 def setUpSet(test):
+    import sets
     test.globs['set'] = sets.Set
 
 def setUpImmutableSet(test):
+    import sets
     test.globs['set'] = sets.ImmutableSet
 
 def test_suite():
-    return unittest.TestSuite((
+    doctests = [
         DocTestSuite(),
         DocTestSuite(setUp=setUpFrozenSet),
-        DocTestSuite(setUp=setUpSet),
-        DocTestSuite(setUp=setUpImmutableSet),
-        ))
+        ]
+    if sys.version_info[:2] < (2, 6):
+        doctests.append(DocTestSuite(setUp=setUpSet))
+        doctests.append(DocTestSuite(setUp=setUpImmutableSet))
+    return unittest.TestSuite(doctests)
 
 if __name__ == '__main__':
     import unittest
