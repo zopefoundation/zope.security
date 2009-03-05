@@ -77,7 +77,8 @@ class Test(CleanUp, unittest.TestCase):
         from zope.security import checkPermission
         from zope.security.management import setSecurityPolicy
         from zope.security.management import queryInteraction
-        from zope.security.management import newInteraction
+        from zope.security.management import newInteraction, endInteraction
+        from zope.security.interfaces import NoInteraction
 
         permission = 'zope.Test'
         obj = object()
@@ -94,6 +95,9 @@ class Test(CleanUp, unittest.TestCase):
         newInteraction()
         interaction = queryInteraction()
         self.assertEquals(checkPermission(permission, obj), True)
+        
+        endInteraction()
+        self.assertRaises(NoInteraction, checkPermission, permission, obj)
 
     def test_checkPublicPermission(self):
         from zope.security import checkPermission

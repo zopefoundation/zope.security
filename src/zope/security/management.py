@@ -137,7 +137,10 @@ def checkPermission(permission, object, interaction=None):
     if permission is CheckerPublic or permission is None:
         return True
     if interaction is None:
-        interaction = thread_local.interaction
+        try:
+            interaction = thread_local.interaction
+        except AttributeError:
+            raise zope.security.interfaces.NoInteraction
     return interaction.checkPermission(permission, object)
 
 addCleanUp(endInteraction)

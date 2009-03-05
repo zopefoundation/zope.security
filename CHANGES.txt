@@ -5,6 +5,9 @@ CHANGES
 3.6.1 (unreleased)
 ------------------
 
+- Raise NoInteraction when zope.security.checkPermission is called
+  without interaction being active (LP #301565).
+
 - Don't define security checkers for deprecated set types from the
   "sets" module on Python 2.6. It's discouraged to use them and
   `set` and `frozenset` built-in types should be used instead. 
