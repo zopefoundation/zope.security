@@ -38,7 +38,7 @@ setup(name='zope.security',
           + '\n\n' +
           read('CHANGES.txt')
           ),
-      keywords = "security",
+      keywords = "zope security policy principal permission",
       classifiers = [
           'Development Status :: 5 - Production/Stable',
           'Environment :: Web Environment',
