@@ -13,17 +13,14 @@
 ##############################################################################
 """Common definitions to avoid circular imports
 """
-
 import threading
-
 import zope.interface
-
-import zope.security.interfaces
+from zope.security import interfaces
 
 thread_local = threading.local()
 
 class system_user(object):
-    zope.interface.classProvides(zope.security.interfaces.IPrincipal)
+    zope.interface.classProvides(interfaces.IPrincipal)
     id = u'zope.security.management.system_user'
     title = u'System'
     description = u''

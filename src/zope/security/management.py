@@ -19,8 +19,7 @@ $Id$
 
 import zope.interface
 
-import zope.security.interfaces
-
+from zope.security import interfaces
 from zope.security.checker import CheckerPublic
 from zope.security._definitions import thread_local, system_user
 from zope.security.simplepolicies import ParanoidSecurityPolicy
@@ -28,8 +27,8 @@ from zope.security.simplepolicies import ParanoidSecurityPolicy
 _defaultPolicy = ParanoidSecurityPolicy
 
 zope.interface.moduleProvides(
-    zope.security.interfaces.ISecurityManagement,
-    zope.security.interfaces.IInteractionManagement)
+    interfaces.ISecurityManagement,
+    interfaces.IInteractionManagement)
 
 def _clear():
     global _defaultPolicy
@@ -81,7 +80,7 @@ def getInteraction():
     try:
         return thread_local.interaction
     except AttributeError:
-        raise zope.security.interfaces.NoInteraction
+        raise interfaces.NoInteraction
 
 def newInteraction(*participations):
     """Start a new interaction."""
@@ -140,7 +139,7 @@ def checkPermission(permission, object, interaction=None):
         try:
             interaction = thread_local.interaction
         except AttributeError:
-            raise zope.security.interfaces.NoInteraction
+            raise interfaces.NoInteraction
     return interaction.checkPermission(permission, object)
 
 addCleanUp(endInteraction)

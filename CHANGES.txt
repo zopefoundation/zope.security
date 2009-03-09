@@ -5,6 +5,9 @@ CHANGES
 3.6.1 (unreleased)
 ------------------
 
+- Use ``from`` imports instead of ``zope.deferred`` to avoid circular
+  import problems, thus drop dependency on ``zope.deferredimport``.
+
 - Raise NoInteraction when zope.security.checkPermission is called
   without interaction being active (LP #301565).
 

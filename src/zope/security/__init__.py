@@ -16,11 +16,5 @@
 $Id$
 
 """
-
-import zope.deferredimport
-
-zope.deferredimport.define(
-    checkPermission = 'zope.security.management:checkPermission',
-    canWrite = 'zope.security.checker:canWrite',
-    canAccess = 'zope.security.checker:canAccess',
-    )
+from zope.security.management import checkPermission
+from zope.security.checker import canWrite, canAccess
