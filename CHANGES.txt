@@ -2,7 +2,12 @@
 CHANGES
 =======
 
-3.6.1 (unreleased)
+3.6.2 (unreleased)
+------------------
+
+- ...
+
+3.6.1 (2009-03-10)
 ------------------
 
 - Use ``from`` imports instead of ``zope.deferred`` to avoid circular
