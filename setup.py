@@ -25,13 +25,10 @@ setup(name='zope.security',
       version = '3.6.1dev',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
-      description='Zope3 Security Architecture',
+      description='Zope3 Security Framework',
       long_description=(
           read('README.txt')
-          + '\n\n' +
-          'Detailed Documentation\n' +
-          '======================'
-          + '\n\n' +
+          + '\n.. contents::\n\n' +
           read('src', 'zope', 'security', 'README.txt')
           + '\n\n' +
           read('src', 'zope', 'security', 'untrustedinterpreter.txt')
