@@ -5,7 +5,14 @@ CHANGES
 3.6.2 (unreleased)
 ------------------
 
-- ...
+- Added PermissionsVocabulary and PermissionIdsVocabulary vocabularies
+  to the ``zope.security.permission`` module. They were moved from
+  the ``zope.app.security`` package.
+
+- Add zcml permission definition for the special "zope.Public"
+  permission.
+
+- Improve test coverage.
 
 3.6.1 (2009-03-10)
 ------------------
