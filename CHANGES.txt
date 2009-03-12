@@ -5,6 +5,12 @@ CHANGES
 3.6.2 (unreleased)
 ------------------
 
+- Add zope.i18nmessageid.Message to non-proxied basic types. It's okay, because
+  messages are immutable. It was done by zope.app.security before.
+
+- Add "__name__" and "__parent__" attributes to list of available by default.
+  This was also done by zope.app.security package before.
+
 - Added PermissionsVocabulary and PermissionIdsVocabulary vocabularies
   to the ``zope.security.permission`` module. They were moved from
   the ``zope.app.security`` package.

@@ -322,6 +322,8 @@ class Test(TestCase, CleanUp):
         self.assertEqual(checker.check(C, '__ge__'), None)
         self.assertEqual(checker.check(C, '__eq__'), None)
         self.assertEqual(checker.check(C, '__ne__'), None)
+        self.assertEqual(checker.check(C, '__name__'), None)
+        self.assertEqual(checker.check(C, '__parent__'), None)
 
     def test_setattr(self):
         checker = NamesChecker(['a', 'b', 'c', '__getitem__'],

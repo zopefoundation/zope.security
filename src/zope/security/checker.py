@@ -37,6 +37,7 @@ from zope.exceptions import DuplicationError
 import zope.interface.interface
 import zope.interface.interfaces
 import zope.interface.declarations
+from zope.i18nmessageid import Message
 from zope.interface import directlyProvides, Interface, implements
 from zope.interface.interfaces import IInterface, IDeclaration
 
@@ -564,6 +565,7 @@ _available_by_default[:] = ['__lt__', '__le__', '__eq__',
                             '__hash__', '__nonzero__',
                             '__class__', '__providedBy__', '__implements__',
                             '__repr__', '__conform__',
+                            '__name__', '__parent__',
                             ]
 
 _callableChecker = NamesChecker(['__str__', '__name__', '__call__'])
@@ -612,6 +614,7 @@ BasicTypes = BasicTypes({
     types.NoneType: NoProxy,
     str: NoProxy,
     unicode: NoProxy,
+    Message: NoProxy, # Messages are immutable, so it's okay
     bool: NoProxy,
     datetime.timedelta: NoProxy,
     datetime.datetime: NoProxy,
@@ -635,7 +638,8 @@ BasicTypes_examples = {
     datetime.timedelta: datetime.timedelta(3),
     datetime.datetime: datetime.datetime(2003, 1, 1),
     datetime.date: datetime.date(2003, 1, 1),
-    datetime.time: datetime.time(23, 58)
+    datetime.time: datetime.time(23, 58),
+    Message: Message('message', domain='hello')
 }
 
 
