@@ -12,6 +12,8 @@ CHANGES
 - Add zcml permission definition for the special "zope.Public"
   permission.
 
+- Add security declarations for the ``zope.security.permisson.Permission`` class.
+
 - Improve test coverage.
 
 3.6.1 (2009-03-10)

@@ -20,4 +20,8 @@
                    Public resources are always accessible."
       />
 
+  <class class=".permission.Permission">
+    <allow interface=".interfaces.IPermission" />
+  </class>
+
 </configure>
