@@ -4,12 +4,14 @@
     >
 
   <utility
-      component=".vocabulary.PermissionsVocabulary"
+      component=".permission.PermissionsVocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
       name="Permissions"
       />
 
   <utility
-      component=".vocabulary.PermissionIdsVocabulary"
+      component=".permission.PermissionIdsVocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
       name="Permission Ids"
       />
 
