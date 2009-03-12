@@ -1,0 +1,40 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="zope"
+    >
+
+  <!-- Note, that "zope.Public" is special one -->
+  <permission
+      id="zope.Public"
+      title="[public-permission] Public"
+      description="Special permission indicating unconditional access.
+                   Public resources are always accessible."
+      />
+
+  <!-- Ready-to-use common permissions for applications -->
+  <permission
+      id="zope.View"
+      title="[view-permission] View"
+      />
+
+  <permission
+      id="zope.Security"
+      title="[change-security-settings-permission] Change security settings"
+      />
+
+  <permission
+      id="zope.ManageContent"
+      title="[manage-content-permission] Manage Content"
+      />
+
+  <permission
+      id="zope.ManageServices"
+      title="[manage-services-permission] Manage Services"
+      />
+
+  <permission
+      id="zope.ManageSite"
+      title="[manage-site-permission] Manage Site"
+      />
+
+</configure>

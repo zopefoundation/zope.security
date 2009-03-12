@@ -15,8 +15,12 @@ CHANGES
   to the ``zope.security.permission`` module. They were moved from
   the ``zope.app.security`` package.
 
-- Add zcml permission definition for the special "zope.Public"
-  permission.
+- Add zcml permission definitions for most common and useful permissions,
+  like "zope.View" and "zope.ManageContent", as well as for the special
+  "zope.Public" permission. They are placed in a separate "permissions.zcml"
+  file, so it can be easily excluded/redefined. They are selected part of
+  permissions moved from ``zope.app.security`` and used by many zope.*
+  packages.
 
 - Add `addCheckerPublic` helper function in ``zope.security.testing`` module
   that registers the "zope.Public" permission as an IPermission utility.

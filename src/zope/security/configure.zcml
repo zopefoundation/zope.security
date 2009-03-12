@@ -1,7 +1,4 @@
-<configure
-    xmlns="http://namespaces.zope.org/zope"
-    i18n_domain="zope"
-    >
+<configure xmlns="http://namespaces.zope.org/zope">
 
   <utility
       component=".permission.PermissionsVocabulary"
@@ -15,15 +12,10 @@
       name="Permission Ids"
       />
 
-  <permission
-      id="zope.Public"
-      title="[public-permission] Public"
-      description="Special permission indicating unconditional access.
-                   Public resources are always accessible."
-      />
-
   <class class=".permission.Permission">
     <allow interface=".interfaces.IPermission" />
   </class>
+
+  <include file="permissions.zcml" />
 
 </configure>
