@@ -18,6 +18,9 @@ CHANGES
 - Add zcml permission definition for the special "zope.Public"
   permission.
 
+- Add `addCheckerPublic` helper function in ``zope.security.testing`` module
+  that registers the "zope.Public" permission as an IPermission utility.
+
 - Add security declarations for the ``zope.security.permisson.Permission`` class.
 
 - Improve test coverage.
