@@ -22,7 +22,7 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.security',
-      version = '3.6.2dev',
+      version = '3.6.3dev',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope3 Security Framework',

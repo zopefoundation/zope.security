@@ -2,7 +2,12 @@
 CHANGES
 =======
 
-3.6.2 (unreleased)
+3.6.3 (unreleased)
+------------------
+
+- ...
+
+3.6.2 (2009-03-14)
 ------------------
 
 - Add zope.i18nmessageid.Message to non-proxied basic types. It's okay, because
