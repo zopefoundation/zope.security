@@ -75,7 +75,10 @@ def PermissionsVocabulary(context=None):
 
     Term values are permissions, while term tokens are permission IDs.
     
-    To illustrate, we need to register the permission IDs vocab:
+    To illustrate, we need to register the permission IDs vocabulary:
+
+    >>> from zope.schema.vocabulary import _clear
+    >>> _clear()
 
     >>> from zope.schema.vocabulary import getVocabularyRegistry
     >>> registry = getVocabularyRegistry()
@@ -119,7 +122,10 @@ def PermissionIdsVocabulary(context=None):
     Terms are sorted by title except for 'Public', which always appears as
     the first term.
 
-    To illustrate, we need to register the permission IDs vocab:
+    To illustrate, we need to register the permission IDs vocabulary:
+
+    >>> from zope.schema.vocabulary import _clear
+    >>> _clear()
 
     >>> from zope.schema.vocabulary import getVocabularyRegistry
     >>> registry = getVocabularyRegistry()

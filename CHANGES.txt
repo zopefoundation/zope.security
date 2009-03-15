@@ -5,7 +5,10 @@ CHANGES
 3.6.3 (unreleased)
 ------------------
 
-- ...
+- Ensure that simple zope.schema's VocabularyRegistry is used for 
+  PermissionVocabulary tests, because it's replaced implicitly in
+  environments with zope.app.schema installed that makes that tests
+  fail.
 
 3.6.2 (2009-03-14)
 ------------------
