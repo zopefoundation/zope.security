@@ -160,7 +160,15 @@ class DecoratedSecurityCheckerDescriptor(object):
 
     the decorator doesn't have a checker:
 
-      >>> wrapper.__Security_checker__ is None
+      >>> wrapper.__Security_checker__
+      Traceback (most recent call last):
+        ...
+      AttributeError: 'Foo' has no attribute '__Security_checker__'
+
+    __Security_checker__ cannot be None, otherwise Checker.proxy blows
+    up:
+
+      >>> checker.proxy(wrapper) is wrapper
       True
 
     """
@@ -176,7 +184,11 @@ class DecoratedSecurityCheckerDescriptor(object):
                 if checker is None:
                     checker = selectChecker(proxied_object)
             wrapper_checker = selectChecker(inst)
-            if wrapper_checker is None:
+            if wrapper_checker is None and checker is None:
+                raise AttributeError("%r has no attribute %r" %
+                                     (proxied_object.__class__.__name__,
+                                      '__Security_checker__'))
+            elif wrapper_checker is None:
                 return checker
             elif checker is None:
                 return wrapper_checker
