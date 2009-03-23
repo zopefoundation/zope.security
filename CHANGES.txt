@@ -2,13 +2,18 @@
 CHANGES
 =======
 
-3.6.3 (unreleased)
+3.6.3 (2009-03-23)
 ------------------
 
 - Ensure that simple zope.schema's VocabularyRegistry is used for 
   PermissionVocabulary tests, because it's replaced implicitly in
   environments with zope.app.schema installed that makes that tests
   fail.
+
+- Fixed a bug in DecoratedSecurityCheckerDescriptor which made
+  security-wrapping location proxied exception instances throw
+  exceptions on Python 2.5.
+  See https://bugs.launchpad.net/zope3/+bug/251848
 
 3.6.2 (2009-03-14)
 ------------------
