@@ -73,6 +73,7 @@ setup(name='zope.security',
                         'zope.interface',
                         'zope.location',
                         'zope.proxy >= 3.4.2',
+                        'zope.thread',
                         'zope.schema',
                         ],
       extras_require = dict(

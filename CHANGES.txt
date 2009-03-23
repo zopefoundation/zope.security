@@ -5,6 +5,9 @@ CHANGES
 3.4.2 - (unreleased)
 -------------------------------
 
+- Added dependency 'zope.thread' to setup.py, without the tests were
+  failing.
+
 - Backported a fix made by Albertas Agejevas to the 3.4 branch. He
   fixed a bug in DecoratedSecurityCheckerDescriptor which made
   security-wrapping location proxied exception instances throw
