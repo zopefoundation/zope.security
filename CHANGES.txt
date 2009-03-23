@@ -2,6 +2,16 @@
 CHANGES
 =======
 
+3.4.2 - (unreleased)
+-------------------------------
+
+- Backported a fix made by Albertas Agejevas to the 3.4 branch. He
+  fixed a bug in DecoratedSecurityCheckerDescriptor which made
+  security-wrapping location proxied exception instances throw
+  exceptions on Python 2.5.  See
+  https://bugs.launchpad.net/zope3/+bug/251848
+
+
 3.4.1 - 2008/07/27
 ------------------
 
