@@ -5,8 +5,7 @@ CHANGES
 3.6.4 (unreleased)
 ------------------
 
-- Make uuid.UUID a rock, they are immutable and in the python standad library
-  from python 2.5.
+- None so far.
 
 3.6.3 (2009-03-23)
 ------------------
