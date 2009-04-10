@@ -624,6 +624,13 @@ BasicTypes = BasicTypes({
     type(pytz.UTC): NoProxy,
 })
 
+try:
+    # NOTE: remove try/except when we depend on python2.5 and up. uuid in standard library from python 2.5.
+    from uuid import UUID
+    BasicTypes[UUID] = NoProxy
+except ImportError:
+    pass
+
 # Available for tests. Located here so it can be kept in sync with BasicTypes.
 BasicTypes_examples = {
     object: object(),

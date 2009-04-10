@@ -424,6 +424,14 @@ def test_rocks():
     >>> from pytz import UTC
     >>> int(type(ProxyFactory(  UTC )) is type(UTC))
     1
+    
+    >>> try:
+    ...     # NOTE: remove try/except when we depend on python 2.5 and greater (uuid in standard library)
+    ...     from uuid import UUID
+    ...     int(type(ProxyFactory(  UUID('12345678123456781234567812345678') )) is UUID)
+    ... except ImportError:
+    ...     1
+    1
     """
 
 def test_iter_of_sequences():
