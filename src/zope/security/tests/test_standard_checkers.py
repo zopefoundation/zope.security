@@ -421,8 +421,11 @@ def test_rocks():
     >>> int(type(ProxyFactory(  tzinfo() )) is tzinfo)
     1
 
-    >>> from pytz import UTC
-    >>> int(type(ProxyFactory(  UTC )) is type(UTC))
+    >>> try:
+    ...     from pytz import UTC
+    ... except ImportError:  # pytz checker only if pytz is present.
+    ...     UTC = None
+    >>> int(UTC is None or type(ProxyFactory(  UTC )) is type(UTC))
     1
     """
 

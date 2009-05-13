@@ -5,7 +5,9 @@ CHANGES
 3.6.4 (unreleased)
 ------------------
 
-- None so far.
+- Made ``pytz`` a soft dependency:  the checker for ``pytz.UTC`` is
+  created / tested only if the package is already present.  Run
+  ``bin/test_pytz`` to run the tests with ``pytz`` on the path.
 
 3.6.3 (2009-03-23)
 ------------------

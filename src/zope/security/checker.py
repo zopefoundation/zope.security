@@ -30,7 +30,6 @@ import sys
 import types
 import datetime
 import decimal
-import pytz
 import weakref
 
 from zope.exceptions import DuplicationError
@@ -605,7 +604,7 @@ class BasicTypes(dict):
         super(BasicTypes.__class__, self).update(d)
         _checkers.update(d)
 
-BasicTypes = BasicTypes({
+_basic_types = {
     object: NoProxy,
     int: NoProxy,
     float: NoProxy,
@@ -621,8 +620,16 @@ BasicTypes = BasicTypes({
     datetime.date: NoProxy,
     datetime.time: NoProxy,
     datetime.tzinfo: NoProxy,
-    type(pytz.UTC): NoProxy,
-})
+}
+try:
+    import pytz
+except ImportError:
+    pass
+else:
+    _basic_types[type(pytz.UTC)] = NoProxy
+
+BasicTypes = BasicTypes(_basic_types)
+del _basic_types
 
 # Available for tests. Located here so it can be kept in sync with BasicTypes.
 BasicTypes_examples = {
