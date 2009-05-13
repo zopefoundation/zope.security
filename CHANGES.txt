@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-3.6.4 (unreleased)
+3.7.0 (2009-05-13)
 ------------------
 
 - Made ``pytz`` a soft dependency:  the checker for ``pytz.UTC`` is
