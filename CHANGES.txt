@@ -5,7 +5,13 @@ CHANGES
 3.7.1 (unreleased)
 ------------------
 
-- TBD
+- Fix for LP bug 181833 (from Gustavo Niemeyer). Before "visiting" a
+  sub-object, a check should be made to ensure the object is still valid.
+  Because garbage collection may involve loops, if you garbage collect an
+  object, it is possible that the actions done on this object may modify the
+  state of other objects. This may cause another round of garbage collection,
+  eventually generating a segfault (see LP bug). The Py_VISIT macro does the
+  necessary checks, so it is used instead of the previous code.
 
 3.7.0 (2009-05-13)
 ------------------
@@ -17,7 +23,7 @@ CHANGES
 3.6.3 (2009-03-23)
 ------------------
 
-- Ensure that simple zope.schema's VocabularyRegistry is used for 
+- Ensure that simple zope.schema's VocabularyRegistry is used for
   PermissionVocabulary tests, because it's replaced implicitly in
   environments with zope.app.schema installed that makes that tests
   fail.
@@ -65,14 +71,14 @@ CHANGES
 
 - Don't define security checkers for deprecated set types from the
   "sets" module on Python 2.6. It's discouraged to use them and
-  `set` and `frozenset` built-in types should be used instead. 
+  `set` and `frozenset` built-in types should be used instead.
 
 - Change package's mailng list address to zope-dev at zope.org as
   zope3-dev at zope.org is now retired.
 
 - Remove old zpkg-related files.
 
-3.6.0 (2009-01-31) 
+3.6.0 (2009-01-31)
 ------------------
 
 - Install decorated security checker support on LocationProxy from the
