@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-3.7.1 (unreleased)
+3.7.1 (2009-08-13)
 ------------------
 
 - Fix for LP bug 181833 (from Gustavo Niemeyer). Before "visiting" a
