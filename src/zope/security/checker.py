@@ -727,10 +727,14 @@ _default_checkers = {
     zope.interface.declarations.Declaration: _Declaration_checker,
 }
 
-if sys.version_info[:2] < (2, 6):
+if sys.version_info < (2, 6):
     import sets
     _default_checkers[sets.Set] = _setChecker
     _default_checkers[sets.ImmutableSet] = _setChecker
+
+if sys.version_info >= (2, 6):
+    import abc
+    _default_checkers[abc.ABCMeta] = _typeChecker
 
 
 def _clear():

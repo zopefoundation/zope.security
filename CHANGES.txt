@@ -2,8 +2,10 @@
 CHANGES
 =======
 
-3.7.2 (unreleased)
+3.7.2 (2009-11-10)
 ------------------
+
+- Added compatibility with Python 2.6 abstract base classes.
 
 3.7.1 (2009-08-13)
 ------------------

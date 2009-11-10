@@ -15,12 +15,11 @@
 
 This is a test of the assertions made in
 zope.security.checkers._default_checkers.
-
-$Id$
 """
 from zope.security.checker import ProxyFactory, NamesChecker
 from zope.security.interfaces import ForbiddenAttribute
 
+import sys
 
 def check_forbidden_get(object, attr):
     try:
@@ -489,6 +488,65 @@ def test_interfaces_and_declarations():
     >>> II.providedBy(n)
     True
     """
+
+if sys.version_info >= (2, 6):
+    def test_ABCMeta():
+        """
+        Test that we work with the ABCMeta meta class
+
+        >>> import abc
+        >>> class MyABC:
+        ...     __metaclass__ = abc.ABCMeta
+
+        >>> class Foo(MyABC): pass
+
+        >>> class Bar(Foo): pass
+
+        >>> PBar = ProxyFactory(Bar)
+        >>> [c.__name__ for c in PBar.__mro__]
+        ['Bar', 'Foo', 'MyABC', 'object']
+
+        >>> issubclass(PBar, Foo)
+        True
+
+        >>> issubclass(Bar, Foo)
+        True
+
+        >>> PBar = ProxyFactory(PBar)
+        >>> check_forbidden_call(PBar)
+        'ForbiddenAttribute: __call__'
+        >>> check_forbidden_get(PBar, '__dict__')
+        'ForbiddenAttribute: __dict__'
+        >>> s = str(PBar)
+        >>> s = `PBar`
+        >>> int(PBar.__module__ == __name__)
+        1
+        >>> len(PBar.__bases__)
+        1
+
+        Always available:
+
+        >>> int(PBar < PBar)
+        0
+        >>> int(PBar > PBar)
+        0
+        >>> int(PBar <= PBar)
+        1
+        >>> int(PBar >= PBar)
+        1
+        >>> int(PBar == PBar)
+        1
+        >>> int(PBar != PBar)
+        0
+        >>> int(bool(PBar))
+        1
+        >>> int(PBar.__class__ == abc.ABCMeta)
+        1
+
+
+
+        """
+
 
 
 from zope.testing.doctestunit import DocTestSuite
