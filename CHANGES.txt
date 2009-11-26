@@ -2,8 +2,21 @@
 CHANGES
 =======
 
+3.4.3 - (2009/11/26)
+--------------------
+
+- Backported a fix made by Gary Poster to the 3.4 branch:
+  Fix for LP bug 181833 (from Gustavo Niemeyer). Before "visiting" a
+  sub-object, a check should be made to ensure the object is still valid.
+  Because garbage collection may involve loops, if you garbage collect an
+  object, it is possible that the actions done on this object may modify the
+  state of other objects. This may cause another round of garbage collection,
+  eventually generating a segfault (see LP bug). The Py_VISIT macro does the
+  necessary checks, so it is used instead of the previous code.
+
+
 3.4.2 - (2009/03/23)
--------------------------------
+--------------------
 
 - Added dependency 'zope.thread' to setup.py, without the tests were
   failing.

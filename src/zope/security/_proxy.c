@@ -302,10 +302,8 @@ proxy_dealloc(SecurityProxy *self)
 static int
 proxy_traverse(SecurityProxy *self, visitproc visit, void *arg)
 {
-  if (visit(self->proxy.proxy_object, arg) < 0)
-    return -1;
-  if (visit(self->proxy_checker, arg) < 0)
-    return -1;
+  Py_VISIT(self->proxy.proxy_object);
+  Py_VISIT(self->proxy_checker);
   return 0;
 }
 
