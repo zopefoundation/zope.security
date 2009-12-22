@@ -17,7 +17,7 @@ $Id$
 """
 import unittest
 import re
-from zope.testing import doctestunit,renormalizing
+from zope.testing import doctest, renormalizing
 
 def test_suite():
     checker = renormalizing.RENormalizing([
@@ -25,7 +25,7 @@ def test_suite():
  	           r'object'),
        ])
     return unittest.TestSuite((
-        doctestunit.DocFileSuite('builtins.txt',
+        doctest.DocFileSuite('builtins.txt',
                                  'rcompile.txt',
                                  'interpreter.txt',checker=checker
                                  ),

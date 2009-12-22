@@ -22,7 +22,7 @@ from cStringIO import StringIO
 
 import zope.component
 from zope.interface import implements
-from zope.testing.doctestunit import DocTestSuite
+from zope.testing.doctest import DocTestSuite
 from zope.component.interface import queryInterface
 
 from zope.configuration.xmlconfig import xmlconfig, XMLConfig

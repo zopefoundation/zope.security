@@ -549,7 +549,7 @@ if sys.version_info >= (2, 6):
 
 
 
-from zope.testing.doctestunit import DocTestSuite
+from zope.testing.doctest import DocTestSuite
 
 def test_suite():
     return DocTestSuite()
