@@ -2,6 +2,13 @@
 CHANGES
 =======
 
+3.7.3 (unreleased)
+------------------
+
+- Fixed directlyProvides IVocabularyFactory for PermissionIdsVocabulary in
+  Python code, even if it's unnecessary because IVocabularyFactory is provided
+  in zcml.
+
 3.7.2 (2009-11-10)
 ------------------
 

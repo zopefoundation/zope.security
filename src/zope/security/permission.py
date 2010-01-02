@@ -179,4 +179,4 @@ def PermissionIdsVocabulary(context=None):
                (lhs.token == 'zope.Public' and -1) or cmp(lhs.title, rhs.title))
     return SimpleVocabulary(terms)
 
-directlyProvides(PermissionsVocabulary, IVocabularyFactory)
+directlyProvides(PermissionIdsVocabulary, IVocabularyFactory)
