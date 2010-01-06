@@ -32,7 +32,6 @@ import datetime
 import decimal
 import weakref
 
-from zope.exceptions import DuplicationError
 import zope.interface.interface
 import zope.interface.interfaces
 import zope.interface.declarations
@@ -45,6 +44,12 @@ from zope.security.interfaces import ISecurityProxyFactory
 from zope.security.interfaces import Unauthorized, ForbiddenAttribute
 from zope.security._definitions import thread_local
 from zope.security._proxy import _Proxy as Proxy, getChecker
+
+try:
+    from zope.exceptions import DuplicationError
+except ImportError:
+    class DuplicationError(Exception):
+        """A duplicate registration was attempted"""
 
 if os.environ.get('ZOPE_WATCH_CHECKERS'):
     try:

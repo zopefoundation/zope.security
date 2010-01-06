@@ -9,6 +9,11 @@ CHANGES
   Python code, even if it's unnecessary because IVocabularyFactory is provided
   in zcml.
 
+- Removed the dependency on the zope.exceptions package: zope.security.checker
+  now imports ``DuplicationError`` from zope.exceptions if available, otherwise
+  it defines a package-specific ``DuplicationError`` class which inherits from
+  Exception.
+
 3.7.2 (2009-11-10)
 ------------------
 
