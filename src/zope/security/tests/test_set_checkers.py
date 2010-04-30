@@ -20,7 +20,8 @@ $Id$
 """
 import sys
 import unittest
-from zope.testing.doctest import DocTestSuite
+from doctest import DocTestSuite
+
 from zope.security.checker import ProxyFactory
 from zope.security.interfaces import ForbiddenAttribute
 
@@ -217,7 +218,3 @@ def test_suite():
         doctests.append(DocTestSuite(setUp=setUpSet))
         doctests.append(DocTestSuite(setUp=setUpImmutableSet))
     return unittest.TestSuite(doctests)
-
-if __name__ == '__main__':
-    import unittest
-    unittest.main()

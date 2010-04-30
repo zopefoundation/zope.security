@@ -542,18 +542,9 @@ if sys.version_info >= (2, 6):
         1
         >>> int(PBar.__class__ == abc.ABCMeta)
         1
-
-
-
         """
 
 
-
-from zope.testing.doctest import DocTestSuite
-
 def test_suite():
+    from doctest import DocTestSuite
     return DocTestSuite()
-
-if __name__ == '__main__':
-    import unittest
-    unittest.main()

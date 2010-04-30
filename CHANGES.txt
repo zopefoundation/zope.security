@@ -5,6 +5,8 @@ CHANGES
 3.7.3 (unreleased)
 ------------------
 
+- Prefer the standard libraries doctest module to the one from zope.testing.
+
 - Fixed directlyProvides IVocabularyFactory for PermissionIdsVocabulary in
   Python code, even if it's unnecessary because IVocabularyFactory is provided
   in zcml.

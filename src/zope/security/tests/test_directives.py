@@ -19,10 +19,10 @@ import re
 import unittest
 import pprint
 from cStringIO import StringIO
+from doctest import DocTestSuite
 
 import zope.component
 from zope.interface import implements
-from zope.testing.doctest import DocTestSuite
 from zope.component.interface import queryInterface
 
 from zope.configuration.xmlconfig import xmlconfig, XMLConfig

@@ -15,12 +15,13 @@
 
 $Id$
 """
+
+import doctest
 import unittest
 from pprint import PrettyPrinter
 
 import zope.security.zcml
 from zope.interface import Interface, Attribute
-from zope.testing import doctest
 from zope.component.testing import setUp, tearDown, PlacelessSetup
 from zope.configuration import xmlconfig
 

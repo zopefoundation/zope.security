@@ -15,14 +15,10 @@
 $Id$
 """
 import unittest
-from zope.testing.doctest import DocTestSuite
+from doctest import DocTestSuite
 
 
 def test_suite():
     return unittest.TestSuite((
         DocTestSuite('zope.security.adapter'),
         ))
-
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')

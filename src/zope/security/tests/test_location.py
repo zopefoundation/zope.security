@@ -16,8 +16,7 @@
 $Id: test_decorator.py 95518 2009-01-29 19:16:15Z ctheune $
 """
 
-import unittest
-from zope.testing import doctest
+import doctest
 
 
 def test_locationproxy_security():

@@ -15,22 +15,22 @@
 
 $Id$
 """
+
+import doctest
 import unittest
 import re
-from zope.testing import doctest, renormalizing
+
+from zope.testing import renormalizing
+
 
 def test_suite():
     checker = renormalizing.RENormalizing([
-       (re.compile(r"'ImmutableModule' object"),
- 	           r'object'),
+       (re.compile(r"'ImmutableModule' object"), r'object'),
        ])
     return unittest.TestSuite((
         doctest.DocFileSuite('builtins.txt',
-                                 'rcompile.txt',
-                                 'interpreter.txt',checker=checker
-                                 ),
+                             'rcompile.txt',
+                             'interpreter.txt',
+                             checker=checker,
+                             ),
         ))
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
-

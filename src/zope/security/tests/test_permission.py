@@ -16,7 +16,8 @@
 $Id$
 """
 import unittest
-from zope.testing.doctest import DocTestSuite
+from doctest import DocTestSuite
+
 from zope.component.testing import setUp, tearDown
 
 __docformat__ = "reStructuredText"
@@ -26,6 +27,3 @@ def test_suite():
         DocTestSuite('zope.security.permission',
                      setUp=setUp, tearDown=tearDown),
         ])
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
