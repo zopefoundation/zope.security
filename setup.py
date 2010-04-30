@@ -27,10 +27,10 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.security',
-      version = '3.7.3dev',
+      version = '3.7.3',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
-      description='Zope3 Security Framework',
+      description='Zope Security Framework',
       long_description=(
           read('README.txt')
           + '\n.. contents::\n\n' +
