@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """ Register class directive.
-
-$Id$
 """
 __docformat__ = 'restructuredtext'
 

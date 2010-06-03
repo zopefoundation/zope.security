@@ -15,8 +15,6 @@
 
 This is a test of the assertions made in
 zope.security.checkers._default_checkers.
-
-$Id$
 """
 import sys
 import unittest

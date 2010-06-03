@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Test permissions
-
-$Id$
 """
 import unittest
 from doctest import DocTestSuite

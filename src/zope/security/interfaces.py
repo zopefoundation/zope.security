@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Interfaces for security machinery.
-
-$Id$
 """
 
 from zope.interface import Interface, Attribute, implements

@@ -22,8 +22,6 @@ messages about granted attribute access.
 
 Note that the ZOPE_WATCH_CHECKERS mechanism will eventually be
 replaced with a more general security auditing mechanism.
-
-$Id$
 """
 import os
 import sys

@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Security related configuration fields.
-
-$Id$
 """
 __docformat__ = 'restructuredtext'
 

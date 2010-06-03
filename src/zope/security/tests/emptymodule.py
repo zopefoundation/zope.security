@@ -15,6 +15,4 @@
 
 (There is a problem with the way the unit tests interact with the modules
 being tests, so the objects can't be expected to show up in place.)
-
-$Id$
 """

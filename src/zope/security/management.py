@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Default 'ISecurityManagement' and 'IInteractionManagement' implementation
-
-$Id$
 """
 
 

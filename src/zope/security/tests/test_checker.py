@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Security Checker tests
-
-$Id$
 """
 from unittest import TestCase, TestSuite, main, makeSuite
 from zope.interface import implements

@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """ Unit tests for SecurityManagement
-
-$Id$
 """
 
 import unittest

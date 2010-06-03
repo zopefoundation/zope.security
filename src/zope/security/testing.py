@@ -14,8 +14,6 @@
 """Testing support code
 
 This module provides some helper/stub objects for setting up interactions.
-
-$Id$
 """
 
 from zope import interface, component

@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Protection of builtin objects.
-
-$Id$
 """
 from zope.security.proxy import ProxyFactory
 import new

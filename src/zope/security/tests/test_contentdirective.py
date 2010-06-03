@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Test 'zope:class' directive.
-
-$Id$
 """
 import unittest
 from StringIO import StringIO

@@ -14,8 +14,6 @@
 """compile() equivalent that produces restricted code.
 
 Only 'eval' is supported at this time.
-
-$Id$
 """
 
 import compiler.pycodegen

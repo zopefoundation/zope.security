@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Helper functions for Proxies.
-
-$Id$
 """
 __docformat__ = 'restructuredtext'
 

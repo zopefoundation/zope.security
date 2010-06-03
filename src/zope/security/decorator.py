@@ -15,8 +15,6 @@
 
 Decorators are proxies that are mostly transparent but that may provide
 additional features.
-
-$Id$
 """
 __docformat__ = "reStructuredText"
 

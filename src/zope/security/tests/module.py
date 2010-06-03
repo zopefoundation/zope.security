@@ -17,8 +17,6 @@ This is necessary because the test framework interferes with seeing changes in
 the running modules via the module namespace.  This enables having some
 subject classes, instances, permissions, etc, that don't live in the test
 modules, themselves.
-
-$Id$
 """
 from zope.interface import Interface
 from zope.schema import Text

@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Test handler for 'protectClass' directive
-
-$Id$
 """
 import unittest
 from zope.interface import implements

@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Component Directives Tests
-
-$Id$
 """
 import re
 import unittest

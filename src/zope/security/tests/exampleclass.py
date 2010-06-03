@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Example test classes
-
-$Id$
 """
 from zope.interface import Interface
 

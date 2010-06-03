@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Component architecture related 'zope' ZCML namespace directive interfaces
-
-$Id$
 """
 __docformat__ = 'restructuredtext'
 

@@ -13,8 +13,6 @@
 ##############################################################################
 """Base security system
 
-$Id$
-
 """
 from zope.security.management import checkPermission
 from zope.security.checker import canWrite, canAccess

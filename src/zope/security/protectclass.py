@@ -13,8 +13,6 @@
 ##############################################################################
 """Make assertions about permissions needed to access class instances
 attributes
-
-$Id$
 """
 from zope.security.checker import defineChecker, getCheckerForInstancesOf
 from zope.security.checker import Checker, CheckerPublic

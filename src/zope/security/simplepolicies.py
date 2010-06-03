@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Simple 'ISecurityPolicy' implementations.
-
-$Id$
 """
 import zope.interface
 from zope.security.checker import CheckerPublic

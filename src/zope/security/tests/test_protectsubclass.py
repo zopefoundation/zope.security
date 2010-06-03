@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Test proper protection of inherited methods
-
-$Id$
 """
 import unittest
 from zope.security.checker import selectChecker

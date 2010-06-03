@@ -14,8 +14,6 @@
 """Restricted interpreter.
 
 TODO: This code needs a serious security review!!!
-
-$Id$
 """
 from zope.security.untrustedpython.builtins import SafeBuiltins
 from zope.security.untrustedpython.rcompile import compile

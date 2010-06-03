@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Unit tests for zope.security.simpleinteraction.
-
-$Id$
 """
 import unittest
 

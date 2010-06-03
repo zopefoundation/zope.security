@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Support for taking security into account in adaptation
-
-$Id$
 """
 
 from zope.security.checker import ProxyFactory

@@ -13,8 +13,6 @@
 #
 ##############################################################################
 """Security setup
-
-$Id$
 """
 from distutils.core import setup, Extension
 
