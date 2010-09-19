@@ -18,12 +18,14 @@ import doctest
 import unittest
 from pprint import PrettyPrinter
 
-import zope.security.zcml
 from zope.interface import Interface, Attribute
 from zope.component.testing import setUp, tearDown, PlacelessSetup
-from zope.configuration import xmlconfig
-
-from zope.security import metaconfigure
+try:
+    from zope.configuration import xmlconfig
+except ImportError:
+    HAVE_ZCML = False
+else:
+    HAVE_ZCML = True
 
 def pprint(ob, width=70):
     PrettyPrinter(width=width).pprint(ob)
@@ -41,6 +43,8 @@ test_bad_perm = 'zope.security.metaconfigure.bad'
 
 def test_protectModule():
     """
+    >>> from zope.security import metaconfigure
+
     >>> from zope.security.tests import test_directives
     >>> from zope.security.interfaces import IPermission
     >>> from zope.security.permission import Permission
@@ -80,6 +84,8 @@ def test_allow():
 
     The allow directive creates actions for each named defined
     directly, or via interface:
+
+    >>> from zope.security import metaconfigure
 
     >>> class Context(object):
     ...     def __init__(self):
@@ -139,6 +145,8 @@ def test_require():
     The allow directive creates actions for each named defined
     directly, or via interface:
 
+    >>> from zope.security import metaconfigure
+
     >>> class Context(object):
     ...     def __init__(self):
     ...         self.actions = []
@@ -191,9 +199,15 @@ def test_require():
     
     """
 
-class IDummy(Interface):
 
-    perm = zope.security.zcml.Permission(title=u'')
+if HAVE_ZCML:
+
+    import zope.security.zcml
+
+    class IDummy(Interface):
+
+        perm = zope.security.zcml.Permission(title=u'')
+
 
 perms = []
 
@@ -228,6 +242,9 @@ def reset():
     setUpAuth()
 
 def test_suite():
+    if not HAVE_ZCML:
+        return unittest.TestSuite()
+
     return unittest.TestSuite((
         doctest.DocTestSuite(setUp=setUp, tearDown=tearDown),
         doctest.DocTestSuite('zope.security.zcml'),

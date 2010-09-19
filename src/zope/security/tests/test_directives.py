@@ -23,8 +23,14 @@ import zope.component
 from zope.interface import implements
 from zope.component.interface import queryInterface
 
-from zope.configuration.xmlconfig import xmlconfig, XMLConfig
-from zope.configuration.xmlconfig import ZopeXMLConfigurationError
+try:
+    from zope.configuration.xmlconfig import xmlconfig, XMLConfig
+    from zope.configuration.xmlconfig import ZopeXMLConfigurationError
+except ImportError:
+    HAVE_ZCML = False
+else:
+    HAVE_ZCML = True
+
 from zope.security.checker import selectChecker
 from zope.security import proxy
 
@@ -366,6 +372,9 @@ def apply_declaration(declaration):
 
 
 def test_suite():
+    if not HAVE_ZCML:
+        return unittest.TestSuite()
+
     return unittest.TestSuite((
         unittest.makeSuite(TestFactoryDirective),
         unittest.makeSuite(TestRequireDirective),

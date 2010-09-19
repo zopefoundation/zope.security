@@ -19,7 +19,12 @@ from StringIO import StringIO
 from zope.component.interfaces import IFactory
 from zope.component.interfaces import ComponentLookupError
 from zope.component.interface import queryInterface
-from zope.configuration.xmlconfig import xmlconfig, XMLConfig
+try:
+    from zope.configuration.xmlconfig import xmlconfig, XMLConfig
+except ImportError:
+    HAVE_ZCML = False
+else:
+    HAVE_ZCML = True
 
 import zope.component
 import zope.security
@@ -190,12 +195,11 @@ class TestFactorySubdirective(PlacelessSetup, unittest.TestCase):
 
 
 def test_suite():
+    if not HAVE_ZCML:
+        return unittest.TestSuite()
+
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
     suite.addTest(loader.loadTestsFromTestCase(TestClassDirective))
     suite.addTest(loader.loadTestsFromTestCase(TestFactorySubdirective))
     return suite
-
-
-if __name__=='__main__':
-    unittest.TextTestRunner().run(test_suite())

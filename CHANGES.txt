@@ -5,6 +5,11 @@ CHANGES
 3.7.4 (unreleased)
 ------------------
 
+- Added ``zcml`` extra dependencies, run related tests only if
+  ``zope.configuration`` is available.
+
+- Run tests related to the ``untrustedpython`` functionality only if
+  ``RestrictedPython`` is available.
 
 3.7.3 (2010-04-30)
 ------------------

@@ -22,6 +22,11 @@ from zope.testing import renormalizing
 
 
 def test_suite():
+    try:
+        import RestrictedPython
+    except ImportError:
+        return unittest.TestSuite()
+
     checker = renormalizing.RENormalizing([
        (re.compile(r"'ImmutableModule' object"), r'object'),
        ])
