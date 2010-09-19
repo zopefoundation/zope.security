@@ -5,6 +5,8 @@ CHANGES
 3.7.4 (unreleased)
 ------------------
 
+- Added tests for our own ``configure.zcml``.
+
 - Added ``zcml`` extra dependencies, run related tests only if
   ``zope.configuration`` is available.
 

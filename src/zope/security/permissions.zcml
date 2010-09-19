@@ -3,6 +3,8 @@
     i18n_domain="zope"
     >
 
+  <include file="meta.zcml" package="zope.security" />
+
   <!-- Note, that "zope.Public" is special one -->
   <permission
       id="zope.Public"

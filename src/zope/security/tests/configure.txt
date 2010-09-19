@@ -1,0 +1,24 @@
+Package configuration
+=====================
+
+The ``zope.security`` package provides a ZCML file that configures some
+utilities and a couple of permissions:
+
+  >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> import zope.security
+
+  >>> XMLConfig('permissions.zcml', zope.security)()
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredUtilities()))
+  7
+
+Clear the current state:
+
+  >>> from zope.component.testing import setUp, tearDown
+  >>> tearDown()
+  >>> setUp()
+
+  >>> XMLConfig('configure.zcml', zope.security)()
+
+  >>> len(list(zope.component.getGlobalSiteManager().registeredUtilities()))
+  10
