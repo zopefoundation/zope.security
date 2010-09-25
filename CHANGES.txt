@@ -5,7 +5,7 @@ CHANGES
 3.7.4 (unreleased)
 ------------------
 
-- ...
+- Added not declared, but needed test dependency on `zope.testing`.
 
 
 3.7.3 (2010-04-30)
