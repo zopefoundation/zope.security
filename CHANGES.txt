@@ -5,6 +5,10 @@ CHANGES
 3.8.1 (unreleased)
 ------------------
 
+- Fixed circular import beween ``zope.security.decorator`` and
+  ``zope.security.proxy`` which led to an ``ImportError`` when only
+  importing ``zope.security.decorator``.
+
 
 3.8.0 (2010-12-14)
 ------------------
@@ -136,7 +140,7 @@ CHANGES
 
 - Moved the <class> directive implementation from `zope.app.component`
   to this package.
-  
+
 
 3.5.2 (2008-07-27)
 ------------------
@@ -149,14 +153,14 @@ CHANGES
 
 - Add `frozenset`, `set`, `reversed`, and `sorted` to the list of safe
   builtins.
-  
+
 
 3.5.0 (2008-03-05)
 ------------------
 
 - Changed title for ``zope.security.management.system_user`` to be more
   presentable.
-  
+
 
 3.4.3 - (2009/11/26)
 --------------------
@@ -169,7 +173,7 @@ CHANGES
   state of other objects. This may cause another round of garbage collection,
   eventually generating a segfault (see LP bug). The Py_VISIT macro does the
   necessary checks, so it is used instead of the previous code.
-  
+
 
 3.4.2 - (2009/03/23)
 --------------------
@@ -182,7 +186,7 @@ CHANGES
   security-wrapping location proxied exception instances throw
   exceptions on Python 2.5.  See
   https://bugs.launchpad.net/zope3/+bug/251848
-  
+
 
 3.4.1 - 2008/07/27
 ------------------

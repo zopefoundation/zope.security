@@ -206,3 +206,13 @@ class SecurityCheckerDecoratorBase(ProxyBase):
 class DecoratorBase(SpecificationDecoratorBase, SecurityCheckerDecoratorBase):
     """Base class for a proxy that provides both additional interfaces and
     security declarations."""
+
+
+# zope.location was made independent of security. To work together with
+# security, we re-inject the DecoratedSecurityCheckerDescriptor onto the
+# location proxy from here.
+# This is the only sane place we found for doing it: it kicks in as soon
+# as someone starts using security proxies.
+import zope.location.location
+zope.location.location.LocationProxy.__Security_checker__ = (
+    DecoratedSecurityCheckerDescriptor())

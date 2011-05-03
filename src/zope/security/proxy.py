@@ -69,14 +69,3 @@ def isinstance(object, cls):
     # being used for isinstance
 
     return builtin_isinstance(removeSecurityProxy(object), cls)
-
-
-# zope.location was made independent of security. To work together with
-# security, we re-inject the DecoratedSecurityCheckerDescriptor onto the
-# location proxy from here.
-# This is the only sane place we found for doing it: it kicks in as soon
-# as someone starts using security proxies.
-import zope.location.location
-from zope.security.decorator import DecoratedSecurityCheckerDescriptor
-zope.location.location.LocationProxy.__Security_checker__ = (
-    DecoratedSecurityCheckerDescriptor())
