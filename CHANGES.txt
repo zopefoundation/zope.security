@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-3.8.1 (unreleased)
+3.8.1 (2011-05-03)
 ------------------
 
 - Fixed circular import beween ``zope.security.decorator`` and
