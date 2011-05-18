@@ -5,7 +5,7 @@ CHANGES
 3.8.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix a test that failed on Python 2.7.
 
 
 3.8.1 (2011-05-03)
@@ -26,6 +26,7 @@ CHANGES
 
 - Run tests related to the ``untrustedpython`` functionality only if
   ``RestrictedPython`` is available.
+
 
 3.7.3 (2010-04-30)
 ------------------

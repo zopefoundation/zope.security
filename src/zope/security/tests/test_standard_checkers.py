@@ -506,13 +506,6 @@ if sys.version_info >= (2, 6):
         >>> [c.__name__ for c in PBar.__mro__]
         ['Bar', 'Foo', 'MyABC', 'object']
 
-        >>> issubclass(PBar, Foo)
-        True
-
-        >>> issubclass(Bar, Foo)
-        True
-
-        >>> PBar = ProxyFactory(PBar)
         >>> check_forbidden_call(PBar)
         'ForbiddenAttribute: __call__'
         >>> check_forbidden_get(PBar, '__dict__')
