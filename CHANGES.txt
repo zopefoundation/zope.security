@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-3.8.2 (unreleased)
+3.8.2 (2011-05-24)
 ------------------
 
 - Fix a test that failed on Python 2.7.
