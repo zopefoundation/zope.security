@@ -75,5 +75,3 @@ def isinstance(object, cls):
     # being used for isinstance
 
     return builtin_isinstance(removeSecurityProxy(object), cls)
-
-
