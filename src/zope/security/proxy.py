@@ -18,6 +18,12 @@ __docformat__ = 'restructuredtext'
 from zope.security._proxy import getChecker, getObject
 from zope.security._proxy import _Proxy as Proxy
 
+# We need the injection of DecoratedSecurityCheckerDescriptor into
+# zope.location's LocationProxy as soon someone uses security proxies by
+# importing zope.security.proxy:
+import zope.security.decorator
+
+
 removeSecurityProxy = getObject
 
 # This import represents part of the API for this module
@@ -69,3 +75,5 @@ def isinstance(object, cls):
     # being used for isinstance
 
     return builtin_isinstance(removeSecurityProxy(object), cls)
+
+
