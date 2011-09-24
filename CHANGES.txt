@@ -5,7 +5,7 @@ CHANGES
 3.8.3 (unreleased)
 ------------------
 
-- Fixed a regression introduced in 3.8.1: ``zope.location`` 's LocationProxy
+- Fixed a regression introduced in 3.8.1: ``zope.location``\'s LocationProxy
   did not get a security checker if ``zope.security.decorator`` was not
   imported manually. Now ``zope.security.decorator`` is imported in
   ``zope.security.proxy`` without re-introducing the circular import fixed in
