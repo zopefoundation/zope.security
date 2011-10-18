@@ -434,8 +434,32 @@ def test_using_mapping_slots_hack():
     """
 
 
+class TestLocationProxySecurityChecker(unittest.TestCase):
+
+    def test_LocationProxy_gets_a_security_checker_when_importing_z_s_proxy(
+            self):
+        # Regression test for a problem introduced in 3.8.1 and fixed in
+        # 3.8.3. For details see change log.
+        import sys
+        import zope.location.location
+        import zope.security.proxy
+        # This attribute is set when zope.security.decorator is imported, to
+        # show that it will be set too, if zope.security.proxy is imported
+        # we set it to a different value at first:
+        del zope.location.location.LocationProxy.__Security_checker__
+        self.assertFalse(
+            hasattr(zope.location.location.LocationProxy, '__Security_checker__'))
+        # After deleting zope.security.decorator and reloading
+        # zope.security.proxy the attribute is set again:
+        del sys.modules["zope.security.decorator"]
+        reload(zope.security.proxy)
+        self.assertTrue(
+            hasattr(zope.location.location.LocationProxy, '__Security_checker__'))
+
+
 def test_suite():
-    suite = unittest.makeSuite(ProxyTests)
-    suite.addTest(DocTestSuite())
+    suite = unittest.TestSuite()
     suite.addTest(DocTestSuite('zope.security.proxy'))
+    suite.addTest(unittest.makeSuite(ProxyTests))
+    suite.addTest(unittest.makeSuite(TestLocationProxySecurityChecker))
     return suite
