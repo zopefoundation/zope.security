@@ -14,7 +14,7 @@
 """Security Checker tests
 """
 from unittest import TestCase, TestSuite, main, makeSuite
-from zope.interface import implements
+from zope.interface import implementer
 from zope.interface.verify import verifyObject
 from zope.testing.cleanup import CleanUp
 from zope.proxy import getProxiedObject
@@ -29,15 +29,15 @@ from zope.security.checker import Checker, NamesChecker, CheckerPublic
 from zope.security.checker import BasicTypes, _checkers, NoProxy, _clear
 import types, pickle
 
+@implementer(ISecurityPolicy)
 class SecurityPolicy(object):
-    implements(ISecurityPolicy)
 
     def checkPermission(self, permission, object):
         'See ISecurityPolicy'
         return permission == 'test_allowed'
 
+@implementer(ISecurityPolicy)
 class RecordedSecurityPolicy(object):
-    implements(ISecurityPolicy)
 
     def __init__(self):
         self._checked = []

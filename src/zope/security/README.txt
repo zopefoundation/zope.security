@@ -225,9 +225,8 @@ We implement our security policy such that it checks the current agent's
 authentication token against the given permission in the home of the object
 being accessed::
 
+  @implementer(ISecurityPolicy)
   class SimulationSecurityPolicy:
-
-      implements(ISecurityPolicy)
 
       createInteraction = staticmethod(simpleinteraction.createInteraction)
 

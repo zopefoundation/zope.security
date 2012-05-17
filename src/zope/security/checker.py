@@ -34,7 +34,7 @@ import zope.interface.interface
 import zope.interface.interfaces
 import zope.interface.declarations
 from zope.i18nmessageid import Message
-from zope.interface import directlyProvides, Interface, implements
+from zope.interface import directlyProvides, Interface, implementer
 from zope.interface.interfaces import IInterface, IDeclaration
 
 from zope.security.interfaces import IChecker, INameBasedChecker
@@ -140,8 +140,8 @@ def canAccess(obj, name):
     # indicates a programming or configuration error
     return True
 
+@implementer(INameBasedChecker)
 class Checker(object):
-    implements(INameBasedChecker)
 
     def __init__(self, get_permissions, set_permissions=None):
         """Create a checker
@@ -432,6 +432,7 @@ else:
 
 _getChecker = _checkers.get
 
+@implementer(IChecker)
 class CombinedChecker(Checker):
     """A checker that combines two other checkers in a logical-or fashion.
 
@@ -448,7 +449,6 @@ class CombinedChecker(Checker):
     ForbiddenAttribute ForbiddenAttribute ForbiddenAttribute
     ------------------ ------------------ -----------------------------------
     """
-    implements(IChecker)
 
     def __init__(self, checker1, checker2):
         """Create a combined checker."""

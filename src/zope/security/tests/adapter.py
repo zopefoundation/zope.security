@@ -36,23 +36,27 @@ class Adapter(object):
     def __init__(self, *args):
         self.context = args
 
+@zope.interface.implementer(I1)
 class A1(Adapter):
-    zope.interface.implements(I1)
+    pass
 
+@zope.interface.implementer(I2)
 class A2(Adapter):
-    zope.interface.implements(I2)
+    pass
 
+@zope.component.adapter(components.IContent, I1, I2)
+@zope.interface.implementer(I3)
 class A3(Adapter):
-    zope.component.adapts(components.IContent, I1, I2)
-    zope.interface.implements(I3)
+    pass
 
 class A4:
     pass
 
 a4 = A4()
 
+@zope.interface.implementer(I1, I2)
 class A5:
-    zope.interface.implements(I1, I2)
+    pass
 
 a5 = A5()
 

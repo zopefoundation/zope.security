@@ -19,8 +19,8 @@ from zope.security import interfaces
 
 thread_local = threading.local()
 
+@zope.interface.provider(interfaces.IPrincipal)
 class system_user(object):
-    zope.interface.classProvides(interfaces.IPrincipal)
     id = u'zope.security.management.system_user'
     title = u'System'
     description = u''

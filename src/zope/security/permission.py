@@ -15,15 +15,15 @@
 """
 __docformat__ = "reStructuredText"
 
-from zope.interface import implements, directlyProvides
+from zope.interface import implementer, directlyProvides
 from zope.component import queryUtility, getUtilitiesFor
 from zope.schema.interfaces import IVocabularyFactory
 from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IPermission
 
+@implementer(IPermission)
 class Permission(object):
-    implements(IPermission)
 
     def __init__(self, id, title="", description=""):
         self.id = id

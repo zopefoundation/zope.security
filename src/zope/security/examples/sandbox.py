@@ -15,7 +15,7 @@
 """
 import time, random
 
-from zope.interface import Interface, implements
+from zope.interface import Interface, implementer
 
 class IAgent(Interface):
     """A player/agent in the world.
@@ -81,8 +81,8 @@ class Identity(object):
     __repr__ = __str__
 
 
+@implementer(IAgent)
 class Agent(Identity):
-    implements(IAgent)
 
     def __init__(self, id, home, auth_token, action):
         """Initialize agent."""
@@ -108,11 +108,11 @@ class Agent(Identity):
         return self.auth_token
 
 
+@implementer(ISandbox)
 class Sandbox(Identity):
     """
     see ISandbox doc
     """
-    implements(ISandbox)
 
     def __init__(self, id, service_factories):
         self.id = id
@@ -162,8 +162,8 @@ class Sandbox(Identity):
                 agent, destination)
                                )
 
+@implementer(IService)
 class Service(object):
-    implements(IService)
     def getId(self):
         return self.__class__.__name__
     def setHome(self, home):

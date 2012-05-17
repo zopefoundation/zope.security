@@ -16,12 +16,13 @@
 __docformat__ = 'restructuredtext'
 
 import zope.schema
-from zope.interface import Interface, implements
+from zope.interface import Interface, implementer
 from zope.schema.interfaces import IFromUnicode
 from zope.security.permission import checkPermission
 from zope.security.management import setSecurityPolicy
 from zope.configuration.fields import MessageID, GlobalObject
 
+@implementer(IFromUnicode)
 class Permission(zope.schema.Id):
     r"""This field describes a permission.
 
@@ -55,7 +56,6 @@ class Permission(zope.schema.Id):
     zope.Public is always valid
     >>> field._validate('zope.Public')
     """
-    implements(IFromUnicode)
 
     def fromUnicode(self, u):
         u = super(Permission, self).fromUnicode(u)

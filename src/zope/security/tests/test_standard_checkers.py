@@ -471,9 +471,10 @@ def test_interfaces_and_declarations():
     ...     pass
     >>> class II(zope.interface.Interface):
     ...     pass
-    >>> class N(object):
-    ...     zope.interface.implements(I)
-    ...     zope.interface.classProvides(IN)
+    >>> @zope.interface.implementer(I)
+    ... @zope.interface.provider(IN)
+    ... class N(object):
+    ...     pass
     >>> n = N()
     >>> zope.interface.directlyProvides(n, II)
     >>> from zope.security.checker import ProxyFactory

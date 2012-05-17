@@ -14,7 +14,7 @@
 """Test handler for 'protectClass' directive
 """
 import unittest
-from zope.interface import implements
+from zope.interface import implementer
 from zope.security.checker import selectChecker
 from zope.security.permission import Permission
 from zope import component
@@ -44,8 +44,8 @@ class Test(PlacelessSetup, unittest.TestCase):
             def m2(self):
                 return "m2"
 
+        @implementer(I)
         class C(B):
-            implements(I)
             def m3(self):
                 return "m3"
             def m4(self):

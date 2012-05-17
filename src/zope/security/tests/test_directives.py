@@ -20,7 +20,7 @@ from cStringIO import StringIO
 from doctest import DocTestSuite
 
 import zope.component
-from zope.interface import implements
+from zope.interface import implementer
 from zope.component.interface import queryInterface
 
 try:
@@ -131,8 +131,8 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
                 return "m1"
             def m2(self):
                 return "m2"
+        @implementer(module.I)
         class C(B):
-            implements(module.I)
             def m3(self):
                 return "m3"
             def m4(self):

@@ -29,7 +29,7 @@ secure mode. There are several steps that are taken to set up the security
 import sandbox
 from zope.security.interfaces import IParticipation
 from zope.security import checker, management, simplepolicies
-from zope.interface import implements
+from zope.interface import implementer
 
 
 # Define all permissions that will be available 
@@ -101,13 +101,13 @@ class SimulationSecurityPolicy(simplepolicies.ParanoidSecurityPolicy):
         return True
 
 
+@implementer(IParticipation)
 class AgentParticipation(object):
     """Agent Participation during the Simulation.
 
     A very simple participation that is specific to the simulations.
     """
 
-    implements(IParticipation)
 
     def __init__(self, agent):
         self.principal = agent

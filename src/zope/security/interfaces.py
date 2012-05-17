@@ -14,7 +14,7 @@
 """Interfaces for security machinery.
 """
 
-from zope.interface import Interface, Attribute, implements
+from zope.interface import Interface, Attribute, implementer
 from zope.interface.common.interfaces import IException, IAttributeError
 from zope.schema import Text, TextLine
 from zope.security.i18n import ZopeMessageFactory as _
@@ -22,27 +22,27 @@ from zope.security.i18n import ZopeMessageFactory as _
 class IUnauthorized(IException):
     pass
 
+@implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""
 
-    implements(IUnauthorized)
 
 
 class IForbidden(IException):
     pass
 
+@implementer(IForbidden)
 class Forbidden(Exception):
     """A resource cannot be accessed under any circumstances
     """
-    implements(IForbidden)
 
 class IForbiddenAttribute(IForbidden, IAttributeError):
     pass
 
+@implementer(IForbiddenAttribute)
 class ForbiddenAttribute(Forbidden, AttributeError):
     """An attribute is unavailable because it is forbidden (private)
     """
-    implements(IForbiddenAttribute)
 
 
 class ISecurityManagement(Interface):

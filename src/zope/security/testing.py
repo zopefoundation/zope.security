@@ -20,9 +20,8 @@ from zope import interface, component
 from zope.security import interfaces
 from zope.security.permission import Permission
 
+@interface.implementer(interfaces.IPrincipal)
 class Principal:
-
-    interface.implements(interfaces.IPrincipal)
 
     def __init__(self, id, title=None, description='', groups=None):
         self.id = id
@@ -32,9 +31,8 @@ class Principal:
             self.groups = groups
             interface.directlyProvides(self, interfaces.IGroupAwarePrincipal)
 
+@interface.implementer(interfaces.IParticipation)
 class Participation:
-
-    interface.implements(interfaces.IParticipation)
 
     def __init__(self, principal):
         self.principal = principal

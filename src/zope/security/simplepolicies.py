@@ -18,9 +18,9 @@ from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IInteraction, ISecurityPolicy
 from zope.security._definitions import system_user
 
+@zope.interface.implementer(IInteraction)
+@zope.interface.provider(ISecurityPolicy)
 class ParanoidSecurityPolicy(object):
-    zope.interface.implements(IInteraction)
-    zope.interface.classProvides(ISecurityPolicy)
 
     def __init__(self, *participations):
         self.participations = []
@@ -51,9 +51,9 @@ class ParanoidSecurityPolicy(object):
 
         return not users
 
+@zope.interface.provider(ISecurityPolicy)
 class PermissiveSecurityPolicy(ParanoidSecurityPolicy):
     """Allow all access."""
-    zope.interface.classProvides(ISecurityPolicy)
 
     def checkPermission(self, permission, object):
         return True
