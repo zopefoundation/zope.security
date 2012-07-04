@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2004 Zope Foundation and Contributors.
+# Copyright (c) 2004-2011 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -19,6 +19,9 @@ This module provides some helper/stub objects for setting up interactions.
 from zope import interface, component
 from zope.security import interfaces
 from zope.security.permission import Permission
+import contextlib
+import zope.security.management
+
 
 @interface.implementer(interfaces.IPrincipal)
 class Principal:
@@ -30,6 +33,7 @@ class Principal:
         if groups is not None:
             self.groups = groups
             interface.directlyProvides(self, interfaces.IGroupAwarePrincipal)
+
 
 @interface.implementer(interfaces.IParticipation)
 class Participation:
@@ -51,3 +55,23 @@ def addCheckerPublic():
             )
     gsm = component.getGlobalSiteManager()
     gsm.registerUtility(perm, interfaces.IPermission, perm.id)
+
+
+def create_interaction(principal_id, **kw):
+    principal = Principal(principal_id, **kw)
+    participation = Participation(principal)
+    zope.security.management.newInteraction(participation)
+    return principal
+
+
+@contextlib.contextmanager
+def interaction(principal_id, **kw):
+    if zope.security.management.queryInteraction():
+        # There already is an interaction. Great. Leave it alone.
+        yield
+    else:
+        principal = create_interaction(principal_id, **kw)
+        try:
+            yield principal
+        finally:
+            zope.security.management.endInteraction()
