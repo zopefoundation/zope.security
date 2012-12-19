@@ -5,6 +5,9 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Enabled building extensions without the 'svn:external' of the ``zope.proxy``
+  headers into our 'include' dir.
+
 - Bumped ``zope.proxy`` dependency to ">= 4.1.0" to enable compilation
   on Py3k.
 
