@@ -5,6 +5,9 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Bumped ``zope.proxy`` dependency to ">= 4.1.0" to enable compilation
+  on Py3k.
+
 - Replaced deprecated ``zope.component.adapts`` usage with equivalent
   ``zope.component.adapter`` decorator.
 
