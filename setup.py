@@ -19,10 +19,64 @@
 """Setup for zope.security package
 """
 import os
-from setuptools import setup, find_packages, Extension
+import platform
+import sys
+from setuptools import setup, find_packages, Extension, Feature
 
+here = os.path.abspath(os.path.dirname(__file__))
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+
+# Include directories for C extensions
+# Sniff the location of the headers in 'persistent' or fall back
+# to local headers in the include sub-directory
+
+class ModuleHeaderDir(object):
+
+    def __init__(self, require_spec, where='../..'):
+        # By default, assume top-level pkg has the same name as the dist.
+        # Also assume that headers are located in the package dir, and
+        # are meant to be included as follows:
+        #    #include "module/header_name.h"
+        self._require_spec = require_spec
+        self._where = where
+
+    def __str__(self):
+        from pkg_resources import require
+        from pkg_resources import resource_filename
+        from pkg_resources import DistributionNotFound
+        try:
+            require(self._require_spec)
+            path = resource_filename(self._require_spec, self._where)
+        except DistributionNotFound:
+            path = os.path.join(here, 'include')
+        return os.path.abspath(path)
+
+include = [ModuleHeaderDir('zope.proxy')]
+
+# Jython cannot build the C optimizations, while on PyPy they are
+# anti-optimizations (the C extension compatibility layer is known-slow,
+# and defeats JIT opportunities).
+py_impl = getattr(platform, 'python_implementation', lambda: None)
+pure_python = os.environ.get('PURE_PYTHON', False)
+is_pypy = py_impl() == 'PyPy'
+is_jython = 'java' in sys.platform
+
+if pure_python or is_pypy or is_jython:
+    setup_requires = []
+    ext_modules = []
+else:
+    setup_requires = ['zope.proxy >= 4.1.0']
+    ext_modules = [
+        Extension("zope.security._proxy",
+                  [os.path.join('src', 'zope', 'security', "_proxy.c")],
+                  include_dirs=include,
+                 ),
+        Extension("zope.security._zope_security_checker",
+                  [os.path.join('src', 'zope', 'security',
+                                        "_zope_security_checker.c")]
+                 ),
+    ]
 
 setup(name='zope.security',
       version='4.0.0dev',
@@ -54,15 +108,8 @@ setup(name='zope.security',
       packages=find_packages('src'),
       package_dir = {'': 'src'},
       namespace_packages=['zope'],
-      ext_modules=[Extension("zope.security._proxy",
-                             [os.path.join('src', 'zope', 'security',
-                                           "_proxy.c")
-                              ], include_dirs=['include']),
-                   Extension("zope.security._zope_security_checker",
-                             [os.path.join('src', 'zope', 'security',
-                                           "_zope_security_checker.c")
-                              ]),
-                   ],
+      setup_requires=setup_requires,
+      ext_modules=ext_modules,
       install_requires=['setuptools',
                         'zope.component',
                         'zope.i18nmessageid',
