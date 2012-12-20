@@ -25,7 +25,7 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.security',
-      version='3.8.3',
+      version='3.8.4',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -68,7 +68,7 @@ setup(name='zope.security',
                         'zope.i18nmessageid',
                         'zope.interface',
                         'zope.location',
-                        'zope.proxy >= 3.4.2',
+                        'zope.proxy >= 3.4.2, <4.1dev',
                         'zope.schema',
                         ],
       extras_require = dict(
