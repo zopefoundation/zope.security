@@ -12,10 +12,10 @@
 #
 ##############################################################################
 import unittest
-from doctest import DocTestSuite
 
 
 def test_suite():
+    from doctest import DocTestSuite
     return unittest.TestSuite((
         DocTestSuite('zope.security.adapter'),
         ))
