@@ -13,35 +13,22 @@
 ##############################################################################
 """Component Directives Tests
 """
-import re
 import unittest
-import pprint
-from cStringIO import StringIO
-from doctest import DocTestSuite
 
-import zope.component
-from zope.interface import implementer
-from zope.component.interface import queryInterface
 
-try:
-    from zope.configuration.xmlconfig import xmlconfig, XMLConfig
-    from zope.configuration.xmlconfig import ZopeXMLConfigurationError
-except ImportError:
-    HAVE_ZCML = False
-else:
-    HAVE_ZCML = True
+def _skip_wo_zope_configuration(testfunc):
+    try:
+        import zope.configuration.xmlconfig
+    except ImportError:
+        from functools import update_wrapper
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    else:
+        return testfunc
 
-from zope.security.checker import selectChecker
-from zope.security import proxy
 
-import zope.security
-from zope.component.testing import PlacelessSetup
-
-from zope.security.tests import module, exampleclass
-
-# TODO: tests for other directives needed
-
-atre = re.compile(' at [0-9a-fA-Fx]+')
 
 class Context(object):
     actions = ()
@@ -50,6 +37,10 @@ class Context(object):
         self.actions += ((discriminator, callable, args), )
 
     def __repr__(self):
+        from cStringIO import StringIO
+        import re
+        import pprint
+        atre = re.compile(' at [0-9a-fA-Fx]+')
         stream = StringIO()
         pprinter = pprint.PrettyPrinter(stream=stream, width=60)
         pprinter.pprint(self.actions)
@@ -64,18 +55,9 @@ template = """<configure
    %s
    </configure>"""
 
-def definePermissions():
-    XMLConfig('meta.zcml', zope.security)()
-
-
-class ParticipationStub(object):
-
-    def __init__(self, principal):
-        self.principal = principal
-        self.interaction = None
-
 
 def configfile(s):
+    from cStringIO import StringIO
     return StringIO("""<configure
       xmlns='http://namespaces.zope.org/zope'
       i18n_domain='zope'>
@@ -83,12 +65,36 @@ def configfile(s):
       </configure>
       """ % s)
 
-class TestFactoryDirective(PlacelessSetup, unittest.TestCase):
+class TestFactoryDirective(unittest.TestCase):
+
     def setUp(self):
-        super(TestFactoryDirective, self).setUp()
+        try:
+            from zope.component.testing import setUp
+        except ImportError:
+            pass
+        else:
+            setUp()
+
+    def tearDown(self):
+        try:
+            from zope.component.testing import tearDown
+        except ImportError:
+            pass
+        else:
+            tearDown()
+
+    def meta(self):
+        import zope.security
+        from zope.configuration.xmlconfig import XMLConfig
         XMLConfig('meta.zcml', zope.security)()
 
+    @_skip_wo_zope_configuration
     def testFactory(self):
+        from zope.component import createObject
+        from zope.configuration.xmlconfig import xmlconfig
+        from zope.security import proxy
+        from zope.security.tests import exampleclass
+        self.meta()
         f = configfile('''
 <permission id="zope.Foo" title="Zope Foo Permission" />
 <class class="zope.security.tests.exampleclass.ExampleClass">
@@ -99,14 +105,20 @@ class TestFactoryDirective(PlacelessSetup, unittest.TestCase):
        />
 </class>''')
         xmlconfig(f)
-        obj = zope.component.createObject('test.Example')
+        obj = createObject('test.Example')
         self.failUnless(proxy.isinstance(obj, exampleclass.ExampleClass))
 
 
 
-PREFIX = module.__name__ + '.'
+def _pfx(name):
+    from zope.security.tests import module
+    return module.__name__ + '.' + name
 
 def defineDirectives():
+    from cStringIO import StringIO
+    from zope.configuration.xmlconfig import XMLConfig
+    from zope.configuration.xmlconfig import xmlconfig
+    import zope.security
     XMLConfig('meta.zcml', zope.security)()
     xmlconfig(StringIO("""<configure
         xmlns='http://namespaces.zope.org/zope'
@@ -120,10 +132,17 @@ NOTSET = []
 P1 = "zope.Extravagant"
 P2 = "zope.Paltry"
 
-class TestRequireDirective(PlacelessSetup, unittest.TestCase):
+class TestRequireDirective(unittest.TestCase):
 
     def setUp(self):
-        super(TestRequireDirective, self).setUp()
+        from zope.interface import implementer
+        from zope.security.tests import module
+        try:
+            from zope.component.testing import setUp
+        except ImportError:
+            pass
+        else:
+            setUp()
         defineDirectives()
 
         class B(object):
@@ -143,38 +162,46 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
         self.assertState()
 
     def tearDown(self):
-        PlacelessSetup.tearDown(self)
+        from zope.security.tests import module
         module.test_class = None
+        try:
+            from zope.component.testing import tearDown
+        except ImportError:
+            pass
+        else:
+            tearDown()
 
     def assertState(self, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
-        "Verify that class, instance, and methods have expected permissions."
-
+        #Verify that class, instance, and methods have expected permissions
+        from zope.security.checker import selectChecker
+        from zope.security.tests import module
         checker = selectChecker(module.test_instance)
         self.assertEqual(checker.permission_id('m1'), (m1P or None))
         self.assertEqual(checker.permission_id('m2'), (m2P or None))
         self.assertEqual(checker.permission_id('m3'), (m3P or None))
 
     def assertDeclaration(self, declaration, **state):
+        from zope.security.tests import module
         apply_declaration(module.template_bracket % declaration)
         self.assertState(**state)
 
     # "testSimple*" exercises tags that do NOT have children.  This mode
     # inherently sets the instances as well as the class attributes.
 
+    @_skip_wo_zope_configuration
     def testSimpleMethodsPlural(self):
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 attributes="m1 m3"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1))
+                       % (_pfx("test_class"), P1))
         self.assertDeclaration(declaration, m1P=P1, m3P=P1)
 
     def assertSetattrState(self, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
-        "Verify that class, instance, and methods have expected permissions."
-
+        # Verify that class, instance, and methods have expected permissions
         from zope.security.checker import selectChecker
-
+        from zope.security.tests import module
         checker = selectChecker(module.test_instance)
         self.assertEqual(checker.setattr_permission_id('m1'), (m1P or None))
         self.assertEqual(checker.setattr_permission_id('m2'), (m2P or None))
@@ -183,32 +210,38 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
     def assertSetattrDeclaration(self, declaration, **state):
         self.assertSetattrState(**state)
 
+    @_skip_wo_zope_configuration
     def test_set_attributes(self):
+        from zope.security.checker import selectChecker
+        from zope.security.tests import module
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 set_attributes="m1 m3"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1))
+                       % (_pfx("test_class"), P1))
         apply_declaration(module.template_bracket % declaration)
         checker = selectChecker(module.test_instance)
         self.assertEqual(checker.setattr_permission_id('m1'), P1)
         self.assertEqual(checker.setattr_permission_id('m2'), None)
         self.assertEqual(checker.setattr_permission_id('m3'), P1)
 
+    @_skip_wo_zope_configuration
     def test_set_schema(self):
-
-        self.assertEqual(queryInterface(PREFIX+"S"), None)
+        from zope.component.interface import queryInterface
+        from zope.security.checker import selectChecker
+        from zope.security.tests import module
+        self.assertEqual(queryInterface(_pfx("S")), None)
 
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 set_schema="%s"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1, PREFIX+"S"))
+                       % (_pfx("test_class"), P1, _pfx("S")))
         apply_declaration(module.template_bracket % declaration)
 
-        self.assertEqual(queryInterface(PREFIX+"S"), module.S)
+        self.assertEqual(queryInterface(_pfx("S")), module.S)
 
 
         checker = selectChecker(module.test_instance)
@@ -219,21 +252,24 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
         self.assertEqual(checker.setattr_permission_id('bar'), P1)
         self.assertEqual(checker.setattr_permission_id('baro'), None)
 
+    @_skip_wo_zope_configuration
     def test_multiple_set_schema(self):
-
-        self.assertEqual(queryInterface(PREFIX+"S"), None)
-        self.assertEqual(queryInterface(PREFIX+"S2"), None)
+        from zope.component.interface import queryInterface
+        from zope.security.checker import selectChecker
+        from zope.security.tests import module
+        self.assertEqual(queryInterface(_pfx("S")), None)
+        self.assertEqual(queryInterface(_pfx("S2")), None)
 
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 set_schema="%s %s"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1, PREFIX+"S", PREFIX+"S2"))
+                       % (_pfx("test_class"), P1, _pfx("S"), _pfx("S2")))
         apply_declaration(module.template_bracket % declaration)
 
-        self.assertEqual(queryInterface(PREFIX+"S"), module.S)
-        self.assertEqual(queryInterface(PREFIX+"S2"), module.S2)
+        self.assertEqual(queryInterface(_pfx("S")), module.S)
+        self.assertEqual(queryInterface(_pfx("S2")), module.S2)
 
 
         checker = selectChecker(module.test_instance)
@@ -246,27 +282,31 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
         self.assertEqual(checker.setattr_permission_id('bar2'), P1)
         self.assertEqual(checker.setattr_permission_id('baro'), None)
 
+    @_skip_wo_zope_configuration
     def testSimpleInterface(self):
-
-        self.assertEqual(queryInterface(PREFIX+"I"), None)
+        from zope.component.interface import queryInterface
+        from zope.security.tests import module
+        self.assertEqual(queryInterface(_pfx("I")), None)
 
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 interface="%s"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1, PREFIX+"I"))
+                       % (_pfx("test_class"), P1, _pfx("I")))
         # m1 and m2 are in the interface, so should be set, and m3 should not:
         self.assertDeclaration(declaration, m1P=P1, m2P=P1)
 
         # Make sure we know about the interfaces
-        self.assertEqual(queryInterface(PREFIX+"I"), module.I)
+        self.assertEqual(queryInterface(_pfx("I")), module.I)
 
 
+    @_skip_wo_zope_configuration
     def testMultipleInterface(self):
-
-        self.assertEqual(queryInterface(PREFIX+"I3"), None)
-        self.assertEqual(queryInterface(PREFIX+"I4"), None)
+        from zope.component.interface import queryInterface
+        from zope.security.tests import module
+        self.assertEqual(queryInterface(_pfx("I3")), None)
+        self.assertEqual(queryInterface(_pfx("I4")), None)
 
         declaration = ('''<class class="%s">
                             <require
@@ -274,62 +314,68 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
                                 interface="  %s
                                              %s  "/>
                           </class>'''
-                       % (PREFIX+"test_class", P1, PREFIX+"I3", PREFIX+"I4"))
+                       % (_pfx("test_class"), P1, _pfx("I3"), _pfx("I4")))
         self.assertDeclaration(declaration, m3P=P1, m2P=P1)
 
         # Make sure we know about the interfaces
-        self.assertEqual(queryInterface(PREFIX+"I3"), module.I3)
-        self.assertEqual(queryInterface(PREFIX+"I4"), module.I4)
+        self.assertEqual(queryInterface(_pfx("I3")), module.I3)
+        self.assertEqual(queryInterface(_pfx("I4")), module.I4)
 
     # "testComposite*" exercises tags that DO have children.
     # "testComposite*TopPerm" exercises tags with permission in containing tag.
     # "testComposite*ElementPerm" exercises tags w/permission in children.
 
+    @_skip_wo_zope_configuration
     def testCompositeNoPerm(self):
         # Establish rejection of declarations lacking a permission spec.
+        from zope.configuration.xmlconfig import ZopeXMLConfigurationError
         declaration = ('''<class class="%s">
                             <require
                                 attributes="m1"/>
                           </class>'''
-                       % (PREFIX+"test_class"))
+                       % (_pfx("test_class")))
         self.assertRaises(ZopeXMLConfigurationError,
                           self.assertDeclaration,
                           declaration)
 
 
 
+    @_skip_wo_zope_configuration
     def testCompositeMethodsPluralElementPerm(self):
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 attributes="m1 m3"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1))
+                       % (_pfx("test_class"), P1))
         self.assertDeclaration(declaration,
                                m1P=P1, m3P=P1)
 
+    @_skip_wo_zope_configuration
     def testCompositeInterfaceTopPerm(self):
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 interface="%s"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1, PREFIX+"I"))
+                       % (_pfx("test_class"), P1, _pfx("I")))
         self.assertDeclaration(declaration,
                                m1P=P1, m2P=P1)
 
 
+    @_skip_wo_zope_configuration
     def testSubInterfaces(self):
         declaration = ('''<class class="%s">
                             <require
                                 permission="%s"
                                 interface="%s"/>
                           </class>'''
-                       % (PREFIX+"test_class", P1, PREFIX+"I2"))
+                       % (_pfx("test_class"), P1, _pfx("I2")))
         # m1 and m2 are in the interface, so should be set, and m3 should not:
         self.assertDeclaration(declaration, m1P=P1, m2P=P1)
 
 
+    @_skip_wo_zope_configuration
     def testMimicOnly(self):
         declaration = ('''<class class="%s">
                             <require
@@ -339,13 +385,14 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
                           <class class="%s">
                             <require like_class="%s" />
                           </class>
-                          ''' % (PREFIX+"test_base", P1,
-                PREFIX+"test_class", PREFIX+"test_base"))
+                          ''' % (_pfx("test_base"), P1,
+                _pfx("test_class"), _pfx("test_base")))
         # m1 and m2 are in the interface, so should be set, and m3 should not:
         self.assertDeclaration(declaration,
                                m1P=P1, m2P=P1)
 
 
+    @_skip_wo_zope_configuration
     def testMimicAsDefault(self):
         declaration = ('''<class class="%s">
                             <require
@@ -358,8 +405,8 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
                                 permission="%s"
                                 attributes="m2 m3"/>
                           </class>
-                          ''' % (PREFIX+"test_base", P1,
-                PREFIX+"test_class", PREFIX+"test_base", P2))
+                          ''' % (_pfx("test_base"), P1,
+                _pfx("test_class"), _pfx("test_base"), P2))
 
         # m1 and m2 are in the interface, so should be set, and m3 should not:
         self.assertDeclaration(declaration,
@@ -368,15 +415,13 @@ class TestRequireDirective(PlacelessSetup, unittest.TestCase):
 
 def apply_declaration(declaration):
     '''Apply the xmlconfig machinery.'''
+    from cStringIO import StringIO
+    from zope.configuration.xmlconfig import xmlconfig
     return xmlconfig(StringIO(declaration))
 
 
 def test_suite():
-    if not HAVE_ZCML:
-        return unittest.TestSuite()
-
     return unittest.TestSuite((
         unittest.makeSuite(TestFactoryDirective),
         unittest.makeSuite(TestRequireDirective),
-        DocTestSuite(),
-        ))
+    ))
