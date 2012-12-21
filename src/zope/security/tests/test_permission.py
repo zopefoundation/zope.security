@@ -14,13 +14,11 @@
 """Test permissions
 """
 import unittest
-from doctest import DocTestSuite
 
-from zope.component.testing import setUp, tearDown
-
-__docformat__ = "reStructuredText"
 
 def test_suite():
+    from zope.component.testing import setUp, tearDown
+    from doctest import DocTestSuite
     return unittest.TestSuite([
         DocTestSuite('zope.security.permission',
                      setUp=setUp, tearDown=tearDown),
