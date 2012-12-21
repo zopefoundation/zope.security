@@ -1,4 +1,16 @@
-import doctest
+##############################################################################
+#
+# Copyright (c) 2010 Zope Foundation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
 import unittest
 
 
@@ -10,6 +22,7 @@ def test_suite():
     except ImportError:
         pass
     else:
+        import doctest
         from zope.component.testing import setUp, tearDown
         suite.addTest(doctest.DocFileSuite('configure.txt',
                       setUp=setUp, tearDown=tearDown))
