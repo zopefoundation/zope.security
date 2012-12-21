@@ -11,12 +11,25 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Context Tests
+"""Test location support
 """
+import unittest
 
-import doctest
+
+def _skip_wo_zope_configuration(testfunc):
+    try:
+        import zope.configuration.xmlconfig
+    except ImportError:
+        from functools import update_wrapper
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    else:
+        return testfunc
 
 
+@_skip_wo_zope_configuration
 def test_locationproxy_security():
     """We start with an unlocated class that will be wrapped by a
        LocationProxy:
@@ -47,4 +60,7 @@ def test_locationproxy_security():
 
 
 def test_suite():
-    return doctest.DocTestSuite()
+    import doctest
+    return unittest.TestSuite((
+        doctest.DocTestSuite(),
+    ))
