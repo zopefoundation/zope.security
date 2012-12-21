@@ -15,9 +15,6 @@
 """
 import unittest
 
-from zope.interface.verify import verifyObject
-from zope.security.interfaces import IInteraction
-from zope.security.simplepolicies import ParanoidSecurityPolicy
 
 class RequestStub(object):
 
@@ -29,10 +26,14 @@ class RequestStub(object):
 class TestInteraction(unittest.TestCase):
 
     def test(self):
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IInteraction
+        from zope.security.simplepolicies import ParanoidSecurityPolicy
         interaction = ParanoidSecurityPolicy()
         verifyObject(IInteraction, interaction)
 
     def test_add(self):
+        from zope.security.simplepolicies import ParanoidSecurityPolicy
         rq = RequestStub()
         interaction = ParanoidSecurityPolicy()
         interaction.add(rq)
@@ -46,6 +47,7 @@ class TestInteraction(unittest.TestCase):
         self.assertRaises(ValueError, interaction2.add, rq)
 
     def test_remove(self):
+        from zope.security.simplepolicies import ParanoidSecurityPolicy
         rq = RequestStub()
         interaction = ParanoidSecurityPolicy()
 
@@ -58,6 +60,9 @@ class TestInteraction(unittest.TestCase):
         self.assert_(rq.interaction is None)
 
     def testCreateInteraction(self):
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IInteraction
+        from zope.security.simplepolicies import ParanoidSecurityPolicy
         i1 = ParanoidSecurityPolicy()
         verifyObject(IInteraction, i1)
         self.assertEquals(list(i1.participations), [])
@@ -70,10 +75,6 @@ class TestInteraction(unittest.TestCase):
 
 
 def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(TestInteraction))
-    return suite
-
-
-if __name__ == '__main__':
-    unittest.main()
+    return unittest.TestSuite((
+        unittest.makeSuite(TestInteraction),
+    ))
