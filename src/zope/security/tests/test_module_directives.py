@@ -13,33 +13,15 @@
 ##############################################################################
 """Directives Tests
 """
-
-import doctest
 import unittest
-from pprint import PrettyPrinter
 
-from zope.interface import Interface, Attribute
-from zope.component.testing import setUp, tearDown, PlacelessSetup
-try:
-    from zope.configuration import xmlconfig
-except ImportError:
-    HAVE_ZCML = False
-else:
-    HAVE_ZCML = True
 
 def pprint(ob, width=70):
+    from pprint import PrettyPrinter
     PrettyPrinter(width=width).pprint(ob)
 
-class I1(Interface):
-    def x(): pass
-    y = Attribute("Y")
-
-class I2(I1):
-    def a(): pass
-    b = Attribute("B")
-
-test_perm = 'zope.security.metaconfigure.test'
-test_bad_perm = 'zope.security.metaconfigure.bad'
+TEST_PERM = 'zope.security.metaconfigure.test'
+TEST_BAD_PERM = 'zope.security.metaconfigure.bad'
 
 def test_protectModule():
     """
@@ -56,9 +38,9 @@ def test_protectModule():
     >>> from zope.security.checker import moduleChecker
     >>> moduleChecker(test_directives)
         
-    >>> perm = Permission(test_perm, '')
-    >>> provideUtility(perm, IPermission, test_perm)
-    >>> metaconfigure.protectModule(test_directives, 'foo', test_perm)
+    >>> perm = Permission(TEST_PERM, '')
+    >>> provideUtility(perm, IPermission, TEST_PERM)
+    >>> metaconfigure.protectModule(test_directives, 'foo', TEST_PERM)
 
     Now, the checker should exist and have an access dictionary with the
     name and permission:
@@ -70,8 +52,8 @@ def test_protectModule():
     
     If we define additional names, they will be added to the dict:
 
-    >>> metaconfigure.protectModule(test_directives, 'bar', test_perm)
-    >>> metaconfigure.protectModule(test_directives, 'baz', test_perm)
+    >>> metaconfigure.protectModule(test_directives, 'bar', TEST_PERM)
+    >>> metaconfigure.protectModule(test_directives, 'baz', TEST_PERM)
     >>> pprint(cdict)
     {'bar': 'zope.security.metaconfigure.test',
      'baz': 'zope.security.metaconfigure.test',
@@ -85,8 +67,16 @@ def test_allow():
     The allow directive creates actions for each named defined
     directly, or via interface:
 
+    >>> from zope.interface import Interface
+    >>> from zope.interface import Attribute
     >>> from zope.security import metaconfigure
 
+    >>> class I1(Interface):
+    ...     def x(): pass
+    ...     y = Attribute("Y")
+    >>> class I2(I1):
+    ...     def a(): pass
+    ...     b = Attribute("B")
     >>> class Context(object):
     ...     def __init__(self):
     ...         self.actions = []
@@ -145,8 +135,16 @@ def test_require():
     The allow directive creates actions for each named defined
     directly, or via interface:
 
+    >>> from zope.interface import Interface
+    >>> from zope.interface import Attribute
     >>> from zope.security import metaconfigure
 
+    >>> class I1(Interface):
+    ...     def x(): pass
+    ...     y = Attribute("Y")
+    >>> class I2(I1):
+    ...     def a(): pass
+    ...     b = Attribute("B")
     >>> class Context(object):
     ...     def __init__(self):
     ...         self.actions = []
@@ -200,12 +198,25 @@ def test_require():
     """
 
 
-if HAVE_ZCML:
+def _skip_wo_zope_configuration(testfunc):
+    try:
+        import zope.configuration.xmlconfig
+    except ImportError:
+        from functools import update_wrapper
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    else:
+        return testfunc
 
+
+@_skip_wo_zope_configuration
+def make_dummy():
+    from zope.interface import Interface
     import zope.security.zcml
-
+    global IDummy
     class IDummy(Interface):
-
         perm = zope.security.zcml.Permission(title=u'')
 
 
@@ -216,37 +227,40 @@ def dummy(context_, perm):
     perms.append(perm)
 
 
-class DirectivesTest(PlacelessSetup, unittest.TestCase):
+class DirectivesTest(unittest.TestCase):
 
     def setUp(self):
-        super(DirectivesTest, self).setUp()
-        from zope.security import tests
-        self.context = xmlconfig.file("redefineperms.zcml", tests)
+        try:
+            from zope.component.testing import setUp
+        except ImportError:
+            pass
+        else:
+            setUp()
 
     def tearDown(self):
-        super(DirectivesTest, self).tearDown()
-        perms.remove('zope.Security')
+        del perms[:]
+        try:
+            from zope.component.testing import tearDown
+        except ImportError:
+            pass
+        else:
+            tearDown()
 
+    @_skip_wo_zope_configuration
     def testRedefinePermission(self):
+        from zope.configuration import xmlconfig
+        from zope.security import tests
+        make_dummy()
+        xmlconfig.file("redefineperms.zcml", tests)
         self.assertEqual(perms, ['zope.Security'])
 
-def setUpAuth(test=None):
-    setUp(test)
-
-def zcml(s):
-    context = xmlconfig.file('meta.zcml', package=zope.security)
-    xmlconfig.string(s, context)
-
-def reset():
-    tearDown()
-    setUpAuth()
-
 def test_suite():
-    if not HAVE_ZCML:
-        return unittest.TestSuite()
+    import doctest
+    from zope.component.testing import tearDown
+    from zope.component.testing import setUp
 
     return unittest.TestSuite((
         doctest.DocTestSuite(setUp=setUp, tearDown=tearDown),
         doctest.DocTestSuite('zope.security.zcml'),
         unittest.makeSuite(DirectivesTest),
-        ))
+    ))
