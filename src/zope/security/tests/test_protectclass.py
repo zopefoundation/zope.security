@@ -14,29 +14,43 @@
 """Test handler for 'protectClass' directive
 """
 import unittest
-from zope.interface import implementer
-from zope.security.checker import selectChecker
-from zope.security.permission import Permission
-from zope import component
-from zope.component.testing import PlacelessSetup
 
-from zope.security.interfaces import IPermission
-from zope.security.protectclass import protectName, protectLikeUnto
-from zope.security.protectclass import protectSetAttribute
-from zope.security.tests.modulehookup import TestModule, I
 
-NOTSET = []
+NOTSET = ()
 
 P1 = "extravagant"
 P2 = "paltry"
 
-class Test(PlacelessSetup, unittest.TestCase):
+class Test(unittest.TestCase):
 
     def setUp(self):
-        super(Test, self).setUp()
+        try:
+            from zope.component.testing import setUp
+        except ImportError:
+            pass
+        else:
+            setUp()
 
-        component.provideUtility(Permission(P1), IPermission, P1)
-        component.provideUtility(Permission(P2), IPermission, P2)
+    def tearDown(self):
+        from zope.security.tests.modulehookup import TestModule
+        TestModule.test_class = None
+        try:
+            from zope.component.testing import tearDown
+        except ImportError:
+            pass
+        else:
+            tearDown()
+
+    def _populateModule(self):
+        from zope.interface import implementer
+        from zope.component import provideUtility
+        from zope.security.permission import Permission
+        from zope.security.interfaces import IPermission
+        from zope.security.tests.modulehookup import I
+        from zope.security.tests.modulehookup import TestModule
+
+        provideUtility(Permission(P1), IPermission, P1)
+        provideUtility(Permission(P2), IPermission, P2)
 
         class B(object):
             def m1(self):
@@ -54,22 +68,21 @@ class Test(PlacelessSetup, unittest.TestCase):
         TestModule.test_base = B
         TestModule.test_class = C
         TestModule.test_instance = C()
-        self.assertState()
+        self.assertState(TestModule)
+        return TestModule
 
-    def tearDown(self):
-        super(Test, self).tearDown()
-        TestModule.test_class = None
-
-    def assertState(self, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
+    def assertState(self, module, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
         "Verify that class, instance, and methods have expected permissions."
-        checker = selectChecker(TestModule.test_instance)
+        from zope.security.checker import selectChecker
+        checker = selectChecker(module.test_instance)
         self.assertEqual(checker.permission_id('m1'), (m1P or None))
         self.assertEqual(checker.permission_id('m2'), (m2P or None))
         self.assertEqual(checker.permission_id('m3'), (m3P or None))
 
-    def assertSetattrState(self, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
+    def assertSetattrState(self, module, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
         "Verify that class, instance, and methods have expected permissions."
-        checker = selectChecker(TestModule.test_instance)
+        from zope.security.checker import selectChecker
+        checker = selectChecker(module.test_instance)
         self.assertEqual(checker.setattr_permission_id('m1'), (m1P or None))
         self.assertEqual(checker.setattr_permission_id('m2'), (m2P or None))
         self.assertEqual(checker.setattr_permission_id('m3'), (m3P or None))
@@ -78,45 +91,50 @@ class Test(PlacelessSetup, unittest.TestCase):
     # inherently sets the instances as well as the class attributes.
 
     def testSimpleMethodsPlural(self):
-        protectName(TestModule.test_class, 'm1', P1)
-        protectName(TestModule.test_class, 'm3', P1)
-        self.assertState(m1P=P1, m3P=P1)
+        from zope.security.protectclass import protectName
+        module = self._populateModule()
+        protectName(module.test_class, 'm1', P1)
+        protectName(module.test_class, 'm3', P1)
+        self.assertState(module, m1P=P1, m3P=P1)
 
     def testLikeUntoOnly(self):
-        protectName(TestModule.test_base, 'm1', P1)
-        protectName(TestModule.test_base, 'm2', P1)
-        protectSetAttribute(TestModule.test_base, 'm1', P1)
-        protectSetAttribute(TestModule.test_base, 'm2', P1)
-        protectLikeUnto(TestModule.test_class, TestModule.test_base)
+        from zope.security.protectclass import protectLikeUnto
+        from zope.security.protectclass import protectName
+        from zope.security.protectclass import protectSetAttribute
+        module = self._populateModule()
+        protectName(module.test_base, 'm1', P1)
+        protectName(module.test_base, 'm2', P1)
+        protectSetAttribute(module.test_base, 'm1', P1)
+        protectSetAttribute(module.test_base, 'm2', P1)
+        protectLikeUnto(module.test_class, module.test_base)
         # m1 and m2 are in the interface, so should be set, and m3 should not:
-        self.assertState(m1P=P1, m2P=P1)
-        self.assertSetattrState(m1P=P1, m2P=P1)
-
-    def assertSetattrState(self, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
-        "Verify that class, instance, and methods have expected permissions."
-        checker = selectChecker(TestModule.test_instance)
-        self.assertEqual(checker.setattr_permission_id('m1'), (m1P or None))
-        self.assertEqual(checker.setattr_permission_id('m2'), (m2P or None))
-        self.assertEqual(checker.setattr_permission_id("m3"), (m3P or None))
+        self.assertState(module, m1P=P1, m2P=P1)
+        self.assertSetattrState(module, m1P=P1, m2P=P1)
 
     def testSetattr(self):
-        protectSetAttribute(TestModule.test_class, 'm1', P1)
-        protectSetAttribute(TestModule.test_class, 'm3', P1)
-        self.assertSetattrState(m1P=P1, m3P=P1)
+        from zope.security.protectclass import protectSetAttribute
+        module = self._populateModule()
+        protectSetAttribute(module.test_class, 'm1', P1)
+        protectSetAttribute(module.test_class, 'm3', P1)
+        self.assertSetattrState(module, m1P=P1, m3P=P1)
 
     def testLikeUntoAsDefault(self):
-        protectName(TestModule.test_base, 'm1', P1)
-        protectName(TestModule.test_base, 'm2', P1)
-        protectSetAttribute(TestModule.test_base, 'm1', P1)
-        protectSetAttribute(TestModule.test_base, 'm2', P1)
-        protectLikeUnto(TestModule.test_class, TestModule.test_base)
-        protectName(TestModule.test_class, 'm2', P2)
-        protectName(TestModule.test_class, 'm3', P2)
-        protectSetAttribute(TestModule.test_class, 'm2', P2)
-        protectSetAttribute(TestModule.test_class, 'm3', P2)
+        from zope.security.protectclass import protectLikeUnto
+        from zope.security.protectclass import protectName
+        from zope.security.protectclass import protectSetAttribute
+        module = self._populateModule()
+        protectName(module.test_base, 'm1', P1)
+        protectName(module.test_base, 'm2', P1)
+        protectSetAttribute(module.test_base, 'm1', P1)
+        protectSetAttribute(module.test_base, 'm2', P1)
+        protectLikeUnto(module.test_class, module.test_base)
+        protectName(module.test_class, 'm2', P2)
+        protectName(module.test_class, 'm3', P2)
+        protectSetAttribute(module.test_class, 'm2', P2)
+        protectSetAttribute(module.test_class, 'm3', P2)
         # m1 and m2 are in the interface, so should be set, and m3 should not:
-        self.assertState(m1P=P1, m2P=P2, m3P=P2)
-        self.assertSetattrState(m1P=P1, m2P=P2, m3P=P2)
+        self.assertState(module, m1P=P1, m2P=P2, m3P=P2)
+        self.assertSetattrState(module, m1P=P1, m2P=P2, m3P=P2)
 
 def test_suite():
     loader=unittest.TestLoader()
