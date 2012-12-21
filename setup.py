@@ -21,7 +21,13 @@
 import os
 import platform
 import sys
-from setuptools import setup, find_packages, Extension, Feature
+from setuptools import Extension
+from setuptools import find_packages
+from setuptools import setup
+
+TESTS_REQUIRE = [
+    'zope.testing',
+]
 
 here = os.path.abspath(os.path.dirname(__file__))
 def read(*rnames):
@@ -120,9 +126,10 @@ setup(name='zope.security',
                         ],
       extras_require = dict(
           untrustedpython=["RestrictedPython"],
-          test=['zope.testing'],
           pytz=["pytz"],
           zcml=['zope.configuration'],
+          test=TESTS_REQUIRE,
+          testing=TESTS_REQUIRE + ['nose', 'coverage'],
           ),
       include_package_data = True,
       zip_safe = False,

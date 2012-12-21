@@ -5,6 +5,9 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Added 'setup.py dev' alias (runs ``setup.py develop`` plus installs
+  ``nose`` and ``coverage``).
+
 - Made non-doctest tests fully independent of ``zope.testing``.
 
   Two modules, ``zope.security.checker`` and ``zope.security.management``,
