@@ -16,14 +16,11 @@
 This is a test of the assertions made in
 zope.security.checkers._default_checkers.
 """
-import sys
 import unittest
-from doctest import DocTestSuite
 
-from zope.security.checker import ProxyFactory
-from zope.security.interfaces import ForbiddenAttribute
 
 def check_forbidden_get(object, attr):
+    from zope.security.interfaces import ForbiddenAttribute
     try:
         return getattr(object, attr)
     except ForbiddenAttribute, e:
@@ -34,6 +31,8 @@ def test_set():
 
     with proxied sets.
 
+    >>> from zope.security.checker import ProxyFactory
+    >>> from zope.security.interfaces import ForbiddenAttribute
     >>> us = set((1, 2))
     >>> s = ProxyFactory(us)
 
@@ -199,20 +198,9 @@ def test_set():
 def setUpFrozenSet(test):
     test.globs['set'] = frozenset
 
-def setUpSet(test):
-    import sets
-    test.globs['set'] = sets.Set
-
-def setUpImmutableSet(test):
-    import sets
-    test.globs['set'] = sets.ImmutableSet
-
 def test_suite():
-    doctests = [
+    from doctest import DocTestSuite
+    return unittest.TestSuite((
         DocTestSuite(),
         DocTestSuite(setUp=setUpFrozenSet),
-        ]
-    if sys.version_info[:2] < (2, 6):
-        doctests.append(DocTestSuite(setUp=setUpSet))
-        doctests.append(DocTestSuite(setUp=setUpImmutableSet))
-    return unittest.TestSuite(doctests)
+    ))
