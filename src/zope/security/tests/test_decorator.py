@@ -11,13 +11,13 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Context Tests
+"""Test zope.security.decorator
 """
-
-import doctest
+import unittest
 
 
 def test_suite():
-    suite = doctest.DocTestSuite()
-    suite.addTest(doctest.DocTestSuite('zope.security.decorator'))
-    return suite
+    import doctest
+    return unittest.TestSuite((
+        doctest.DocTestSuite('zope.security.decorator'),
+    ))
