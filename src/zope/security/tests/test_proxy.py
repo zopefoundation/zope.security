@@ -13,12 +13,8 @@
 ##############################################################################
 """Security proxy tests
 """
-
 import unittest
-from doctest import DocTestSuite
 
-from zope.security.proxy import getChecker, ProxyFactory, removeSecurityProxy
-from zope.proxy import ProxyBase as proxy
 
 class Checker(object):
 
@@ -39,6 +35,7 @@ class Checker(object):
             raise RuntimeError
 
     def proxy(self, value):
+        from zope.security.proxy import ProxyFactory
         if type(value) in self.unproxied_types:
             return value
         return ProxyFactory(value, self)
@@ -79,6 +76,7 @@ class Something:
 class ProxyTests(unittest.TestCase):
 
     def setUp(self):
+        from zope.security.proxy import ProxyFactory
         self.x = Something()
         self.c = Checker()
         self.p = ProxyFactory(self.x, self.c)
@@ -89,9 +87,11 @@ class ProxyTests(unittest.TestCase):
         self.c.ok = 1
 
     def testDerivation(self):
-        self.assert_(isinstance(self.p, proxy))
+        from zope.proxy import ProxyBase
+        self.assert_(isinstance(self.p, ProxyBase))
 
     def testStr(self):
+        from zope.security.proxy import ProxyFactory
         self.assertEqual(str(self.p), str(self.x))
 
         x = Something()
@@ -106,6 +106,7 @@ class ProxyTests(unittest.TestCase):
 
 
     def testRepr(self):
+        from zope.security.proxy import ProxyFactory
         self.assertEqual(repr(self.p), repr(self.x))
 
         x = Something()
@@ -119,6 +120,7 @@ class ProxyTests(unittest.TestCase):
                         s)
 
     def testGetAttrOK(self):
+        from zope.security.proxy import removeSecurityProxy
         self.assertEqual(removeSecurityProxy(self.p.foo), [1,2,3])
 
     def testGetAttrFail(self):
@@ -169,6 +171,7 @@ class ProxyTests(unittest.TestCase):
 ##         self.shouldFail(lambda: self.p == self.x)
 
     def testIterOK(self):
+        from zope.security.proxy import removeSecurityProxy
         self.assertEqual(removeSecurityProxy(iter(self.p)), self.x)
 
     def testIterFail(self):
@@ -205,6 +208,7 @@ class ProxyTests(unittest.TestCase):
         self.shouldFail(len, self.p)
 
     def testSliceOK(self):
+        from zope.security.proxy import removeSecurityProxy
         self.assertEqual(removeSecurityProxy(self.p[:]), [42])
 
     def testSliceFail(self):
@@ -224,12 +228,15 @@ class ProxyTests(unittest.TestCase):
         self.shouldFail(lambda: 42 in self.p)
 
     def testGetObject(self):
+        from zope.security.proxy import removeSecurityProxy
         self.assertEqual(self.x, removeSecurityProxy(self.p))
 
     def testGetChecker(self):
+        from zope.security.proxy import getChecker
         self.assertEqual(self.c, getChecker(self.p))
 
     def testProxiedClassicClassAsDictKey(self):
+        from zope.security.proxy import ProxyFactory
         class C(object):
             pass
         d = {C: C()}
@@ -237,6 +244,7 @@ class ProxyTests(unittest.TestCase):
         self.assertEqual(d[pC], d[C])
 
     def testProxiedNewClassAsDictKey(self):
+        from zope.security.proxy import ProxyFactory
         class C(object):
             pass
         d = {C: C()}
@@ -253,6 +261,8 @@ class ProxyTests(unittest.TestCase):
         # but we don't want to create new proxies as a result of
         # evaluation, so we have to extend the list of types that
         # aren't proxied.
+        from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import removeSecurityProxy
         self.c.unproxied_types = str, int, long, float
         for expr in self.unops:
             x = 1
@@ -280,6 +290,7 @@ class ProxyTests(unittest.TestCase):
         ]
 
     def test_binops(self):
+        from zope.security.proxy import removeSecurityProxy
         P = self.c.proxy
         for expr in self.binops:
             first = 1
@@ -295,6 +306,7 @@ class ProxyTests(unittest.TestCase):
 
     def test_inplace(self):
         # TODO: should test all inplace operators...
+        from zope.security.proxy import removeSecurityProxy
         P = self.c.proxy
 
         pa = P(1)
@@ -322,6 +334,7 @@ class ProxyTests(unittest.TestCase):
         self.shouldFail(doit)
 
     def test_coerce(self):
+        from zope.security.proxy import removeSecurityProxy
         P = self.c.proxy
 
         # Before 2.3, coerce() of two proxies returns them unchanged
@@ -384,6 +397,7 @@ def test_using_mapping_slots_hack():
     check_getattr methods are used to check operator and attribute
     access:
 
+      >>> from zope.security.proxy import ProxyFactory
       >>> class Checker(object):
       ...     def check(self, object, name):
       ...         print 'check', name
@@ -458,8 +472,9 @@ class TestLocationProxySecurityChecker(unittest.TestCase):
 
 
 def test_suite():
-    suite = unittest.TestSuite()
-    suite.addTest(DocTestSuite('zope.security.proxy'))
-    suite.addTest(unittest.makeSuite(ProxyTests))
-    suite.addTest(unittest.makeSuite(TestLocationProxySecurityChecker))
-    return suite
+    from doctest import DocTestSuite
+    return unittest.TestSuite((
+        DocTestSuite('zope.security.proxy'),
+        unittest.makeSuite(ProxyTests),
+        unittest.makeSuite(TestLocationProxySecurityChecker),
+    ))
