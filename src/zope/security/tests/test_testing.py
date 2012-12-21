@@ -11,38 +11,48 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-
-from __future__ import with_statement
 import unittest
-import zope.security.management
-import zope.security.testing
 
 
 class InteractionHelperTest(unittest.TestCase):
 
     def tearDown(self):
-        zope.security.management.endInteraction()
+        from zope.security.management import endInteraction
+        endInteraction()
 
     def test_create_interaction_should_return_principal(self):
-        principal = zope.security.testing.create_interaction(
+        from zope.security.management import getInteraction
+        from zope.security.testing import create_interaction
+        principal = create_interaction(
             'foo', groups=['bar'], description='desc')
-        interaction = zope.security.management.getInteraction()
-        participation = interaction.participations[0]
+        ix = getInteraction()
+        participation = ix.participations[0]
         self.assertEqual('foo', participation.principal.id)
         self.assertEqual(principal.groups, participation.principal.groups)
         self.assertEqual('desc', participation.principal.description)
 
     def test_usable_as_contextmanager(self):
-        with zope.security.testing.interaction('foo'):
-            interaction = zope.security.management.getInteraction()
-            participation = interaction.participations[0]
+        from zope.security.management import getInteraction
+        from zope.security.management import queryInteraction
+        from zope.security.testing import interaction
+        with interaction('foo'):
+            ix = getInteraction()
+            participation = ix.participations[0]
             self.assertEqual('foo', participation.principal.id)
-        self.assertFalse(zope.security.management.queryInteraction())
+        self.assertFalse(queryInteraction())
 
     def test_contextmanager_ends_interaction_on_exception(self):
+        from zope.security.management import queryInteraction
+        from zope.security.testing import interaction
         try:
-            with zope.security.testing.interaction('foo'):
+            with interaction('foo'):
                 raise RuntimeError()
         except RuntimeError:
             pass
-        self.assertFalse(zope.security.management.queryInteraction())
+        self.assertFalse(queryInteraction())
+
+
+def test_suite():
+    return unittest.TestSuite((
+        unittest.makeSuite(InteractionHelperTest),
+    ))
