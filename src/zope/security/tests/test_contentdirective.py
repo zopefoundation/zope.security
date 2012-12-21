@@ -11,39 +11,25 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Test 'zope:class' directive.
+"""Test 'zope:class' ZCML directive.
 """
 import unittest
-from StringIO import StringIO
-
-from zope.component.interfaces import IFactory
-from zope.component.interfaces import ComponentLookupError
-from zope.component.interface import queryInterface
-try:
-    from zope.configuration.xmlconfig import xmlconfig, XMLConfig
-except ImportError:
-    HAVE_ZCML = False
-else:
-    HAVE_ZCML = True
-
-import zope.component
-import zope.security
-from zope.component.testing import PlacelessSetup
-
-# explicitly import ExampleClass and IExample using full paths
-# so that they are the same objects as resolve will get.
-from zope.security.tests.exampleclass import ExampleClass
-from zope.security.tests.exampleclass import IExample, IExample2
 
 
-class ParticipationStub(object):
-
-    def __init__(self, principal):
-        self.principal = principal
-        self.interaction = None
-
+def _skip_wo_zope_configuration(testfunc):
+    try:
+        import zope.configuration.xmlconfig
+    except ImportError:
+        from functools import update_wrapper
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    else:
+        return testfunc
 
 def configfile(s):
+    from StringIO import StringIO
     return StringIO("""<configure
       xmlns='http://namespaces.zope.org/zope'
       i18n_domain='zope'>
@@ -51,17 +37,43 @@ def configfile(s):
       </configure>
       """ % s)
 
-class TestClassDirective(PlacelessSetup, unittest.TestCase):
-    def setUp(self):
-        super(TestClassDirective, self).setUp()
-        XMLConfig('meta.zcml', zope.security)()
+class TestClassDirective(unittest.TestCase):
 
+    def setUp(self):
+        from zope.security.tests.exampleclass import ExampleClass
         try:
             del ExampleClass.__implements__
         except AttributeError:
             pass
+        try:
+            from zope.component.testing import setUp
+        except ImportError:
+            pass
+        else:
+            setUp()
 
+    def tearDown(self):
+        from zope.security.tests.exampleclass import ExampleClass
+        try:
+            del ExampleClass.__implements__
+        except AttributeError:
+            pass
+        try:
+            from zope.component.testing import tearDown
+        except ImportError:
+            pass
+        else:
+            tearDown()
+
+    def _meta(self):
+        from zope.configuration.xmlconfig import XMLConfig
+        import zope.security
+        XMLConfig('meta.zcml', zope.security)()
+
+    @_skip_wo_zope_configuration
     def testEmptyDirective(self):
+        from zope.configuration.xmlconfig import xmlconfig
+        self._meta()
         f = configfile("""
 <class class="zope.security.tests.exampleclass.ExampleClass">
 </class>
@@ -69,7 +81,13 @@ class TestClassDirective(PlacelessSetup, unittest.TestCase):
         xmlconfig(f)
 
 
+    @_skip_wo_zope_configuration
     def testImplements(self):
+        from zope.component.interface import queryInterface
+        from zope.configuration.xmlconfig import xmlconfig
+        from zope.security.tests.exampleclass import ExampleClass
+        from zope.security.tests.exampleclass import IExample
+        self._meta()
         self.assertEqual(queryInterface(
             "zope.security.tests.exampleclass.IExample"), None)
 
@@ -85,7 +103,14 @@ class TestClassDirective(PlacelessSetup, unittest.TestCase):
             "zope.security.tests.exampleclass.IExample"), IExample)
 
 
+    @_skip_wo_zope_configuration
     def testMulImplements(self):
+        from zope.component.interface import queryInterface
+        from zope.configuration.xmlconfig import xmlconfig
+        from zope.security.tests.exampleclass import ExampleClass
+        from zope.security.tests.exampleclass import IExample
+        from zope.security.tests.exampleclass import IExample2
+        self._meta()
         self.assertEqual(queryInterface(
             "zope.security.tests.exampleclass.IExample"), None)
         self.assertEqual(queryInterface(
@@ -109,7 +134,10 @@ class TestClassDirective(PlacelessSetup, unittest.TestCase):
             "zope.security.tests.exampleclass.IExample2"),
                          IExample2)
 
+    @_skip_wo_zope_configuration
     def testRequire(self):
+        from zope.configuration.xmlconfig import xmlconfig
+        self._meta()
         f = configfile("""
 <permission id="zope.View" title="Zope view permission" />
 <class class="zope.security.tests.exampleclass.ExampleClass">
@@ -119,7 +147,10 @@ class TestClassDirective(PlacelessSetup, unittest.TestCase):
                        """)
         xmlconfig(f)
 
+    @_skip_wo_zope_configuration
     def testAllow(self):
+        from zope.configuration.xmlconfig import xmlconfig
+        self._meta()
         f = configfile("""
 <class class="zope.security.tests.exampleclass.ExampleClass">
     <allow attributes="anAttribute anotherAttribute" />
@@ -127,7 +158,10 @@ class TestClassDirective(PlacelessSetup, unittest.TestCase):
                        """)
         xmlconfig(f)
 
+    @_skip_wo_zope_configuration
     def testMimic(self):
+        from zope.configuration.xmlconfig import xmlconfig
+        self._meta()
         f = configfile("""
 <class class="zope.security.tests.exampleclass.ExampleClass">
     <require like_class="zope.security.tests.exampleclass.ExampleClass" />
@@ -136,12 +170,35 @@ class TestClassDirective(PlacelessSetup, unittest.TestCase):
         xmlconfig(f)
 
 
-class TestFactorySubdirective(PlacelessSetup, unittest.TestCase):
+class TestFactorySubdirective(unittest.TestCase):
+
     def setUp(self):
-        super(TestFactorySubdirective, self).setUp()
+        try:
+            from zope.component.testing import setUp
+        except ImportError:
+            pass
+        else:
+            setUp()
+
+    def tearDown(self):
+        try:
+            from zope.component.testing import tearDown
+        except ImportError:
+            pass
+        else:
+            tearDown()
+
+    def _meta(self):
+        from zope.configuration.xmlconfig import XMLConfig
+        import zope.security
         XMLConfig('meta.zcml', zope.security)()
 
+    @_skip_wo_zope_configuration
     def testFactory(self):
+        from zope.component import getUtility
+        from zope.component.interfaces import IFactory
+        from zope.configuration.xmlconfig import xmlconfig
+        self._meta()
         f = configfile("""
 <permission id="zope.Foo" title="Zope Foo Permission" />
 
@@ -154,11 +211,17 @@ class TestFactorySubdirective(PlacelessSetup, unittest.TestCase):
 </class>
                        """)
         xmlconfig(f)
-        factory = zope.component.getUtility(IFactory, 'test.Example')
+        factory = getUtility(IFactory, 'test.Example')
         self.assertEquals(factory.title, "Example content")
         self.assertEquals(factory.description, "Example description")
 
+    @_skip_wo_zope_configuration
     def testFactoryNoId(self):
+        from zope.component import getUtility
+        from zope.component.interfaces import IFactory
+        from zope.component.interfaces import ComponentLookupError
+        from zope.configuration.xmlconfig import xmlconfig
+        self._meta()
         f = configfile("""
 <permission id="zope.Foo" title="Zope Foo Permission" />
 
@@ -170,16 +233,20 @@ class TestFactorySubdirective(PlacelessSetup, unittest.TestCase):
 </class>
                        """)
         xmlconfig(f)
-        self.assertRaises(ComponentLookupError, zope.component.getUtility,
+        self.assertRaises(ComponentLookupError, getUtility,
                           IFactory, 'Example')
-        factory = zope.component.getUtility(
+        factory = getUtility(
             IFactory, 'zope.security.tests.exampleclass.ExampleClass')
         self.assertEquals(factory.title, "Example content")
         self.assertEquals(factory.description, "Example description")
 
 
+    @_skip_wo_zope_configuration
     def testFactoryPublicPermission(self):
-
+        from zope.component import getUtility
+        from zope.component.interfaces import IFactory
+        from zope.configuration.xmlconfig import xmlconfig
+        self._meta()
         f = configfile("""
 <class class="zope.security.tests.exampleclass.ExampleClass">
     <factory
@@ -190,16 +257,13 @@ class TestFactorySubdirective(PlacelessSetup, unittest.TestCase):
 </class>
             """)
         xmlconfig(f)
-        factory = zope.component.getUtility(IFactory, 'test.Example')
+        factory = getUtility(IFactory, 'test.Example')
         self.assert_(hasattr(factory, '__Security_checker__'))
 
 
 def test_suite():
-    if not HAVE_ZCML:
-        return unittest.TestSuite()
 
-    suite = unittest.TestSuite()
-    loader = unittest.TestLoader()
-    suite.addTest(loader.loadTestsFromTestCase(TestClassDirective))
-    suite.addTest(loader.loadTestsFromTestCase(TestFactorySubdirective))
-    return suite
+    return unittest.TestSuite((
+        unittest.makeSuite(TestClassDirective),
+        unittest.makeSuite(TestFactorySubdirective),
+    ))
