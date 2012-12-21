@@ -16,12 +16,10 @@
 This is a test of the assertions made in
 zope.security.checkers._default_checkers.
 """
-from zope.security.checker import ProxyFactory, NamesChecker
-from zope.security.interfaces import ForbiddenAttribute
-
-import sys
+import unittest
 
 def check_forbidden_get(object, attr):
+    from zope.security.interfaces import ForbiddenAttribute
     try:
         return getattr(object, attr)
     except ForbiddenAttribute, e:
@@ -29,6 +27,7 @@ def check_forbidden_get(object, attr):
 
 
 def check_forbidden_setitem(object, item, value):
+    from zope.security.interfaces import ForbiddenAttribute
     try:
         object[item] = value
     except ForbiddenAttribute, e:
@@ -36,6 +35,7 @@ def check_forbidden_setitem(object, item, value):
 
 
 def check_forbidden_delitem(object, item):
+    from zope.security.interfaces import ForbiddenAttribute
     try:
         del object[item]
     except ForbiddenAttribute, e:
@@ -43,6 +43,7 @@ def check_forbidden_delitem(object, item):
 
 
 def check_forbidden_call(callable, *args):
+    from zope.security.interfaces import ForbiddenAttribute
     try:
         return callable(*args)
     except ForbiddenAttribute, e:
@@ -54,6 +55,7 @@ def test_dict():
 
     with proxied dicts.
 
+    >>> from zope.security.checker import ProxyFactory
     >>> d = ProxyFactory({'a': 1, 'b': 2})
 
     >>> check_forbidden_get(d, 'clear') # Verify that we are protected
@@ -127,6 +129,7 @@ def test_list():
 
     with proxied lists.
 
+    >>> from zope.security.checker import ProxyFactory
     >>> l = ProxyFactory([1, 2])
     >>> check_forbidden_delitem(l, 0)
     'ForbiddenAttribute: __delitem__'
@@ -182,6 +185,7 @@ def test_tuple():
 
     with proxied lists.
 
+    >>> from zope.security.checker import ProxyFactory
     >>> l = ProxyFactory((1, 2))
     >>> l[0]
     1
@@ -223,6 +227,7 @@ def test_tuple():
 
 def test_iter():
     """
+    >>> from zope.security.checker import ProxyFactory
     >>> list(ProxyFactory(iter([1, 2])))
     [1, 2]
     >>> list(ProxyFactory(iter((1, 2))))
@@ -242,6 +247,7 @@ def test_iter():
 def test_new_class():
     """
 
+    >>> from zope.security.checker import ProxyFactory
     >>> class C(object):
     ...    x = 1
     >>> C = ProxyFactory(C)
@@ -282,6 +288,8 @@ def test_new_class():
 def test_new_instance():
     """
 
+    >>> from zope.security.checker import NamesChecker
+    >>> from zope.security.checker import ProxyFactory
     >>> class C(object):
     ...    x, y = 1, 2
     >>> c = ProxyFactory(C(), NamesChecker(['x']))
@@ -318,6 +326,7 @@ def test_new_instance():
 def test_classic_class():
     """
 
+    >>> from zope.security.checker import ProxyFactory
     >>> class C:
     ...    x = 1
     >>> C = ProxyFactory(C)
@@ -354,6 +363,8 @@ def test_classic_class():
 def test_classic_instance():
     """
 
+    >>> from zope.security.checker import NamesChecker
+    >>> from zope.security.checker import ProxyFactory
     >>> class C(object):
     ...    x, y = 1, 2
     >>> c = ProxyFactory(C(), NamesChecker(['x']))
@@ -389,6 +400,7 @@ def test_classic_instance():
 
 def test_rocks():
     """
+    >>> from zope.security.checker import ProxyFactory
     >>> int(type(ProxyFactory(  object()  )) is object)
     1
     >>> int(type(ProxyFactory(  1  )) is int)
@@ -441,6 +453,9 @@ def test_iter_of_sequences():
 
     >>> list(x)
     [1, 2, 3]
+
+    >>> from zope.security.checker import NamesChecker
+    >>> from zope.security.checker import ProxyFactory
     >>> c = NamesChecker(['__getitem__'])
     >>> p = ProxyFactory(x, c)
 
@@ -490,55 +505,57 @@ def test_interfaces_and_declarations():
     True
     """
 
-if sys.version_info >= (2, 6):
-    def test_ABCMeta():
-        """
-        Test that we work with the ABCMeta meta class
+def test_ABCMeta():
+    """
+    Test that we work with the ABCMeta meta class
 
-        >>> import abc
-        >>> class MyABC:
-        ...     __metaclass__ = abc.ABCMeta
+    >>> import abc
+    >>> class MyABC:
+    ...     __metaclass__ = abc.ABCMeta
 
-        >>> class Foo(MyABC): pass
+    >>> class Foo(MyABC): pass
 
-        >>> class Bar(Foo): pass
+    >>> class Bar(Foo): pass
 
-        >>> PBar = ProxyFactory(Bar)
-        >>> [c.__name__ for c in PBar.__mro__]
-        ['Bar', 'Foo', 'MyABC', 'object']
+    >>> from zope.security.checker import ProxyFactory
+    >>> PBar = ProxyFactory(Bar)
+    >>> [c.__name__ for c in PBar.__mro__]
+    ['Bar', 'Foo', 'MyABC', 'object']
 
-        >>> check_forbidden_call(PBar)
-        'ForbiddenAttribute: __call__'
-        >>> check_forbidden_get(PBar, '__dict__')
-        'ForbiddenAttribute: __dict__'
-        >>> s = str(PBar)
-        >>> s = `PBar`
-        >>> int(PBar.__module__ == __name__)
-        1
-        >>> len(PBar.__bases__)
-        1
+    >>> check_forbidden_call(PBar)
+    'ForbiddenAttribute: __call__'
+    >>> check_forbidden_get(PBar, '__dict__')
+    'ForbiddenAttribute: __dict__'
+    >>> s = str(PBar)
+    >>> s = `PBar`
+    >>> int(PBar.__module__ == __name__)
+    1
+    >>> len(PBar.__bases__)
+    1
 
-        Always available:
+    Always available:
 
-        >>> int(PBar < PBar)
-        0
-        >>> int(PBar > PBar)
-        0
-        >>> int(PBar <= PBar)
-        1
-        >>> int(PBar >= PBar)
-        1
-        >>> int(PBar == PBar)
-        1
-        >>> int(PBar != PBar)
-        0
-        >>> int(bool(PBar))
-        1
-        >>> int(PBar.__class__ == abc.ABCMeta)
-        1
-        """
+    >>> int(PBar < PBar)
+    0
+    >>> int(PBar > PBar)
+    0
+    >>> int(PBar <= PBar)
+    1
+    >>> int(PBar >= PBar)
+    1
+    >>> int(PBar == PBar)
+    1
+    >>> int(PBar != PBar)
+    0
+    >>> int(bool(PBar))
+    1
+    >>> int(PBar.__class__ == abc.ABCMeta)
+    1
+    """
 
 
 def test_suite():
     from doctest import DocTestSuite
-    return DocTestSuite()
+    return unittest.TestSuite((
+        DocTestSuite(),
+    ))
