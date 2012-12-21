@@ -11,18 +11,27 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-""" Unit tests for SecurityManagement
+""" Unit tests for zope.security.management
 """
-
 import unittest
 
-from zope.interface.verify import verifyObject
-from zope.testing.cleanup import CleanUp
 
+class Test(unittest.TestCase):
 
-class Test(CleanUp, unittest.TestCase):
+    def setUp(self):
+        self._cleanUp()
+
+    def tearDown(self):
+        self._cleanUp()
+
+    def _cleanUp(self):
+        from zope.security.management import _clear
+        from zope.security.management import endInteraction
+        _clear()
+        endInteraction()
 
     def test_import(self):
+        from zope.interface.verify import verifyObject
         from zope.security import management
         from zope.security.interfaces import ISecurityManagement
         from zope.security.interfaces import IInteractionManagement

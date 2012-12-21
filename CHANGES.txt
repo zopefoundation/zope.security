@@ -5,6 +5,12 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Made non-doctest tests fully independent of ``zope.testing``.
+
+  Two modules, ``zope.security.checker`` and ``zope.security.management``,
+  register cleanups with ``zope.testing`` IFF it is importable, but the
+  tests no longer rely on it.
+
 - Enabled building extensions without the 'svn:external' of the ``zope.proxy``
   headers into our 'include' dir.
 

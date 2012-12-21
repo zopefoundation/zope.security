@@ -16,7 +16,6 @@
 from unittest import TestCase, TestSuite, main, makeSuite
 from zope.interface import implementer
 from zope.interface.verify import verifyObject
-from zope.testing.cleanup import CleanUp
 from zope.proxy import getProxiedObject
 from zope.security.interfaces import ISecurityPolicy, Unauthorized
 from zope.security.interfaces import Forbidden, ForbiddenAttribute
@@ -94,17 +93,19 @@ class NewInst(object, OldInst):
     e = property(gete, sete)
 
 
-class Test(TestCase, CleanUp):
+class Test(TestCase):
 
     def setUp(self):
-        CleanUp.setUp(self)
+        from zope.security.checker import _clear
+        _clear()
         self.__oldpolicy = setSecurityPolicy(SecurityPolicy)
         newInteraction()
 
     def tearDown(self):
+        from zope.security.checker import _clear
         endInteraction()
         setSecurityPolicy(self.__oldpolicy)
-        CleanUp.tearDown(self)
+        _clear()
 
     def test_typesAcceptedByDefineChecker(self):
         class ClassicClass:

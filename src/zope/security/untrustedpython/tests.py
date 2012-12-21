@@ -13,17 +13,15 @@
 ##############################################################################
 """Untrusted python tests
 """
-
-import doctest
 import unittest
-import re
-
-from zope.testing import renormalizing
 
 
 def test_suite():
+    import doctest
+    import re
     try:
         import RestrictedPython
+        from zope.testing import renormalizing
     except ImportError:
         return unittest.TestSuite()
 
