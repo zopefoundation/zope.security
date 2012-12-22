@@ -2,10 +2,17 @@
 CHANGES
 =======
 
-3.8.5 (unreleased)
+3.9.0 (unreleased)
 ------------------
 
-- TBD
+- Ship with an included ``proxy.h`` header which is compatible with the
+  4.1.x version ov ``zope.proxy``.
+
+3.8.5 (2012-12-21)
+------------------
+
+- Ship with an included ``proxy.h`` header which is compatible with the
+  supported versions of ``zope.proxy``.
 
 3.8.4 (2012-12-20)
 ------------------
