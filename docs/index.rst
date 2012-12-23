@@ -11,6 +11,7 @@ API Reference
    api/adapter
    api/checker
    api/decorator
+   api/management
    api/permission
 
 
