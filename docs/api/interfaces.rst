@@ -6,7 +6,7 @@
 
 .. automodule:: zope.security.interfaces
 
-#xceptions
+Exceptions
 ##########
 
    .. autointerface:: IUnauthorized
