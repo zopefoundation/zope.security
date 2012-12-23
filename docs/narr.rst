@@ -1,4 +1,3 @@
-======================
 Untrusted interpreters
 ======================
 
@@ -218,3 +217,400 @@ the interpreted program needs to be able to create simple data
 containers to hold information computed in the course of the program
 execution.  Several safe container types are provided for this
 purpose.
+
+
+Safe Builtins
+=============
+
+When executing untrusted Python code, we need to make sure that we
+only give the code access to safe, basic or proxied objects. This
+included the builtin objects provided to Python code through a special
+__builtins__ module in globals.  The `builtins` module provides a
+suitable module object:
+
+.. doctest::
+
+   >>> from zope.security.untrustedpython.builtins import SafeBuiltins
+   >>> d = {'__builtins__': SafeBuiltins}
+   >>> exec 'x = str(1)' in d
+   >>> d['x']
+   '1'
+
+The object is immutable:
+
+.. doctest::
+
+   >>> SafeBuiltins.foo = 1
+   Traceback (most recent call last):
+   ...
+   AttributeError: foo
+
+   >>> del SafeBuiltins['getattr']
+   Traceback (most recent call last):
+   ...
+   TypeError: object does not support item deletion
+
+
+
+   Exception raised:
+   ...
+   TypeError: object does not support item deletion
+
+(Note that you can mutate it through its `__dict__` attribute,
+ however, when combined with the untrusted code compiler, getting the
+ `__dict__` attribute will return a proxied object that will prevent
+ mutation.)
+
+It contains items with keys that are all strings and values that are
+either proxied or are basic types:
+
+.. doctest::
+
+   >>> from zope.security.proxy import Proxy
+   >>> for key, value in SafeBuiltins.__dict__.items():
+   ...     if not isinstance(key, str):
+   ...         raise TypeError(key)
+   ...     if value is not None and not isinstance(value, (Proxy, int, str)):
+   ...         raise TypeError(value, key)
+
+It doesn't contain unsafe items, such as eval, globals, etc:
+
+.. doctest::
+
+   >>> SafeBuiltins.eval
+   Traceback (most recent call last):
+   ...
+   AttributeError: 'ImmutableModule' object has no attribute 'eval'
+   >>> SafeBuiltins.globals
+   Traceback (most recent call last):
+   ...
+   AttributeError: 'ImmutableModule' object has no attribute 'globals'
+
+The safe builtins also contains a custom __import__ function.
+
+.. doctest::
+
+   >>> imp = SafeBuiltins.__import__
+
+As with regular import, it only returns the top-level package if no
+fromlist is specified:
+
+.. doctest::
+
+   >>> import zope.security
+   >>> imp('zope.security') == zope
+   True
+   >>> imp('zope.security', {}, {}, ['*']) == zope.security
+   True
+
+Note that the values returned are proxied:
+
+.. doctest::
+
+   >>> type(imp('zope.security')) is Proxy
+   True
+
+This means that, having imported a module, you will only be able to
+access attributes for which you are authorized.
+
+Unlike regular __import__, you can only import modules that have been
+previously imported.  This is to prevent unauthorized execution of
+module-initialization code:
+
+.. doctest::
+
+   >>> security = zope.security
+   >>> import sys
+   >>> del sys.modules['zope.security']
+   >>> imp('zope.security')
+   Traceback (most recent call last):
+   ...
+   ImportError: zope.security
+
+   >>> sys.modules['zope.security'] = security
+
+Package-relative imports are supported (for now):
+
+.. doctest::
+
+   >>> imp('security', {'__name__': 'zope', '__path__': []}) == security
+   True
+   >>> imp('security', {'__name__': 'zope.foo'}) == zope.security
+   True
+
+   >>> imp('security.untrustedpython', {'__name__': 'zope.foo'}) == security
+   True
+   >>> from zope.security import untrustedpython
+   >>> imp('security.untrustedpython', {'__name__': 'zope.foo'}, {}, ['*']
+   ...     ) == untrustedpython
+   True
+
+Untrusted Python interpreter
+============================
+
+The interpreter module provides very basic Python interpreter
+support.  It combined untrusted code compilation with safe builtins
+and an exec-like API.  The exec_src function can be used to execute
+Python source:
+
+.. doctest::
+
+   >>> from zope.security.untrustedpython.interpreter import exec_src
+   >>> d = {}
+   >>> exec_src("x=1", d)
+   >>> d['x']
+   1
+
+   >>> exec_src("x=getattr", d)
+
+Note that the safe builtins dictionary is inserted into the
+dictionary:
+
+.. doctest::
+
+   >>> from zope.security.untrustedpython.builtins import SafeBuiltins
+   >>> d['__builtins__'] == SafeBuiltins
+   True
+
+All of the non-basic items in the safe builtins are proxied:
+
+.. doctest::
+
+   >>> exec_src('str=str', d)
+   >>> from zope.security.proxy import Proxy
+   >>> type(d['str']) is Proxy
+   True
+
+Note that, while you can get to the safe `__builtins__`'s dictionary,
+you can't use the dictionary to mutate it:
+
+.. doctest::
+
+   >>> from zope.security.interfaces import ForbiddenAttribute
+
+   >>> try: exec_src('__builtins__.__dict__["x"] = 1', d)
+   ... except ForbiddenAttribute: print 'Forbidden!'
+   Forbidden!
+
+   >>> try: exec_src('del __builtins__.__dict__["str"]', d)
+   ... except ForbiddenAttribute: print 'Forbidden!'
+   Forbidden!
+
+   >>> try: exec_src('__builtins__.__dict__.update({"x": 1})', d)
+   ... except ForbiddenAttribute: print 'Forbidden!'
+   Forbidden!
+
+Because the untrusted code compiler is used, you can't use exec,
+raise, or try/except statements:
+
+.. doctest::
+
+   >>> exec_src("exec 'x=1'", d)
+   Traceback (most recent call last):
+   ...
+   SyntaxError: Line 1: exec statements are not supported
+  
+Any attribute-access results will be proxied:
+
+.. doctest::
+
+   >>> exec_src("data = {}\nupdate = data.update\nupdate({'x': 'y'})", d)
+   >>> type(d['update']) is Proxy
+   True
+
+In this case, we were able to get to and use the update method because
+the data dictionary itself was created by the untrusted code and was,
+thus, unproxied.
+
+You can compile code yourself and call exec_code instead:
+
+.. doctest::
+
+   >>> from zope.security.untrustedpython.rcompile import compile
+   >>> code = compile('x=2', '<mycode>', 'exec')
+   >>> d = {}
+   >>> from zope.security.untrustedpython.interpreter import exec_code
+   >>> exec_code(code, d)
+   >>> d['x']
+   2
+
+This is useful if you are going to be executing the same expression
+many times, as you can avoid the cost of repeated comilation.
+
+Compiled Programs
+-----------------
+
+A slightly higher-level interface is provided by compiled programs.
+These make it easier to safetly safe the results of compilation:
+
+.. doctest::
+
+   >>> from zope.security.untrustedpython.interpreter import CompiledProgram
+   >>> p = CompiledProgram('x=2')
+   >>> d = {}
+   >>> p.exec_(d)
+   >>> d['x']
+   2
+    
+When you execute a compiled program, you can supply an object with a
+write method to get print output:
+
+.. doctest::
+
+   >>> p = CompiledProgram('print "Hello world!"')
+   >>> import cStringIO
+   >>> f = cStringIO.StringIO()
+   >>> p.exec_({}, output=f)
+   >>> f.getvalue()
+   'Hello world!\n'
+
+
+Compiled Expressions
+--------------------
+
+You can also precompile expressions:
+
+.. doctest::
+
+   >>> from zope.security.untrustedpython.interpreter import CompiledExpression
+   >>> p = CompiledExpression('x*2')
+   >>> p.eval({'x': 2})
+   4
+
+Support for Restricted Python Code
+==================================
+
+This package provides a way to compile
+untrusted Python code so that it can be executed safely.
+
+This form of restricted Python assumes that security proxies will be
+used to protect assets.  Given this, the only thing that actually
+needs to be done differently by the generated code is to:
+
+- Ensure that all attribute lookups go through a safe version of the getattr()
+  function that's been provided in the built-in functions used in the
+  execution environment.  
+
+- Prevent exec statements. (Later, we could possibly make exec safe.)
+
+- Print statements always go to an output that is provided as a
+  global, rather than having an implicit sys.output.
+
+- Prevent try/except and raise statements. This is mainly because they
+  don't work properly in the presense of security proxies.  Try/except
+  statements will be made to work in the future.
+
+No other special treatment is needed to support safe expression
+evaluation.
+
+The implementation makes use of the `RestrictedPython` package,
+originally written for Zope 2.  There is a new AST re-writer in
+`zope.security.untrustedpython.rcompile` which performs the
+tree-transformation, and a top-level `compile()` function in
+`zope.security.untrustedpython.rcompile`; the later is what client
+applications are expected to use.
+
+The signature of the `compile()` function is very similar to that of
+Python's built-in `compile()` function::
+
+  compile(source, filename, mode)
+
+Using it is equally simple:
+
+.. doctest::
+
+   >>> from zope.security.untrustedpython.rcompile import compile
+
+   >>> code = compile("21 * 2", "<string>", "eval")
+   >>> eval(code)
+   42
+
+What's interesting about the restricted code is that all attribute
+lookups go through the `getattr()` function.  This is generally
+provided as a built-in function in the restricted environment:
+
+.. doctest::
+
+   >>> def mygetattr(object, name, default="Yahoo!"):
+   ...     marker = []
+   ...     print "Looking up", name
+   ...     if getattr(object, name, marker) is marker:
+   ...         return default
+   ...     else:
+   ...         return "Yeehaw!"
+
+   >>> import __builtin__
+   >>> builtins = __builtin__.__dict__.copy()
+   >>> builtins["getattr"] = mygetattr
+
+   >>> def reval(source):
+   ...     code = compile(source, "README.txt", "eval")
+   ...     globals = {"__builtins__": builtins}
+   ...     return eval(code, globals, {})
+
+   >>> reval("(42).__class__")
+   Looking up __class__
+   'Yeehaw!'
+   >>> reval("(42).not_really_there")
+   Looking up not_really_there
+   'Yahoo!'
+   >>> reval("(42).foo.not_really_there")
+   Looking up foo
+   Looking up not_really_there
+   'Yahoo!'
+
+This allows a `getattr()` to be used that ensures the result of
+evaluation is a security proxy.
+
+To compile code with statements, use exec or single:
+
+.. doctest::
+
+   >>> exec compile("x = 1", "<string>", "exec")
+   >>> x
+   1
+
+Trying to compile exec, raise or try/except sattements gives
+syntax errors:
+
+.. doctest::
+
+   >>> compile("exec 'x = 2'", "<string>", "exec")
+   Traceback (most recent call last):
+   ...
+   SyntaxError: Line 1: exec statements are not supported
+
+   >>> compile("raise KeyError('x')", "<string>", "exec")
+   Traceback (most recent call last):
+   ...
+   SyntaxError: Line 1: raise statements are not supported
+
+   >>> compile("try: pass\nexcept: pass", "<string>", "exec")
+   Traceback (most recent call last):
+   ...
+   SyntaxError: Line 1: try/except statements are not supported
+
+Printing to an explicit writable is allowed:
+
+.. doctest::
+
+   >>> import StringIO
+   >>> f = StringIO.StringIO()
+   >>> code = compile("print >> f, 'hi',\nprint >> f, 'world'", '', 'exec')
+   >>> exec code in {'f': f}
+   >>> f.getvalue()
+   'hi world\n'
+
+But if no output is specified, then output will be send to
+`untrusted_output`:
+
+.. doctest::
+
+   >>> code = compile("print 'hi',\nprint 'world'", '', 'exec')
+   >>> exec code in {}
+   Traceback (most recent call last):
+   ...
+   NameError: name 'untrusted_output' is not defined
+
+   >>> f = StringIO.StringIO()
+   >>> exec code in {'untrusted_output': f}
