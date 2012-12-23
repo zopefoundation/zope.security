@@ -1,6 +1,36 @@
 :mod:`zope.security.zcml`
 ===============================
 
+Configuring security via ZCML
+-----------------------------
+
+:mod:`zope.security` provides a ZCML file that configures some utilities and
+a couple of permissions:
+
+.. doctest::
+
+  >>> from zope.component import getGlobalSiteManager
+  >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> import zope.security
+
+  >>> XMLConfig('permissions.zcml', zope.security)()
+
+  >>> len(list(getGlobalSiteManager().registeredUtilities()))
+  7
+
+Clear the current state:
+
+.. doctest::
+
+  >>> from zope.component.testing import setUp, tearDown
+  >>> tearDown()
+  >>> setUp()
+
+  >>> XMLConfig('configure.zcml', zope.security)()
+
+  >>> len(list(getGlobalSiteManager().registeredUtilities()))
+  10
+
 .. autoclass:: zope.security.zcml.Permission
    :members:
    :member-order: bysource
