@@ -25,36 +25,6 @@ from zope.configuration.fields import MessageID, GlobalObject
 @implementer(IFromUnicode)
 class Permission(zope.schema.Id):
     r"""This field describes a permission.
-
-    Let's look at an example:
-
-    >>> class FauxContext(object):
-    ...     permission_mapping = {'zope.ManageCode':'zope.private'}
-    ...     _actions = []
-    ...     def action(self, **kws):
-    ...        self._actions.append(kws)
-    >>> context = FauxContext()
-    >>> field = Permission().bind(context)
-
-    Let's test the fromUnicode method:
-
-    >>> field.fromUnicode(u'zope.foo')
-    'zope.foo'
-    >>> field.fromUnicode(u'zope.ManageCode')
-    'zope.private'
-
-    Now let's see whether validation works alright
-
-    >>> field._validate('zope.ManageCode')
-    >>> context._actions[0]['args']
-    (None, 'zope.foo')
-    >>> field._validate('3 foo')
-    Traceback (most recent call last):
-    ...
-    InvalidId: 3 foo
-
-    zope.Public is always valid
-    >>> field._validate('zope.Public')
     """
 
     def fromUnicode(self, u):

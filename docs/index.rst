@@ -17,7 +17,7 @@ API Reference
    api/proxy
    api/simplepolicies
    api/testing
-
+   api/zcml
 
 
 Indices and tables
