@@ -29,38 +29,30 @@ def _skip_wo_zope_location(testfunc):
         return testfunc
 
 
-@_skip_wo_zope_location
-def test_locationproxy_security():
-    """We start with an unlocated class that will be wrapped by a
-       LocationProxy:
+class LocationSecurityProxyTests(unittest.TestCase):
 
-       >>> class Unlocated(object):
-       ...     a = 'a'
+    @_skip_wo_zope_location
+    def test_locationproxy_security(self):
+        from zope.location.location import LocationProxy
+        from zope.security.checker import defineChecker
+        from zope.security.checker import NamesChecker
+        from zope.security.proxy import ProxyFactory
+        class Unlocated(object):
+            a = 'a'
+        unlocated = Unlocated()
+        located = LocationProxy(unlocated)
 
-       >>> unlocated = Unlocated()
+        # define a checker for the unlocated object, which will also be
+        # used by the security proxy as the LocationProxy defines
+        # __Security_checker__:
+        unlocatedChecker = NamesChecker(['a'])
+        defineChecker(Unlocated, unlocatedChecker)
 
-       Now we create a location proxy around it:
-
-       >>> from zope.location.location import LocationProxy
-       >>> located = LocationProxy(unlocated)
-
-       We define a checker for the unlocated object, which will also be
-       used by the security proxy as the LocationProxy defines
-       __Security_checker__:
-
-       >>> from zope.security.checker import NamesChecker, defineChecker
-       >>> unlocatedChecker = NamesChecker(['a'])
-       >>> defineChecker(Unlocated, unlocatedChecker)
-
-       >>> from zope.security.proxy import ProxyFactory
-       >>> secure_located = ProxyFactory(located)
-       >>> secure_located.a
-       'a'
-    """
+        secure_located = ProxyFactory(located)
+        self.assertEqual(secure_located.a, 'a')
 
 
 def test_suite():
-    import doctest
     return unittest.TestSuite((
-        doctest.DocTestSuite(),
+        unittest.makeSuite(LocationSecurityProxyTests),
     ))
