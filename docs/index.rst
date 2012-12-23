@@ -1,6 +1,14 @@
 :mod:`zope.security` Documentation
 ==================================
 
+Narrative Documentation
+-----------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   narr
+
 API Reference
 -------------
 

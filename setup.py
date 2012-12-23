@@ -95,10 +95,6 @@ setup(name='zope.security',
       description='Zope Security Framework',
       long_description=(
           read('README.txt')
-          + '\n.. contents::\n\n' +
-          read('src', 'zope', 'security', 'README.txt')
-          + '\n\n' +
-          read('src', 'zope', 'security', 'untrustedinterpreter.txt')
           + '\n\n' +
           read('CHANGES.txt')
           ),
