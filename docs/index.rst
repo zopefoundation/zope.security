@@ -8,6 +8,7 @@ API Reference
    :maxdepth: 2
 
    api/interfaces
+   api/adapter
    api/permission
 
 

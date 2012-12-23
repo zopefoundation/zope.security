@@ -25,8 +25,6 @@ def assertLocation(adapter, parent):
     it doesn't provide ILocation itself. Further more the returned
     locatable adapter get its parent set if its __parent__ attribute
     is currently None.
-
-    see adapter.txt
     """
     # handle none-locatable adapters (A)
     if not ILocation.providedBy(adapter):
@@ -57,8 +55,6 @@ class LocatingTrustedAdapterFactory(object):
     ILocation it is wrapped within a location proxy and it parent will
     be set. If the adapter does provide ILocation and it's __parent__ is None,
     we set the __parent__ to the adapter's context:
-
-    see adapter.txt
     """
     def __init__(self, factory):
         self.factory = factory
@@ -118,8 +114,6 @@ class LocatingUntrustedAdapterFactory(object):
     set the parent. If the adapter does provide ILocation and
     it's __parent__ is None, we set the __parent__ to the adapter's
     context only:
-
-    see adapter.txt
     """
 
     def __init__(self, factory):
