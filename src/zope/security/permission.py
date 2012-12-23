@@ -32,23 +32,6 @@ class Permission(object):
 
 def checkPermission(context, permission_id):
     """Check whether a given permission exists in the provided context.
-
-    >>> from zope.component.testing import setUp, tearDown
-    >>> setUp()
-    >>> from zope.component import provideUtility
-    >>> provideUtility(Permission('x'), IPermission, 'x')
-
-    >>> checkPermission(None, 'x')
-    >>> checkPermission(None, 'y')
-    Traceback (most recent call last):
-    ...
-    ValueError: ('Undefined permission id', 'y')
-    
-    The CheckerPublic always exists:
-    
-    >>> checkPermission(None, CheckerPublic)
-    >>> tearDown()
-    
     """
     if permission_id is CheckerPublic:
         return
@@ -57,18 +40,6 @@ def checkPermission(context, permission_id):
 
 def allPermissions(context=None):
     """Get the ids of all defined permissions
-
-    >>> from zope.component.testing import setUp, tearDown
-    >>> setUp()
-    >>> from zope.component import provideUtility
-    >>> provideUtility(Permission('x'), IPermission, 'x')
-    >>> provideUtility(Permission('y'), IPermission, 'y')
-
-    >>> ids = list(allPermissions(None))
-    >>> ids.sort()
-    >>> ids
-    [u'x', u'y']
-    >>> tearDown()
     """
     for id, permission in getUtilitiesFor(IPermission, context):
         if id != u'zope.Public':
@@ -78,37 +49,6 @@ def PermissionsVocabulary(context=None):
     """A vocabulary of permission IDs.
 
     Term values are permissions, while term tokens are permission IDs.
-    
-    To illustrate, we need to register the permission IDs vocabulary:
-
-    >>> from zope.component.testing import setUp, tearDown
-    >>> setUp()
-    >>> from zope.schema.vocabulary import _clear
-    >>> _clear()
-
-    >>> from zope.schema.vocabulary import getVocabularyRegistry
-    >>> registry = getVocabularyRegistry()
-    >>> registry.register('Permissions', PermissionsVocabulary)
-
-    We also need to register some sample permission utilities:
-
-    >>> from zope.security.interfaces import IPermission
-    >>> from zope.security.permission import Permission
-    >>> from zope.component import provideUtility
-    >>> a = Permission('a')
-    >>> b = Permission('b')
-    >>> provideUtility(a, IPermission, 'a')
-    >>> provideUtility(b, IPermission, 'b')
-
-    We can now lookup these permissions using the vocabulary:
-
-    >>> vocab = registry.get(None, 'Permissions')
-    >>> vocab.getTermByToken('a').value is a
-    True
-    >>> vocab.getTermByToken('b').value is b
-    True
-    >>> tearDown()
-
     """
     terms = []
     for id, permission in getUtilitiesFor(IPermission, context):
@@ -128,57 +68,7 @@ def PermissionIdsVocabulary(context=None):
 
     Terms are sorted by title except for 'Public', which always appears as
     the first term.
-
-    To illustrate, we need to register the permission IDs vocabulary:
-
-    >>> from zope.component.testing import setUp, tearDown
-    >>> setUp()
-    >>> from zope.schema.vocabulary import _clear
-    >>> _clear()
-
-    >>> from zope.schema.vocabulary import getVocabularyRegistry
-    >>> registry = getVocabularyRegistry()
-    >>> registry.register('Permission Ids', PermissionIdsVocabulary)
-
-    We also need to register some sample permission utilities, including
-    the special permission 'zope.Public':
-
-    >>> from zope.security.interfaces import IPermission
-    >>> from zope.security.permission import Permission
-    >>> from zope.component import provideUtility
-    >>> provideUtility(Permission('zope.Public'), IPermission, 'zope.Public')
-    >>> provideUtility(Permission('b'), IPermission, 'b')
-    >>> provideUtility(Permission('a'), IPermission, 'a')
-
-    We can now lookup these permissions using the vocabulary:
-
-    >>> vocab = registry.get(None, 'Permission Ids')
-
-    The non-public permissions 'a' and 'b' are string values:
-
-    >>> vocab.getTermByToken('a').value
-    u'a'
-    >>> vocab.getTermByToken('b').value
-    u'b'
-
-    However, the public permission value is CheckerPublic:
-
-    >>> vocab.getTermByToken('zope.Public').value is CheckerPublic
-    True
-
-    and its title is shortened:
-
-    >>> vocab.getTermByToken('zope.Public').title
-    u'Public'
-
-    The terms are sorted by title except for the public permission, which is
-    listed first:
-
-    >>> [term.title for term in vocab]
-    [u'Public', u'a', u'b']
-    >>> tearDown()
     """
-
     terms = []
     for name, permission in getUtilitiesFor(IPermission, context):
         if name == 'zope.Public':

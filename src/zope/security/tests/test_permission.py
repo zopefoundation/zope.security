@@ -17,9 +17,5 @@ import unittest
 
 
 def test_suite():
-    from zope.component.testing import setUp, tearDown
-    from doctest import DocTestSuite
     return unittest.TestSuite([
-        DocTestSuite('zope.security.permission',
-                     setUp=setUp, tearDown=tearDown),
         ])
