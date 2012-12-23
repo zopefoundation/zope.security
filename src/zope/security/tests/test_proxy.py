@@ -472,9 +472,7 @@ class TestLocationProxySecurityChecker(unittest.TestCase):
 
 
 def test_suite():
-    from doctest import DocTestSuite
     return unittest.TestSuite((
-        DocTestSuite('zope.security.proxy'),
         unittest.makeSuite(ProxyTests),
         unittest.makeSuite(TestLocationProxySecurityChecker),
     ))

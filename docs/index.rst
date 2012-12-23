@@ -14,6 +14,7 @@ API Reference
    api/management
    api/permission
    api/protectclass
+   api/proxy
 
 
 
