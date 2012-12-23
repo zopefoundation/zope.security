@@ -10,6 +10,7 @@ API Reference
    api/interfaces
    api/adapter
    api/checker
+   api/decorator
    api/permission
 
 

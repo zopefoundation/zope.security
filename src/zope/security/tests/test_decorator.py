@@ -17,7 +17,5 @@ import unittest
 
 
 def test_suite():
-    import doctest
     return unittest.TestSuite((
-        doctest.DocTestSuite('zope.security.decorator'),
     ))
