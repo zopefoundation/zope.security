@@ -16,6 +16,7 @@ API Reference
    api/protectclass
    api/proxy
    api/simplepolicies
+   api/testing
 
 
 
