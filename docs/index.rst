@@ -13,6 +13,7 @@ API Reference
    api/decorator
    api/management
    api/permission
+   api/protectclass
 
 
 
