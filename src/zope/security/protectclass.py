@@ -57,7 +57,7 @@ def protectSetAttribute(class_, name, permission):
     protections[name] = permission
 
 def protectLikeUnto(class_, like_unto):
-    """Use the protections from like_unto for class_"""
+    """Use the protections from like_unto for the given class."""
 
     unto_checker = getCheckerForInstancesOf(like_unto)
     if unto_checker is None:

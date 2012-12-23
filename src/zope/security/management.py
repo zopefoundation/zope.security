@@ -105,12 +105,13 @@ def restoreInteraction():
 def checkPermission(permission, object, interaction=None):
     """Return whether security policy allows permission on object.
 
-    Arguments:
-    permission -- A permission name
-    object -- The object being accessed according to the permission
-    interaction -- An interaction, which provides access to information
-        such as authenticated principals.  If it is None, the current
-        interaction is used.
+    'permission' is a permission name.
+
+    'object' is the object being accessed according to the permission.
+
+    'interaction' is an interaction, providing access to information
+    such as authenticated principals.  If it is None, the current
+    interaction is used.
 
     checkPermission is guaranteed to return True if permission is
     CheckerPublic or None.
