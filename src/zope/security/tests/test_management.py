@@ -136,5 +136,6 @@ class Test(unittest.TestCase):
             self.assert_(isinstance(getattr(system_user, name), unicode))
 
 def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromTestCase(Test)
+    return unittest.TestSuite((
+        unittest.makeSuite(Test),
+    ))
