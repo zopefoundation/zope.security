@@ -171,21 +171,319 @@ directly, or via interface:
                        'y')}]
 
 
-Protections for set objects
----------------------------
-
-we can do everything we expect to be able to do with proxied sets.
+Protections for standard objects
+--------------------------------
 
 .. doctest::
 
+   >>> from zope.security.checker import ProxyFactory
+   >>> from zope.security.interfaces import ForbiddenAttribute
    >>> def check_forbidden_get(object, attr):
    ...     from zope.security.interfaces import ForbiddenAttribute
    ...     try:
    ...         return getattr(object, attr)
    ...     except ForbiddenAttribute, e:
    ...         return 'ForbiddenAttribute: %s' % e[0]
+   >>> def check_forbidden_setitem(object, item, value):
+   ...     from zope.security.interfaces import ForbiddenAttribute
+   ...     try:
+   ...         object[item] = value
+   ...     except ForbiddenAttribute, e:
+   ...         return 'ForbiddenAttribute: %s' % e[0]
+   >>> def check_forbidden_delitem(object, item):
+   ...     from zope.security.interfaces import ForbiddenAttribute
+   ...     try:
+   ...         del object[item]
+   ...     except ForbiddenAttribute, e:
+   ...         return 'ForbiddenAttribute: %s' % e[0]
+   >>> def check_forbidden_call(callable, *args): # **
+   ...     from zope.security.interfaces import ForbiddenAttribute
+   ...     try:
+   ...         return callable(*args) # **
+   ...     except ForbiddenAttribute, e:
+   ...         return 'ForbiddenAttribute: %s' % e[0]
+
+dicts
+#####
+
+We can do everything we expect to be able to do with proxied dicts.
+
+.. doctest::
+
+   >>> d = ProxyFactory({'a': 1, 'b': 2})
+   >>> check_forbidden_get(d, 'clear') # Verify that we are protected
+   'ForbiddenAttribute: clear'
+   >>> check_forbidden_setitem(d, 3, 4) # Verify that we are protected
+   'ForbiddenAttribute: __setitem__'
+   >>> d['a']
+   1
+   >>> len(d)
+   2
+   >>> list(d)
+   ['a', 'b']
+   >>> d.get('a')
+   1
+   >>> int(d.has_key('a'))
+   1
+   >>> c = d.copy()
+   >>> check_forbidden_get(c, 'clear')
+   'ForbiddenAttribute: clear'
+   >>> int(str(c) in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}"))
+   1
+   >>> int(`c` in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}"))
+   1
+   >>> def sorted(x):
+   ...    x = list(x)
+   ...    x.sort()
+   ...    return x
+   >>> sorted(d.keys())
+   ['a', 'b']
+   >>> sorted(d.values())
+   [1, 2]
+   >>> sorted(d.items())
+   [('a', 1), ('b', 2)]
+   >>> sorted(d.iterkeys())
+   ['a', 'b']
+   >>> sorted(d.itervalues())
+   [1, 2]
+   >>> sorted(d.iteritems())
+   [('a', 1), ('b', 2)]
+
+Always available:
+
+.. doctest::
+
+    >>> int(d < d)
+    0
+    >>> int(d > d)
+    0
+    >>> int(d <= d)
+    1
+    >>> int(d >= d)
+    1
+    >>> int(d == d)
+    1
+    >>> int(d != d)
+    0
+    >>> int(bool(d))
+    1
+    >>> int(d.__class__ == dict)
+    1
+
+lists
+#####
+
+We can do everything we expect to be able to do with proxied lists.
+
+.. doctest::
+
+   >>> l = ProxyFactory([1, 2])
+   >>> check_forbidden_delitem(l, 0)
+   'ForbiddenAttribute: __delitem__'
+   >>> check_forbidden_setitem(l, 0, 3)
+   'ForbiddenAttribute: __setitem__'
+   >>> l[0]
+   1
+   >>> l[0:1]
+   [1]
+   >>> check_forbidden_setitem(l[:1], 0, 2)
+   'ForbiddenAttribute: __setitem__'
+   >>> len(l)
+   2
+   >>> tuple(l)
+   (1, 2)
+   >>> int(1 in l)
+   1
+   >>> l.index(2)
+   1
+   >>> l.count(2)
+   1
+   >>> str(l)
+   '[1, 2]'
+   >>> `l`
+   '[1, 2]'
+   >>> l + l
+   [1, 2, 1, 2]
+
+Always available:
+
+.. doctest::
+
+   >>> int(l < l)
+   0
+   >>> int(l > l)
+   0
+   >>> int(l <= l)
+   1
+   >>> int(l >= l)
+   1
+   >>> int(l == l)
+   1
+   >>> int(l != l)
+   0
+   >>> int(bool(l))
+   1
+   >>> int(l.__class__ == list)
+   1
+
+tuples
+######
+
+We can do everything we expect to be able to do with proxied tuples.
+
+.. doctest::
+
    >>> from zope.security.checker import ProxyFactory
-   >>> from zope.security.interfaces import ForbiddenAttribute
+   >>> l = ProxyFactory((1, 2))
+   >>> l[0]
+   1
+   >>> l[0:1]
+   (1,)
+   >>> len(l)
+   2
+   >>> list(l)
+   [1, 2]
+   >>> int(1 in l)
+   1
+   >>> str(l)
+   '(1, 2)'
+   >>> `l`
+   '(1, 2)'
+   >>> l + l
+   (1, 2, 1, 2)
+
+Always available:
+
+.. doctest::
+
+   >>> int(l < l)
+   0
+   >>> int(l > l)
+   0
+   >>> int(l <= l)
+   1
+   >>> int(l >= l)
+   1
+   >>> int(l == l)
+   1
+   >>> int(l != l)
+   0
+   >>> int(bool(l))
+   1
+   >>> int(l.__class__ == tuple)
+   1
+
+iterators
+#########
+
+.. doctest::
+
+   >>> list(ProxyFactory(iter([1, 2])))
+   [1, 2]
+   >>> list(ProxyFactory(iter((1, 2))))
+   [1, 2]
+   >>> list(ProxyFactory(iter({1:1, 2:2})))
+   [1, 2]
+   >>> def f():
+   ...     for i in 1, 2:
+   ...             yield i
+   ...
+   >>> list(ProxyFactory(f()))
+   [1, 2]
+   >>> list(ProxyFactory(f)())
+   [1, 2]
+
+
+New-style classes
+#################
+
+.. doctest::
+
+   >>> from zope.security.checker import NamesChecker
+   >>> class C(object):
+   ...    x = 1
+   ...    y = 2
+   >>> C = ProxyFactory(C)
+   >>> check_forbidden_call(C)
+   'ForbiddenAttribute: __call__'
+   >>> check_forbidden_get(C, '__dict__')
+   'ForbiddenAttribute: __dict__'
+   >>> s = str(C)
+   >>> s = `C`
+   >>> int(C.__module__ == __name__)
+   1
+   >>> len(C.__bases__)
+   1
+   >>> len(C.__mro__)
+   2
+
+Always available:
+
+.. doctest::
+
+   >>> int(C < C)
+   0
+   >>> int(C > C)
+   0
+   >>> int(C <= C)
+   1
+   >>> int(C >= C)
+   1
+   >>> int(C == C)
+   1
+   >>> int(C != C)
+   0
+   >>> int(bool(C))
+   1
+   >>> int(C.__class__ == type)
+   1
+
+New-style Instances
+###################
+
+.. doctest::
+
+   >>> class C(object):
+   ...    x = 1
+   ...    y = 2
+   >>> c = ProxyFactory(C(), NamesChecker(['x']))
+   >>> check_forbidden_get(c, 'y')
+   'ForbiddenAttribute: y'
+   >>> check_forbidden_get(c, 'z')
+   'ForbiddenAttribute: z'
+   >>> c.x
+   1
+   >>> int(c.__class__ == C)
+   1
+
+Always available:
+
+.. doctest::
+
+   >>> int(c < c)
+   0
+   >>> int(c > c)
+   0
+   >>> int(c <= c)
+   1
+   >>> int(c >= c)
+   1
+   >>> int(c == c)
+   1
+   >>> int(c != c)
+   0
+   >>> int(bool(c))
+   1
+   >>> int(c.__class__ == C)
+   1
+
+sets
+####
+
+we can do everything we expect to be able to do with proxied sets.
+
+.. doctest::
+
    >>> us = set((1, 2))
    >>> s = ProxyFactory(us)
 
@@ -349,7 +647,12 @@ with any kind of proxy.
    >>> s.__class__ == set
    True
 
-Likewise with proxied frozensets.
+
+
+frozensets
+##########
+
+we can do everything we expect to be able to do with proxied frozensets.
 
 .. doctest::
 
