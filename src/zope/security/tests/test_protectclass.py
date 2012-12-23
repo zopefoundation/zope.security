@@ -137,8 +137,6 @@ class Test(unittest.TestCase):
         self.assertSetattrState(module, m1P=P1, m2P=P2, m3P=P2)
 
 def test_suite():
-    loader=unittest.TestLoader()
-    return loader.loadTestsFromTestCase(Test)
-
-if __name__=='__main__':
-    unittest.TextTestRunner().run(test_suite())
+    return unittest.TestSuite((
+        unittest.makeSuite(Test),
+    ))
