@@ -15,6 +15,7 @@ API Reference
    api/permission
    api/protectclass
    api/proxy
+   api/simplepolicies
 
 
 

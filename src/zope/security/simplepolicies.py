@@ -21,6 +21,7 @@ from zope.security._definitions import system_user
 @zope.interface.implementer(IInteraction)
 @zope.interface.provider(ISecurityPolicy)
 class ParanoidSecurityPolicy(object):
+    """Prohibit all access exctp to public items, or by explicit principals"""
 
     def __init__(self, *participations):
         self.participations = []
