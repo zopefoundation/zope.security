@@ -1,13 +1,14 @@
-:mod:`zope.security`
-====================
+:mod:`zope.security` Documentation
+==================================
 
-Contents:
+API Reference
+-------------
 
 .. toctree::
    :maxdepth: 2
 
    api/interfaces
-   api/permissions
+   api/permission
 
 
 
