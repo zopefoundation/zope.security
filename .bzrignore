@@ -10,3 +10,4 @@ parts
 nosetests.xml
 src/coverage.xml
 .tox
+docs/_build
