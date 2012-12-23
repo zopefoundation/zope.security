@@ -203,6 +203,57 @@ Protections for standard objects
    ...     except ForbiddenAttribute, e:
    ...         return 'ForbiddenAttribute: %s' % e[0]
 
+Rocks
+#####
+
+Rocks are immuatle, non-callable objects without interesting methods.  They
+*don't* get proxied.
+
+.. doctest::
+
+   >>> int(type(ProxyFactory(  object()  )) is object)
+   1
+   >>> int(type(ProxyFactory(  1  )) is int)
+   1
+   >>> int(type(ProxyFactory(  1.0  )) is float)
+   1
+   >>> int(type(ProxyFactory(  1l  )) is long)
+   1
+   >>> int(type(ProxyFactory(  1j  )) is complex)
+   1
+   >>> int(type(ProxyFactory(  None  )) is type(None))
+   1
+   >>> int(type(ProxyFactory(  'xxx'  )) is str)
+   1
+   >>> int(type(ProxyFactory(  u'xxx'  )) is unicode)
+   1
+   >>> int(type(ProxyFactory(  True  )) is type(True))
+   1
+
+Datetime-reltatd instances are rocks, too:
+
+.. doctest::
+
+   >>> from datetime import timedelta, datetime, date, time, tzinfo
+   >>> int(type(ProxyFactory(  timedelta(1)  )) is timedelta)
+   1
+   >>> int(type(ProxyFactory(  datetime(2000, 1, 1)  )) is datetime)
+   1
+   >>> int(type(ProxyFactory(  date(2000, 1, 1)  )) is date)
+   1
+   >>> int(type(ProxyFactory(  time()  )) is time)
+   1
+   >>> int(type(ProxyFactory(  tzinfo() )) is tzinfo)
+   1
+   >>> try:
+   ...     from pytz import UTC
+   ... except ImportError:  # pytz checker only if pytz is present.
+   ...     1
+   ... else:
+   ...      int(type(ProxyFactory(  UTC )) is type(UTC))
+   1
+
+
 dicts
 #####
 
@@ -371,110 +422,6 @@ Always available:
    >>> int(bool(l))
    1
    >>> int(l.__class__ == tuple)
-   1
-
-iterators
-#########
-
-.. doctest::
-
-   >>> list(ProxyFactory(iter([1, 2])))
-   [1, 2]
-   >>> list(ProxyFactory(iter((1, 2))))
-   [1, 2]
-   >>> list(ProxyFactory(iter({1:1, 2:2})))
-   [1, 2]
-   >>> def f():
-   ...     for i in 1, 2:
-   ...             yield i
-   ...
-   >>> list(ProxyFactory(f()))
-   [1, 2]
-   >>> list(ProxyFactory(f)())
-   [1, 2]
-
-
-New-style classes
-#################
-
-.. doctest::
-
-   >>> from zope.security.checker import NamesChecker
-   >>> class C(object):
-   ...    x = 1
-   ...    y = 2
-   >>> C = ProxyFactory(C)
-   >>> check_forbidden_call(C)
-   'ForbiddenAttribute: __call__'
-   >>> check_forbidden_get(C, '__dict__')
-   'ForbiddenAttribute: __dict__'
-   >>> s = str(C)
-   >>> s = `C`
-   >>> int(C.__module__ == __name__)
-   1
-   >>> len(C.__bases__)
-   1
-   >>> len(C.__mro__)
-   2
-
-Always available:
-
-.. doctest::
-
-   >>> int(C < C)
-   0
-   >>> int(C > C)
-   0
-   >>> int(C <= C)
-   1
-   >>> int(C >= C)
-   1
-   >>> int(C == C)
-   1
-   >>> int(C != C)
-   0
-   >>> int(bool(C))
-   1
-   >>> int(C.__class__ == type)
-   1
-
-New-style Instances
-###################
-
-.. doctest::
-
-   >>> class C(object):
-   ...    x = 1
-   ...    y = 2
-   >>> c = ProxyFactory(C(), NamesChecker(['x']))
-   >>> check_forbidden_get(c, 'y')
-   'ForbiddenAttribute: y'
-   >>> check_forbidden_get(c, 'z')
-   'ForbiddenAttribute: z'
-   >>> c.x
-   1
-   >>> int(c.__class__ == C)
-   1
-
-Always available:
-
-.. doctest::
-
-   >>> int(c < c)
-   0
-   >>> int(c > c)
-   0
-   >>> int(c <= c)
-   1
-   >>> int(c >= c)
-   1
-   >>> int(c == c)
-   1
-   >>> int(c != c)
-   0
-   >>> int(bool(c))
-   1
-   >>> int(c.__class__ == C)
    1
 
 sets
@@ -826,3 +773,311 @@ with any kind of proxy.
    True
    >>> s.__class__ == frozenset
    True
+
+iterators
+#########
+
+.. doctest::
+
+   >>> list(ProxyFactory(iter([1, 2])))
+   [1, 2]
+   >>> list(ProxyFactory(iter((1, 2))))
+   [1, 2]
+   >>> list(ProxyFactory(iter({1:1, 2:2})))
+   [1, 2]
+   >>> def f():
+   ...     for i in 1, 2:
+   ...             yield i
+   ...
+   >>> list(ProxyFactory(f()))
+   [1, 2]
+   >>> list(ProxyFactory(f)())
+   [1, 2]
+
+
+We can iterate over custom sequences, too:
+
+.. doctest::
+
+   >>> class X(object):
+   ...   d = 1, 2, 3
+   ...   def __getitem__(self, i):
+   ...      return self.d[i]
+   ...
+   >>> x = X()
+
+We can iterate over sequences
+
+.. doctest::
+
+   >>> list(x)
+   [1, 2, 3]
+
+   >>> from zope.security.checker import NamesChecker
+   >>> from zope.security.checker import ProxyFactory
+   >>> c = NamesChecker(['__getitem__'])
+   >>> p = ProxyFactory(x, c)
+
+Even if they are proxied
+
+.. doctest::
+
+   >>> list(p)
+   [1, 2, 3]
+
+But if the class has an iter:
+
+.. doctest::
+
+   >>> X.__iter__ = lambda self: iter(self.d)
+   >>> list(x)
+   [1, 2, 3]
+
+We shouldn't be able to iterate if we don't have an assertion:
+
+.. doctest::
+
+   >>> check_forbidden_call(list, p)
+   'ForbiddenAttribute: __iter__'
+
+
+New-style classes
+#################
+
+.. doctest::
+
+   >>> from zope.security.checker import NamesChecker
+   >>> class C(object):
+   ...    x = 1
+   ...    y = 2
+   >>> C = ProxyFactory(C)
+   >>> check_forbidden_call(C)
+   'ForbiddenAttribute: __call__'
+   >>> check_forbidden_get(C, '__dict__')
+   'ForbiddenAttribute: __dict__'
+   >>> s = str(C)
+   >>> s = `C`
+   >>> int(C.__module__ == __name__)
+   1
+   >>> len(C.__bases__)
+   1
+   >>> len(C.__mro__)
+   2
+
+Always available:
+
+.. doctest::
+
+   >>> int(C < C)
+   0
+   >>> int(C > C)
+   0
+   >>> int(C <= C)
+   1
+   >>> int(C >= C)
+   1
+   >>> int(C == C)
+   1
+   >>> int(C != C)
+   0
+   >>> int(bool(C))
+   1
+   >>> int(C.__class__ == type)
+   1
+
+New-style Instances
+###################
+
+.. doctest::
+
+   >>> class C(object):
+   ...    x = 1
+   ...    y = 2
+   >>> c = ProxyFactory(C(), NamesChecker(['x']))
+   >>> check_forbidden_get(c, 'y')
+   'ForbiddenAttribute: y'
+   >>> check_forbidden_get(c, 'z')
+   'ForbiddenAttribute: z'
+   >>> c.x
+   1
+   >>> int(c.__class__ == C)
+   1
+
+Always available:
+
+.. doctest::
+
+   >>> int(c < c)
+   0
+   >>> int(c > c)
+   0
+   >>> int(c <= c)
+   1
+   >>> int(c >= c)
+   1
+   >>> int(c == c)
+   1
+   >>> int(c != c)
+   0
+   >>> int(bool(c))
+   1
+   >>> int(c.__class__ == C)
+   1
+
+
+Classic Classes
+###############
+
+.. doctest::
+
+   >>> class C:
+   ...    x = 1
+   >>> C = ProxyFactory(C)
+   >>> check_forbidden_call(C)
+   'ForbiddenAttribute: __call__'
+   >>> check_forbidden_get(C, '__dict__')
+   'ForbiddenAttribute: __dict__'
+   >>> s = str(C)
+   >>> s = `C`
+   >>> int(C.__module__ == __name__)
+   1
+   >>> len(C.__bases__)
+   0
+
+Always available:
+
+.. doctest::
+
+   >>> int(C < C)
+   0
+   >>> int(C > C)
+   0
+   >>> int(C <= C)
+   1
+   >>> int(C >= C)
+   1
+   >>> int(C == C)
+   1
+   >>> int(C != C)
+   0
+   >>> int(bool(C))
+   1
+
+Classic Instances
+#################
+
+.. doctest::
+
+   >>> class C(object):
+   ...    x, y = 1, 2
+   >>> c = ProxyFactory(C(), NamesChecker(['x']))
+   >>> check_forbidden_get(c, 'y')
+   'ForbiddenAttribute: y'
+   >>> check_forbidden_get(c, 'z')
+   'ForbiddenAttribute: z'
+   >>> c.x
+   1
+   >>> int(c.__class__ == C)
+   1
+
+Always available:
+
+.. doctest::
+
+   >>> int(c < c)
+   0
+   >>> int(c > c)
+   0
+   >>> int(c <= c)
+   1
+   >>> int(c >= c)
+   1
+   >>> int(c == c)
+   1
+   >>> int(c != c)
+   0
+   >>> int(bool(c))
+   1
+   >>> int(c.__class__ == C)
+   1
+
+Interfaces and declarations
+###########################
+
+We can still use interfaces though proxies:
+
+.. doctest::
+
+   >>> from zope.interface import directlyProvides
+   >>> from zope.interface import implementer
+   >>> from zope.interface import provider
+   >>> class I(Interface):
+   ...     pass
+   >>> class IN(Interface):
+   ...     pass
+   >>> class II(Interface):
+   ...     pass
+   >>> @implementer(I)
+   ... @provider(IN)
+   ... class N(object):
+   ...     pass
+   >>> n = N()
+   >>> directlyProvides(n, II)
+   >>> N = ProxyFactory(N)
+   >>> n = ProxyFactory(n)
+   >>> I.implementedBy(N)
+   True
+   >>> IN.providedBy(N)
+   True
+   >>> I.providedBy(n)
+   True
+   >>> II.providedBy(n)
+   True
+
+
+abstract Base Classes
+#####################
+
+We work with the ABCMeta meta class:
+
+.. doctest::
+
+   >>> import abc
+   >>> class MyABC:
+   ...     __metaclass__ = abc.ABCMeta
+   >>> class Foo(MyABC): pass
+   >>> class Bar(Foo): pass
+   >>> PBar = ProxyFactory(Bar)
+   >>> [c.__name__ for c in PBar.__mro__]
+   ['Bar', 'Foo', 'MyABC', 'object']
+   >>> check_forbidden_call(PBar)
+   'ForbiddenAttribute: __call__'
+   >>> check_forbidden_get(PBar, '__dict__')
+   'ForbiddenAttribute: __dict__'
+   >>> s = str(PBar)
+   >>> s = `PBar`
+   >>> int(PBar.__module__ == __name__)
+   1
+   >>> len(PBar.__bases__)
+   1
+
+Always available:
+
+.. doctest::
+
+   >>> int(PBar < PBar)
+   0
+   >>> int(PBar > PBar)
+   0
+   >>> int(PBar <= PBar)
+   1
+   >>> int(PBar >= PBar)
+   1
+   >>> int(PBar == PBar)
+   1
+   >>> int(PBar != PBar)
+   0
+   >>> int(bool(PBar))
+   1
+   >>> int(PBar.__class__ == abc.ABCMeta)
+   1
