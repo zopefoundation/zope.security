@@ -9,6 +9,7 @@ API Reference
 
    api/interfaces
    api/adapter
+   api/checker
    api/permission
 
 
