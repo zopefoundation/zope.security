@@ -16,9 +16,9 @@
 import unittest
 
 
-def _skip_wo_zope_configuration(testfunc):
+def _skip_wo_zope_location(testfunc):
     try:
-        import zope.configuration.xmlconfig
+        import zope.location
     except ImportError:
         from functools import update_wrapper
         def dummy(self):
@@ -29,7 +29,7 @@ def _skip_wo_zope_configuration(testfunc):
         return testfunc
 
 
-@_skip_wo_zope_configuration
+@_skip_wo_zope_location
 def test_locationproxy_security():
     """We start with an unlocated class that will be wrapped by a
        LocationProxy:
