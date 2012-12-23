@@ -1,5 +1,5 @@
-Defining and Using Permissions
-==============================
+:mod:`zope.security.permission`
+===============================
 
 .. testsetup::
 

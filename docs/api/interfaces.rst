@@ -1,8 +1,5 @@
-:mod:`zope.security` API Revference
-===================================
-
 :mod:`zope.security.interfaces`
--------------------------------
+===============================
 
 .. automodule:: zope.security.interfaces
 
