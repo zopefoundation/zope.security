@@ -33,6 +33,8 @@ class Permission(object):
 def checkPermission(context, permission_id):
     """Check whether a given permission exists in the provided context.
 
+    >>> from zope.component.testing import setUp, tearDown
+    >>> setUp()
     >>> from zope.component import provideUtility
     >>> provideUtility(Permission('x'), IPermission, 'x')
 
@@ -45,6 +47,7 @@ def checkPermission(context, permission_id):
     The CheckerPublic always exists:
     
     >>> checkPermission(None, CheckerPublic)
+    >>> tearDown()
     
     """
     if permission_id is CheckerPublic:
@@ -55,6 +58,8 @@ def checkPermission(context, permission_id):
 def allPermissions(context=None):
     """Get the ids of all defined permissions
 
+    >>> from zope.component.testing import setUp, tearDown
+    >>> setUp()
     >>> from zope.component import provideUtility
     >>> provideUtility(Permission('x'), IPermission, 'x')
     >>> provideUtility(Permission('y'), IPermission, 'y')
@@ -63,6 +68,7 @@ def allPermissions(context=None):
     >>> ids.sort()
     >>> ids
     [u'x', u'y']
+    >>> tearDown()
     """
     for id, permission in getUtilitiesFor(IPermission, context):
         if id != u'zope.Public':
@@ -75,6 +81,8 @@ def PermissionsVocabulary(context=None):
     
     To illustrate, we need to register the permission IDs vocabulary:
 
+    >>> from zope.component.testing import setUp, tearDown
+    >>> setUp()
     >>> from zope.schema.vocabulary import _clear
     >>> _clear()
 
@@ -99,6 +107,7 @@ def PermissionsVocabulary(context=None):
     True
     >>> vocab.getTermByToken('b').value is b
     True
+    >>> tearDown()
 
     """
     terms = []
@@ -122,6 +131,8 @@ def PermissionIdsVocabulary(context=None):
 
     To illustrate, we need to register the permission IDs vocabulary:
 
+    >>> from zope.component.testing import setUp, tearDown
+    >>> setUp()
     >>> from zope.schema.vocabulary import _clear
     >>> _clear()
 
@@ -165,6 +176,7 @@ def PermissionIdsVocabulary(context=None):
 
     >>> [term.title for term in vocab]
     [u'Public', u'a', u'b']
+    >>> tearDown()
     """
 
     terms = []
