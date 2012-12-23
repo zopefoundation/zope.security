@@ -136,6 +136,36 @@ class Test(unittest.TestCase):
         self.assertState(module, m1P=P1, m2P=P2, m3P=P2)
         self.assertSetattrState(module, m1P=P1, m2P=P2, m3P=P2)
 
+    def testInherited(self):
+        from zope.component import provideUtility
+        from zope.security.checker import selectChecker
+        from zope.security.interfaces import IPermission
+        from zope.security.permission import Permission
+        from zope.security.protectclass import protectName
+
+        class B1(object):
+            def g(self): return 'B1.g'
+
+        class B2(object):
+            def h(self): return 'B2.h'
+
+        class S(B1, B2):
+            pass
+
+        provideUtility(Permission('B1', ''), IPermission, 'B1')
+        provideUtility(Permission('S', ''), IPermission, 'S')
+        protectName(B1, 'g', 'B1')
+        protectName(S, 'g', 'S')
+        protectName(S, 'h', 'S')
+
+        self.assertEqual(selectChecker(B1()).permission_id('g'), 'B1')
+        self.assertEqual(selectChecker(B2()).permission_id('h'), None)
+        self.assertEqual(selectChecker(S()).permission_id('g'), 'S')
+        self.assertEqual(selectChecker(S()).permission_id('h'), 'S')
+
+        self.assertEqual(S().g(), 'B1.g')
+        self.assertEqual(S().h(), 'B2.h')
+
 def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(Test),
