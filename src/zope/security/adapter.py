@@ -38,8 +38,7 @@ def assertLocation(adapter, parent):
         return adapter
 
     # handle locatable, parentful adapters (C)
-    else:
-        return adapter
+    return adapter
 
 
 class LocatingTrustedAdapterFactory(object):
