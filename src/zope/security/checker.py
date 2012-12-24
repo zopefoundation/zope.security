@@ -23,6 +23,7 @@ messages about granted attribute access.
 Note that the ZOPE_WATCH_CHECKERS mechanism will eventually be
 replaced with a more general security auditing mechanism.
 """
+import abc
 import os
 import sys
 import types
@@ -34,14 +35,20 @@ import zope.interface.interface
 import zope.interface.interfaces
 import zope.interface.declarations
 from zope.i18nmessageid import Message
-from zope.interface import directlyProvides, Interface, implementer
-from zope.interface.interfaces import IInterface, IDeclaration
+from zope.interface import Interface
+from zope.interface import directlyProvides
+from zope.interface import implementer
+from zope.interface.interfaces import IDeclaration
+from zope.interface.interfaces import IInterface
 
-from zope.security.interfaces import IChecker, INameBasedChecker
+from zope.security.interfaces import IChecker
+from zope.security.interfaces import INameBasedChecker
 from zope.security.interfaces import ISecurityProxyFactory
-from zope.security.interfaces import Unauthorized, ForbiddenAttribute
+from zope.security.interfaces import ForbiddenAttribute
+from zope.security.interfaces import Unauthorized
 from zope.security._definitions import thread_local
-from zope.security._proxy import _Proxy as Proxy, getChecker
+from zope.security._proxy import _Proxy as Proxy
+from zope.security._proxy import getChecker
 
 try:
     from zope.exceptions import DuplicationError
@@ -728,16 +735,8 @@ _default_checkers = {
     zope.interface.declarations.ClassProvides: _Declaration_checker,
     zope.interface.declarations.Implements: _Declaration_checker,
     zope.interface.declarations.Declaration: _Declaration_checker,
+    abc.ABCMeta: _typeChecker,
 }
-
-if sys.version_info < (2, 6):
-    import sets
-    _default_checkers[sets.Set] = _setChecker
-    _default_checkers[sets.ImmutableSet] = _setChecker
-
-if sys.version_info >= (2, 6):
-    import abc
-    _default_checkers[abc.ABCMeta] = _typeChecker
 
 
 def _clear():
