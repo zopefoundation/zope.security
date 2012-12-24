@@ -5,6 +5,10 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Converted use of ``assert`` in non-test code to apprpriate error types:
+
+  - Non-dict's passed to ``Checker.__init__``.
+
 - Removed dprecattion of ``zope.security.adapter.TrustedAdapterFactory``.
   Although it has been marked as deprectaed since before Zope3 3.2, current
   versions of ``zope.compoent`` still rely on it.

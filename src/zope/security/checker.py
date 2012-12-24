@@ -148,7 +148,7 @@ def canAccess(obj, name):
     return True
 
 @implementer(INameBasedChecker)
-class Checker(object):
+class CheckerPy(object):
 
     def __init__(self, get_permissions, set_permissions=None):
         """Create a checker
@@ -164,10 +164,12 @@ class Checker(object):
         set attribute access.
 
         """
-        assert isinstance(get_permissions, dict)
+        if not isinstance(get_permissions, dict):
+            raise TypeError('get_permissions must be a dict')
         self.get_permissions = get_permissions
         if set_permissions is not None:
-            assert isinstance(set_permissions, dict)
+            if not isinstance(set_permissions, dict):
+                raise TypeError('set_permissions must be a dict')
         self.set_permissions = set_permissions
 
     def permission_id(self, name):
@@ -231,7 +233,7 @@ class Checker(object):
                 return value
 
         return Proxy(value, checker)
-
+Checker = CheckerPy # in case no C optimizations
 
 
 # Helper class for __traceback_supplement__
@@ -291,7 +293,7 @@ CheckerPublic = Global('CheckerPublic')
 # Now we wrap it in a security proxy so that it retains it's
 # identity when it needs to be security proxied.
 d={}
-CheckerPublic = Proxy(CheckerPublic, Checker(d))
+CheckerPublic = Proxy(CheckerPublic, Checker(d)) # XXX uses CheckerPy
 d['__reduce__'] = CheckerPublic
 del d
 
