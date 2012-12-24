@@ -16,14 +16,91 @@
 import unittest
 
 
-class TransparentProxy(object):
-    def __init__(self, ob):
-        self._ob = ob
 
-    def __getattribute__(self, name):
-        ob = object.__getattribute__(self, '_ob')
-        return getattr(ob, name)
+class ProxyFactoryTests(unittest.TestCase):
 
+    def _callFUT(self, object, checker=None):
+        from zope.security.checker import ProxyFactory
+        return ProxyFactory(object, checker)
+
+    def test_w_already_proxied_no_checker(self):
+        from zope.security._proxy import _Proxy as Proxy
+        from zope.security._proxy import getChecker
+        obj = object()
+        def _check(*x):
+            pass
+        proxy = Proxy(obj, _check)
+        returned = self._callFUT(proxy, None)
+        self.assertTrue(returned is proxy)
+        self.assertTrue(getChecker(returned) is _check)
+
+    def test_w_already_proxied_same_checker(self):
+        from zope.security._proxy import _Proxy as Proxy
+        from zope.security._proxy import getChecker
+        obj = object()
+        def _check(*x):
+            pass
+        proxy = Proxy(obj, _check)
+        returned = self._callFUT(proxy, _check)
+        self.assertTrue(returned is proxy)
+        self.assertTrue(getChecker(returned) is _check)
+
+    def test_w_already_proxied_different_checker(self):
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        def _check(*x):
+            pass
+        proxy = Proxy(obj, _check)
+        def _sneaky(*x):
+            pass
+        self.assertRaises(TypeError, self._callFUT, proxy, _sneaky)
+
+    def test_w_explicit_checker(self):
+        from zope.security._proxy import getChecker
+        obj = object()
+        def _check(*x):
+            pass
+        returned = self._callFUT(obj, _check)
+        self.assertFalse(returned is obj)
+        self.assertTrue(getChecker(returned) is _check)
+
+    def test_no_checker_no_dunder_no_select(self):
+        obj = object()
+        returned = self._callFUT(obj)
+        self.assertTrue(returned is obj)
+
+    def test_no_checker_w_dunder(self):
+        from zope.security._proxy import getChecker
+        from zope.security._proxy import getObject
+        _check = object() # don't use a func, due to bound method
+        class _WithChecker(object):
+            __Security_checker__ = _check
+        obj = _WithChecker()
+        returned = self._callFUT(obj)
+        self.assertFalse(returned is obj)
+        self.assertTrue(getObject(returned) is obj)
+        self.assertTrue(getChecker(returned) is _check)
+
+    def test_no_checker_no_dunder_w_select(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import _checkers
+        from zope.security.checker import _clear
+        from zope.security._proxy import getChecker
+        from zope.security._proxy import getObject
+        class _Obj(object):
+            pass
+        obj = _Obj()
+        _checker = Checker({})
+        def _check(*args):
+            return _checker
+        _checkers[_Obj] = _check
+        try:
+            returned = self._callFUT(obj)
+            self.assertFalse(returned is obj)
+            self.assertTrue(getObject(returned) is obj)
+            self.assertTrue(getChecker(returned) is _checker)
+        finally:
+            _clear()
 
 
 class Test(unittest.TestCase):
@@ -227,6 +304,13 @@ class Test(unittest.TestCase):
             #special = NamesChecker(['a', 'b'], 'test_allowed')
             #defineChecker(class_, special)
             #
+            #class TransparentProxy(object):
+            #    def __init__(self, ob):
+            #        self._ob = ob
+            #
+            #   def __getattribute__(self, name):
+            #       ob = object.__getattribute__(self, '_ob')
+            #       return getattr(ob, name)
             #for ob in inst, TransparentProxy(inst):
             #    proxy = checker.proxy(ob)
             #    self.failUnless(removeSecurityProxy(proxy) is ob)
@@ -677,6 +761,7 @@ class TestBasicTypes(unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
+        unittest.makeSuite(ProxyFactoryTests),
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
         unittest.makeSuite(TestCombinedChecker),
