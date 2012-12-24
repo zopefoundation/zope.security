@@ -205,6 +205,16 @@ class CheckerTestsBase(object):
             return self._getTargetClass()(get_permissions)
         return self._getTargetClass()(get_permissions, set_permissions)
 
+    def test_class_conforms_to_IChecker(self):
+        from zope.interface.verify import verifyClass
+        from zope.security.interfaces import IChecker
+        verifyClass(IChecker, self._getTargetClass())
+
+    def test_instance_conforms_to_IChecker(self):
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IChecker
+        verifyObject(IChecker, self._makeOne())
+
     def test_ctor_w_non_dict_get_permissions(self):
         self.assertRaises(TypeError, self._makeOne, object())
 
