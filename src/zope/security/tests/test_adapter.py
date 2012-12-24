@@ -256,9 +256,172 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         self.assertTrue(factory.__parent__ is adapter)
         self.assertEqual(after, before) # no added attrs
 
+    def test__call__w_ILocation_w_spacesuit_w_existing_parent(self):
+        from zope.interface import directlyProvides
+        from zope.location import ILocation
+        from zope.proxy import getProxiedObject
+        from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import removeSecurityProxy
+        factory = self._makeFactory()
+        factory.__name__ = None
+        factory.__parent__ = parent = object()
+        directlyProvides(factory, ILocation)
+        ltaf = self._makeOne(factory)
+        class _Adapter(object):
+            pass
+        adapter = _Adapter()
+        proxy = ProxyFactory(adapter)
+        before = dict([(k, v) for k, v in factory.__dict__.items()
+                         if k not in ('_called_with', '__parent__')])
+        returned = ltaf(proxy)
+        self.assertFalse(returned is factory)
+        ploc = removeSecurityProxy(returned)
+        self.assertTrue(ploc.__parent__ is parent)
+        unwrapped = getProxiedObject(ploc)
+        self.assertTrue(unwrapped is factory)
+        after = dict([(k, v) for k, v in unwrapped.__dict__.items()
+                         if k not in ('_called_with', '__parent__')])
+        self.assertEqual(factory._called_with, (adapter,))
+        self.assertEqual(after, before) # no added attrs
+
+
+class TrustedAdapterFactoryTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from zope.security.adapter import TrustedAdapterFactory
+        return TrustedAdapterFactory
+
+    def _makeOne(self, factory):
+        return self._getTargetClass()(factory)
+
+    def _makeFactory(self):
+        class _Factory(object):
+            __name__ = 'testing'
+            __module__ = 'zope.security.tests.test_adapter'
+            def __call__(self, *args):
+                self._called_with = args
+                return self
+        return _Factory()
+
+    def test__call__w_non_ILocation_w_spacesuit(self):
+        from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import removeSecurityProxy
+        factory = self._makeFactory()
+        ltaf = self._makeOne(factory)
+        class _NotAdapter(object):
+            pass
+        adapter = _NotAdapter()
+        proxy = ProxyFactory(adapter)
+        before = factory.__dict__.copy()
+        returned = ltaf(proxy)
+        self.assertFalse(returned is factory)
+        unwrapped = removeSecurityProxy(returned)
+        self.assertTrue('__parent__' not in unwrapped.__dict__)
+        self.assertTrue(unwrapped is factory)
+        after = dict([(k, v) for k, v in unwrapped.__dict__.items()
+                         if k not in ('_called_with',)])
+        self.assertEqual(factory._called_with, (adapter,))
+        self.assertEqual(after, before) # no added attrs
+
+    def test__call__w_non_ILocation_w_spacesuit_multiple_args(self):
+        from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import removeSecurityProxy
+        factory = self._makeFactory()
+        ltaf = self._makeOne(factory)
+        class _NotAdapter(object):
+            pass
+        adapter = _NotAdapter()
+        extra = object()
+        proxy = ProxyFactory(adapter)
+        before = factory.__dict__.copy()
+        returned = ltaf(proxy, extra)
+        self.assertFalse(returned is factory)
+        unwrapped = removeSecurityProxy(returned)
+        self.assertTrue('__parent__' not in unwrapped.__dict__)
+        self.assertTrue(unwrapped is factory)
+        after = dict([(k, v) for k, v in unwrapped.__dict__.items()
+                         if k not in ('_called_with',)])
+        self.assertEqual(factory._called_with, (adapter, extra))
+        self.assertEqual(after, before) # no added attrs
+
+    def test__call__w_non_ILocation_multiple_args_extra_spacesuit(self):
+        from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import removeSecurityProxy
+        factory = self._makeFactory()
+        ltaf = self._makeOne(factory)
+        class _NotAdapter(object):
+            pass
+        class _Extra(object):
+            pass
+        adapter = _NotAdapter()
+        extra = _Extra()
+        proxy = ProxyFactory(extra)
+        before = factory.__dict__.copy()
+        returned = ltaf(adapter, proxy)
+        self.assertFalse(returned is factory)
+        unwrapped = removeSecurityProxy(returned)
+        self.assertTrue('__parent__' not in unwrapped.__dict__)
+        self.assertTrue(unwrapped is factory)
+        after = dict([(k, v) for k, v in unwrapped.__dict__.items()
+                         if k not in ('_called_with',)])
+        self.assertEqual(factory._called_with, (adapter, extra))
+        self.assertEqual(after, before) # no added attrs
+
+    def test__call__w_ILocation_w_spacesuit(self):
+        from zope.interface import directlyProvides
+        from zope.location import ILocation
+        from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import removeSecurityProxy
+        factory = self._makeFactory()
+        factory.__parent__ = factory.__name__ = None
+        directlyProvides(factory, ILocation)
+        ltaf = self._makeOne(factory)
+        class _Adapter(object):
+            pass
+        adapter = _Adapter()
+        proxy = ProxyFactory(adapter)
+        before = dict([(k, v) for k, v in factory.__dict__.items()
+                         if k not in ('_called_with', '__parent__')])
+        returned = ltaf(proxy)
+        self.assertFalse(returned is factory)
+        unwrapped = removeSecurityProxy(returned)
+        self.assertTrue(unwrapped.__parent__ is adapter)
+        self.assertTrue(unwrapped is factory)
+        after = dict([(k, v) for k, v in unwrapped.__dict__.items()
+                         if k not in ('_called_with', '__parent__')])
+        self.assertEqual(factory._called_with, (adapter,))
+        self.assertEqual(after, before) # no added attrs
+
+    def test__call__w_ILocation_w_spacesuit_w_existing_parent(self):
+        from zope.interface import directlyProvides
+        from zope.location import ILocation
+        from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import removeSecurityProxy
+        factory = self._makeFactory()
+        factory.__name__ = None
+        factory.__parent__ = parent = object()
+        directlyProvides(factory, ILocation)
+        ltaf = self._makeOne(factory)
+        class _Adapter(object):
+            pass
+        adapter = _Adapter()
+        proxy = ProxyFactory(adapter)
+        before = dict([(k, v) for k, v in factory.__dict__.items()
+                         if k not in ('_called_with', '__parent__')])
+        returned = ltaf(proxy)
+        self.assertFalse(returned is factory)
+        unwrapped = removeSecurityProxy(returned)
+        self.assertTrue(unwrapped.__parent__ is parent)
+        self.assertTrue(unwrapped is factory)
+        after = dict([(k, v) for k, v in unwrapped.__dict__.items()
+                         if k not in ('_called_with', '__parent__')])
+        self.assertEqual(factory._called_with, (adapter,))
+        self.assertEqual(after, before) # no added attrs
+
 
 def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(Test_assertLocation),
         unittest.makeSuite(LocatingTrustedAdapterFactoryTests),
+        unittest.makeSuite(TrustedAdapterFactoryTests),
     ))

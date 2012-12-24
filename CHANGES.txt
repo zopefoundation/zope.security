@@ -5,6 +5,10 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Removed dprecattion of ``zope.security.adapter.TrustedAdapterFactory``.
+  Although it has been marked as deprectaed since before Zope3 3.2, current
+  versions of ``zope.compoent`` still rely on it.
+
 - Converted doctests to Sphinx documentation in 'docs'.
 
 - Added 'setup.py docs' alias (installs ``Sphinx`` and dependencies).

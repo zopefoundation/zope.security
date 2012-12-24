@@ -83,7 +83,6 @@ class LocatingTrustedAdapterFactory(object):
         return adapter
 
 
-# BBB, entire class gone in 3.2
 class TrustedAdapterFactory(LocatingTrustedAdapterFactory):
     """Adapt an adapter factory to provide trusted adapters.
 
