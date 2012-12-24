@@ -181,9 +181,6 @@ class CheckerPy(object):
         if self.set_permissions:
             return self.set_permissions.get(name)
 
-    def check_getattr(self, object, name):
-        'See IChecker'
-        self.check(object, name)
 
     def check_setattr(self, object, name):
         'See IChecker'
@@ -221,6 +218,7 @@ class CheckerPy(object):
         if name != '__iter__' or hasattr(object, name):
             __traceback_supplement__ = (TracebackSupplement, object)
             raise ForbiddenAttribute(name, object)
+    check_getattr = check # 'See IChecker'
 
     def proxy(self, value):
         'See IChecker'
