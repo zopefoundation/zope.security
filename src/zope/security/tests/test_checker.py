@@ -191,6 +191,205 @@ class Test_canAccess(unittest.TestCase):
         self.assertRaises(ForbiddenAttribute, self._callFUT, proxy, 'whatever')
 
 
+_marker = []
+class CheckerTestsBase(object):
+
+    def _getTargetClass(self):
+        from zope.security.checker import Checker
+        return Checker
+
+    def _makeOne(self, get_permissions=_marker, set_permissions=_marker):
+        if get_permissions is _marker:
+            get_permissions = {}
+        if set_permissions is _marker:
+            return self._getTargetClass()(get_permissions)
+        return self._getTargetClass()(get_permissions, set_permissions)
+
+    def test_ctor_w_non_dict_get_permissions(self):
+        self.assertRaises(TypeError, self._makeOne, object())
+
+    def test_ctor_w_non_dict_set_permissions(self):
+        self.assertRaises(TypeError, self._makeOne, {}, object())
+
+    def test_permission_id_miss(self):
+        checker = self._makeOne()
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_permission_id_hit(self):
+        checker = self._makeOne({'name': 'PERMISSION'})
+        self.assertEqual(checker.permission_id('name'), 'PERMISSION')
+
+    def test_setattr_permission_id_miss_none_set(self):
+        checker = self._makeOne()
+        self.assertTrue(checker.setattr_permission_id('nonesuch') is None)
+
+    def test_setattr_permission_id_miss(self):
+        checker = self._makeOne(set_permissions={'name': 'PERMISSION'})
+        self.assertTrue(checker.setattr_permission_id('nonesuch') is None)
+
+    def test_setattr_permission_id_hit(self):
+        checker = self._makeOne(set_permissions={'name': 'PERMISSION'})
+        self.assertEqual(checker.setattr_permission_id('name'), 'PERMISSION')
+
+    def test_check_setattr_miss_none_set(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        checker = self._makeOne()
+        obj = object()
+        self.assertRaises(ForbiddenAttribute,
+                          checker.check_setattr, obj, 'nonesuch')
+
+    def test_check_setattr_miss(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        checker = self._makeOne(set_permissions={'name': 'PERMISSION'})
+        obj = object()
+        self.assertRaises(ForbiddenAttribute,
+                          checker.check_setattr, obj, 'nonesuch')
+
+    def test_check_setattr_public(self):
+        from zope.security.checker import CheckerPublic
+        checker = self._makeOne(set_permissions={'name': CheckerPublic})
+        obj = object()
+        self.assertEqual(checker.check_setattr(obj, 'name'), None)
+
+    def test_check_setattr_w_interaction_allows(self):
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return True
+        checker = self._makeOne(set_permissions={'name': 'view'})
+        obj = object()
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertEqual(checker.check_setattr(obj, 'name'), None)
+        finally:
+            del thread_local.interaction
+
+    def test_check_setattr_w_interaction_denies(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        checker = self._makeOne(set_permissions={'name': 'view'})
+        obj = object()
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              checker.check_setattr, obj, 'name')
+        finally:
+            del thread_local.interaction
+
+    def test_check_miss(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        checker = self._makeOne()
+        obj = object()
+        self.assertRaises(ForbiddenAttribute,
+                          checker.check, obj, 'nonesuch')
+
+    def test_check_available_by_default(self):
+        checker = self._makeOne()
+        obj = object()
+        self.assertEqual(checker.check(obj, '__repr__'), None)
+
+    def test_check_public(self):
+        from zope.security.checker import CheckerPublic
+        checker = self._makeOne({'name': CheckerPublic})
+        obj = object()
+        self.assertEqual(checker.check(obj, 'name'), None)
+
+    def test_check_non_public_w_interaction_allows(self):
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return True
+        checker = self._makeOne({'name': 'view'})
+        obj = object()
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertEqual(checker.check(obj, 'name'), None)
+        finally:
+            del thread_local.interaction
+
+    def test_check_non_public_w_interaction_denies(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        checker = self._makeOne({'name': 'view'})
+        obj = object()
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              checker.check, obj, 'name')
+        finally:
+            del thread_local.interaction
+
+    def test_proxy_already_proxied(self):
+        from zope.security._proxy import _Proxy as Proxy
+        from zope.security._proxy import getChecker
+        obj = object()
+        def _check(*x):
+            pass
+        proxy = Proxy(obj, _check)
+        checker = self._makeOne({'name': 'view'})
+        returned = checker.proxy(proxy)
+        self.assertTrue(returned is proxy)
+        self.assertTrue(getChecker(returned) is _check)
+
+    def test_proxy_no_dunder_no_select(self):
+        obj = object()
+        checker = self._makeOne()
+        returned = checker.proxy(obj)
+        self.assertTrue(returned is obj)
+
+    def test_proxy_no_checker_w_dunder(self):
+        from zope.security._proxy import getChecker
+        from zope.security._proxy import getObject
+        _check = object() # don't use a func, due to bound method
+        class _WithChecker(object):
+            __Security_checker__ = _check
+        obj = _WithChecker()
+        checker = self._makeOne()
+        returned = checker.proxy(obj)
+        self.assertFalse(returned is obj)
+        self.assertTrue(getObject(returned) is obj)
+        self.assertTrue(getChecker(returned) is _check)
+
+    def test_proxy_no_checker_no_dunder_w_select(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import _checkers
+        from zope.security.checker import _clear
+        from zope.security._proxy import getChecker
+        from zope.security._proxy import getObject
+        class _Obj(object):
+            pass
+        obj = _Obj()
+        _checker = Checker({})
+        def _check(*args):
+            return _checker
+        _checkers[_Obj] = _check
+        try:
+            checker = self._makeOne()
+            returned = checker.proxy(obj)
+            self.assertFalse(returned is obj)
+            self.assertTrue(getObject(returned) is obj)
+            self.assertTrue(getChecker(returned) is _checker)
+        finally:
+            _clear()
+
+class CheckerPyTests(unittest.TestCase, CheckerTestsBase):
+
+    def _getTargetClass(self):
+        from zope.security.checker import CheckerPy
+        return CheckerPy
+
+class CheckerTests(unittest.TestCase, CheckerTestsBase):
+
+    def _getTargetClass(self):
+        from zope.security.checker import Checker
+        return Checker
+
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -852,6 +1051,9 @@ def test_suite():
         unittest.makeSuite(Test_ProxyFactory),
         unittest.makeSuite(Test_canWrite),
         unittest.makeSuite(Test_canAccess),
+        unittest.makeSuite(Test_canAccess),
+        unittest.makeSuite(CheckerPyTests),
+        unittest.makeSuite(CheckerTests),
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
         unittest.makeSuite(TestCombinedChecker),
