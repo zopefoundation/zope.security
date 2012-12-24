@@ -52,11 +52,11 @@ from zope.security._proxy import getChecker
 
 try:
     from zope.exceptions import DuplicationError
-except ImportError:
+except ImportError: #pragma NO COVER
     class DuplicationError(Exception):
         """A duplicate registration was attempted"""
 
-if os.environ.get('ZOPE_WATCH_CHECKERS'):
+if os.environ.get('ZOPE_WATCH_CHECKERS'): #pragma NO COVER
     try:
         WATCH_CHECKERS = int(os.environ.get('ZOPE_WATCH_CHECKERS'))
     except ValueError:

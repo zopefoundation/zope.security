@@ -17,7 +17,7 @@ import unittest
 
 
 
-class ProxyFactoryTests(unittest.TestCase):
+class Test_ProxyFactory(unittest.TestCase):
 
     def _callFUT(self, object, checker=None):
         from zope.security.checker import ProxyFactory
@@ -101,6 +101,60 @@ class ProxyFactoryTests(unittest.TestCase):
             self.assertTrue(getChecker(returned) is _checker)
         finally:
             _clear()
+
+
+class Test_canWrite(unittest.TestCase):
+
+    def _callFUT(self, obj, name):
+        from zope.security.checker import canWrite
+        return canWrite(obj, name)
+
+    def _makeChecker(self, ch_get=None, ch_set=None):
+        class _Checker(object):
+            def check_getattr(self, obj, name):
+                if ch_get is not None:
+                    raise ch_get()
+            def check_setattr(self, obj, name):
+                if ch_set is not None:
+                    raise ch_set()
+        return _Checker()
+
+    def test_ok(self):
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker())
+        self.assertTrue(self._callFUT(proxy, 'whatever'))
+
+    def test_w_setattr_unauth(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker(ch_set=Unauthorized))
+        self.assertFalse(self._callFUT(proxy, 'whatever'))
+
+    def test_w_setattr_forbidden_getattr_allowed(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker(ch_set=ForbiddenAttribute))
+        self.assertFalse(self._callFUT(proxy, 'whatever'))
+
+    def test_w_setattr_forbidden_getattr_unauth(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        from zope.security.interfaces import Unauthorized
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker(ch_get=Unauthorized,
+                                             ch_set=ForbiddenAttribute))
+        self.assertFalse(self._callFUT(proxy, 'whatever'))
+
+    def test_w_setattr_forbidden_getattr_forbidden(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker(ch_get=ForbiddenAttribute,
+                                             ch_set=ForbiddenAttribute))
+        self.assertRaises(ForbiddenAttribute, self._callFUT, proxy, 'whatever')
 
 
 class Test(unittest.TestCase):
@@ -761,7 +815,8 @@ class TestBasicTypes(unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(ProxyFactoryTests),
+        unittest.makeSuite(Test_ProxyFactory),
+        unittest.makeSuite(Test_canWrite),
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
         unittest.makeSuite(TestCombinedChecker),
