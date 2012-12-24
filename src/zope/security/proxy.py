@@ -42,12 +42,15 @@ def getTestProxyItems(proxy):
     return items
 
 
-builtin_isinstance = isinstance
+builtin_isinstance = None
 def isinstance(object, cls):
     """Test whether an object is an instance of a type.
 
     This works even if the object is security proxied:
     """
+    global builtin_isinstance
+    if builtin_isinstance is None:
+        builtin_isinstance = __builtins__['isinstance']
     # The removeSecurityProxy call is OK here because it is *only*
     # being used for isinstance
     return builtin_isinstance(removeSecurityProxy(object), cls)

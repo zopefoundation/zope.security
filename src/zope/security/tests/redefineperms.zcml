@@ -9,8 +9,8 @@
   <meta:directive
       name="dummy"
       namespace="http://namespaces.zope.org/zope"
-      schema=".test_module_directives.IDummy"
-      handler=".test_module_directives.dummy" />
+      schema=".test_zcml.IDummy"
+      handler=".test_zcml.dummy" />
 
   <permission
       id="zope.View"
