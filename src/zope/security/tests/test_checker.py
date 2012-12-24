@@ -157,6 +157,40 @@ class Test_canWrite(unittest.TestCase):
         self.assertRaises(ForbiddenAttribute, self._callFUT, proxy, 'whatever')
 
 
+class Test_canAccess(unittest.TestCase):
+
+    def _callFUT(self, obj, name):
+        from zope.security.checker import canAccess
+        return canAccess(obj, name)
+
+    def _makeChecker(self, ch_get=None):
+        class _Checker(object):
+            def check_getattr(self, obj, name):
+                if ch_get is not None:
+                    raise ch_get()
+        return _Checker()
+
+    def test_ok(self):
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker())
+        self.assertTrue(self._callFUT(proxy, 'whatever'))
+
+    def test_w_getattr_unauth(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker(ch_get=Unauthorized))
+        self.assertFalse(self._callFUT(proxy, 'whatever'))
+
+    def test_w_setattr_forbidden_getattr_allowed(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        from zope.security._proxy import _Proxy as Proxy
+        obj = object()
+        proxy = Proxy(obj, self._makeChecker(ch_get=ForbiddenAttribute))
+        self.assertRaises(ForbiddenAttribute, self._callFUT, proxy, 'whatever')
+
+
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -817,6 +851,7 @@ def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(Test_ProxyFactory),
         unittest.makeSuite(Test_canWrite),
+        unittest.makeSuite(Test_canAccess),
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
         unittest.makeSuite(TestCombinedChecker),
