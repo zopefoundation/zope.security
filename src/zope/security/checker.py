@@ -247,19 +247,19 @@ class TracebackSupplement(object):
             cls = self.obj.__class__
             if hasattr(cls, "__module__"):
                 s = "%s.%s" % (cls.__module__, cls.__name__)
-            else:
+            else: #pragma NO COVER XXX
                 s = str(cls.__name__)
             result.append("   - class: " + s)
-        except:
+        except: #pragma NO COVER XXX
             pass
         try:
             cls = type(self.obj)
             if hasattr(cls, "__module__"):
                 s = "%s.%s" % (cls.__module__, cls.__name__)
-            else:
+            else: #pragma NO COVER XXX
                 s = str(cls.__name__)
             result.append("   - type: " + s)
-        except:
+        except: #pragma NO COVER XXX
             pass
         return "\n".join(result)
 

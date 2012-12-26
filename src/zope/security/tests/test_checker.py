@@ -15,7 +15,15 @@
 """
 import unittest
 
-
+def _skip_if_not_Py2(testfunc):
+    import sys
+    from functools import update_wrapper
+    if sys.version_info[0] >= 3:
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    return testfunc
 
 class Test_ProxyFactory(unittest.TestCase):
 
@@ -388,17 +396,62 @@ class CheckerTestsBase(object):
         finally:
             _clear()
 
+
 class CheckerPyTests(unittest.TestCase, CheckerTestsBase):
 
     def _getTargetClass(self):
         from zope.security.checker import CheckerPy
         return CheckerPy
 
+
 class CheckerTests(unittest.TestCase, CheckerTestsBase):
 
     def _getTargetClass(self):
         from zope.security.checker import Checker
         return Checker
+
+
+class TracebackSupplementTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from zope.security.checker import TracebackSupplement
+        return TracebackSupplement
+
+    def _makeOne(self, obj):
+        return self._getTargetClass()(obj)
+
+    def test_getInfo_builtin_types(self):
+        for val, typ in [('', 'str'),
+                         (0, 'int'),
+                         (1.0, 'float'),
+                         ((), 'tuple'),
+                         ([], 'list'),
+                         ({}, 'dict'),
+                        ]:
+            tbs = self._makeOne(val)
+            self.assertEqual(tbs.getInfo().splitlines(),
+                            ['   - class: __builtin__.%s' % typ,
+                             '   - type: __builtin__.%s' % typ,
+                            ])
+
+    def test_getInfo_newstyle_instance(self):
+        class C(object):
+            pass
+        tbs = self._makeOne(C())
+        self.assertEqual(tbs.getInfo().splitlines(),
+                         ['   - class: %s.C' % self.__class__.__module__,
+                          '   - type: %s.C' % self.__class__.__module__,
+                         ])
+
+    @_skip_if_not_Py2
+    def test_getInfo_classic_instance(self):
+        exec("class C: pass", globals(), locals())
+        tbs = self._makeOne(locals()['C']())
+        self.assertEqual(tbs.getInfo().splitlines(),
+                         ['   - class: %s.C' % self.__class__.__module__,
+                          '   - type: __builtin__.instance',
+                         ])
+
 
 class Test(unittest.TestCase):
 
@@ -1064,6 +1117,7 @@ def test_suite():
         unittest.makeSuite(Test_canAccess),
         unittest.makeSuite(CheckerPyTests),
         unittest.makeSuite(CheckerTests),
+        unittest.makeSuite(TracebackSupplementTests),
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
         unittest.makeSuite(TestCombinedChecker),
