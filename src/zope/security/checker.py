@@ -218,6 +218,7 @@ class CheckerPy(object):
         if name != '__iter__' or hasattr(object, name):
             __traceback_supplement__ = (TracebackSupplement, object)
             raise ForbiddenAttribute(name, object)
+
     check_getattr = check # 'See IChecker'
 
     def proxy(self, value):
