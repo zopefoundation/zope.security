@@ -453,6 +453,32 @@ class TracebackSupplementTests(unittest.TestCase):
                          ])
 
 
+class GlobalTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from zope.security.checker import Global
+        return Global
+
+    def _makeOne(self, name, module=_marker):
+        if module is _marker:
+            return self._getTargetClass()(name)
+        return self._getTargetClass()(name, module)
+
+    def test_ctor_name_and_module(self):
+        global glob
+        glob = self._makeOne('foo', 'bar.baz')
+        self.assertEqual(glob.__name__, 'foo')
+        self.assertEqual(glob.__module__, 'bar.baz')
+
+    def test___reduce__(self):
+        glob = self._makeOne('foo', 'bar.baz')
+        self.assertEqual(glob.__reduce__(), 'foo')
+
+    def test___repr__(self):
+        glob = self._makeOne('foo', 'bar.baz')
+        self.assertEqual(repr(glob), 'Global(foo,bar.baz)')
+
+
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -1118,6 +1144,7 @@ def test_suite():
         unittest.makeSuite(CheckerPyTests),
         unittest.makeSuite(CheckerTests),
         unittest.makeSuite(TracebackSupplementTests),
+        unittest.makeSuite(GlobalTests),
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
         unittest.makeSuite(TestCombinedChecker),

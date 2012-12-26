@@ -273,7 +273,7 @@ class Global(object):
     """
 
     def __init__(self, name, module=None):
-        if module is None:
+        if module is None: #pragma NO COVER XXX
             module = sys._getframe(1).f_locals['__name__']
 
         self.__name__ = name
