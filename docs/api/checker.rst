@@ -16,8 +16,8 @@ defined for the module:
 .. doctest::
 
    >>> from zope.security.checker import moduleChecker
-   >>> from zope.security.tests import test_directives
-   >>> moduleChecker(test_directives) is None
+   >>> from zope.security.tests import test_zcml_functest
+   >>> moduleChecker(test_zcml_functest) is None
    True
 
 We can add a checker using :func:`zope.security.metaconfigure.protectModule`:
@@ -31,7 +31,7 @@ We can add a checker using :func:`zope.security.metaconfigure.protectModule`:
    >>> TEST_PERM = 'zope.security.metaconfigure.test'
    >>> perm = Permission(TEST_PERM, '')
    >>> provideUtility(perm, IPermission, TEST_PERM)
-   >>> protectModule(test_directives, 'foo', TEST_PERM)
+   >>> protectModule(test_zcml_functest, 'foo', TEST_PERM)
 
 Now, the checker should exist and have an access dictionary with the
 name and permission:
@@ -41,15 +41,15 @@ name and permission:
    >>> def pprint(ob, width=70):
    ...     from pprint import PrettyPrinter
    ...     PrettyPrinter(width=width).pprint(ob)
-   >>> checker = moduleChecker(test_directives)
+   >>> checker = moduleChecker(test_zcml_functest)
    >>> cdict = checker.get_permissions
    >>> pprint(cdict)
    {'foo': 'zope.security.metaconfigure.test'}
    
    If we define additional names, they will be added to the dict:
 
-   >>> protectModule(test_directives, 'bar', TEST_PERM)
-   >>> protectModule(test_directives, 'baz', TEST_PERM)
+   >>> protectModule(test_zcml_functest, 'bar', TEST_PERM)
+   >>> protectModule(test_zcml_functest, 'baz', TEST_PERM)
    >>> pprint(cdict)
    {'bar': 'zope.security.metaconfigure.test',
     'baz': 'zope.security.metaconfigure.test',
