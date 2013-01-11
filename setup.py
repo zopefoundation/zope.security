@@ -1,4 +1,4 @@
-##############################################################################
+#############################################################################
 #
 # Copyright (c) 2006 Zope Foundation and Contributors.
 # All Rights Reserved.
@@ -94,9 +94,9 @@ setup(name='zope.security',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
       long_description=(
-          read('README.txt')
+          read('README.rst')
           + '\n\n' +
-          read('CHANGES.txt')
+          read('CHANGES.rst')
           ),
       keywords = "zope security policy principal permission",
       classifiers = [
