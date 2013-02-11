@@ -667,7 +667,7 @@ BasicTypes_examples = {
 }
 
 
-class _Sequence(object):
+class _Sequence(object): #pragma NO COVER
     def __len__(self): return 0
     def __getitem__(self, i): raise IndexError
 
@@ -679,7 +679,7 @@ _Declaration_checker = InterfaceChecker(
     __call__=CheckerPublic,
     )
 
-def f():
+def f(): #pragma NO COVER
     yield f
 
 
@@ -755,7 +755,7 @@ _clear()
 
 try:
     from zope.testing.cleanup import addCleanUp
-except ImportError:
+except ImportError: #pragma NO COVER
     pass
 else:
     addCleanUp(_clear)
