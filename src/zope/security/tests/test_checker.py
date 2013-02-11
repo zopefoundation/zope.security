@@ -1246,6 +1246,33 @@ class CheckerLoggingMixinTests(unittest.TestCase):
         self.assertEqual(checker._file[0],
                          '[CHK] - Forbidden setattr: name on TESTING\n')
 
+
+class Test__instanceChecker(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, type_):
+        from zope.security.checker import _instanceChecker
+        return _instanceChecker(type_)
+
+    def test_miss(self):
+        from zope.security.checker import _defaultChecker
+        class Foo(object):
+            pass
+        self.assertTrue(self._callFUT(Foo()) is _defaultChecker)
+
+    def test_hit(self):
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = _checkers[Foo] = object()
+        self.assertTrue(self._callFUT(Foo()) is checker)
  
 
 # Pre-geddon tests start here
@@ -1926,6 +1953,7 @@ def test_suite():
         unittest.makeSuite(Test_undefineChecker),
         unittest.makeSuite(CombinedCheckerTests),
         unittest.makeSuite(CombinedCheckerTests),
+        unittest.makeSuite(Test__instanceChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
