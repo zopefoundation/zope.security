@@ -478,6 +478,7 @@ class GlobalTests(unittest.TestCase):
         glob = self._makeOne('foo', 'bar.baz')
         self.assertEqual(repr(glob), 'Global(foo,bar.baz)')
 
+# Pre-geddon tests start here
 
 class Test(unittest.TestCase):
 
