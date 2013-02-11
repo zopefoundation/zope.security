@@ -642,7 +642,7 @@ try:
     import pytz
 except ImportError:
     pass
-else:
+else: #pragma NO COVER
     _basic_types[type(pytz.UTC)] = NoProxy
 
 BasicTypes = BasicTypes(_basic_types)

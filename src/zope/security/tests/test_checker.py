@@ -1298,6 +1298,52 @@ class Test_moduleChecker(unittest.TestCase):
         from zope.security.checker import _checkers
         checker = _checkers[verify] = object()
         self.assertTrue(self._callFUT(verify) is checker)
+
+
+class BasicTypesTests(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def test___setitem__(self):
+        from zope.security.checker import BasicTypes
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = object()
+        BasicTypes[Foo] = checker
+        self.assertTrue(BasicTypes[Foo] is checker)
+        self.assertTrue(_checkers[Foo] is checker)
+
+    def test___delitem__(self):
+        from zope.security.checker import BasicTypes
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = object()
+        BasicTypes[Foo] = checker
+        del BasicTypes[Foo]
+        self.assertFalse(Foo in BasicTypes)
+        self.assertFalse(Foo in _checkers)
+
+    def test_clear(self):
+        from zope.security.checker import BasicTypes
+        self.assertRaises(NotImplementedError, BasicTypes.clear)
+
+    def test_update(self):
+        from zope.security.checker import BasicTypes
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = object()
+        BasicTypes.update({Foo:  checker})
+        self.assertTrue(BasicTypes[Foo] is checker)
+        self.assertTrue(_checkers[Foo] is checker)
  
 
 # Pre-geddon tests start here
@@ -1977,9 +2023,10 @@ def test_suite():
         unittest.makeSuite(Test_defineChecker),
         unittest.makeSuite(Test_undefineChecker),
         unittest.makeSuite(CombinedCheckerTests),
-        unittest.makeSuite(CombinedCheckerTests),
+        unittest.makeSuite(CheckerLoggingMixinTests),
         unittest.makeSuite(Test__instanceChecker),
         unittest.makeSuite(Test_moduleChecker),
+        unittest.makeSuite(BasicTypesTests),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
