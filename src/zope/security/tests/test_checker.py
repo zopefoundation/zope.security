@@ -766,6 +766,33 @@ class Test_selectChecker(unittest.TestCase, _SelectCheckerBase):
         return selectChecker(obj)
 
 
+class Test_getCheckerForInstancesOf(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, obj):
+        from zope.security.checker import getCheckerForInstancesOf
+        return getCheckerForInstancesOf(obj)
+
+    def test_miss(self):
+        class Unknown(object):
+            pass
+        self.assertTrue(self._callFUT(Unknown) is None)
+
+    def test_hit(self):
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = _checkers[Foo] = object() 
+        self.assertTrue(self._callFUT(Foo) is checker)
+
+
 # Pre-geddon tests start here
 
 class Test(unittest.TestCase):
@@ -1439,6 +1466,7 @@ def test_suite():
         unittest.makeSuite(Test_MultiChecker),
         unittest.makeSuite(Test_selectCheckerPy),
         unittest.makeSuite(Test_selectChecker),
+        unittest.makeSuite(Test_getCheckerForInstancesOf),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
