@@ -500,6 +500,15 @@ class Test_NamesChecker(unittest.TestCase):
         self.assertTrue(checker.permission_id('baz') is CheckerPublic)
         self.assertTrue(checker.permission_id('nonesuch') is None)
 
+    def test_w_names_no_kw_explicit_permission(self):
+        other_checker = object()
+        checker = self._callFUT(('foo', 'bar', 'baz'),
+                                permission_id=other_checker)
+        self.assertTrue(checker.permission_id('foo') is other_checker)
+        self.assertTrue(checker.permission_id('bar') is other_checker)
+        self.assertTrue(checker.permission_id('baz') is other_checker)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
     def test_w_names_w_kw_no_clash(self):
         from zope.security.checker import CheckerPublic
         other_checker = object()
@@ -515,6 +524,69 @@ class Test_NamesChecker(unittest.TestCase):
         other_checker = object()
         self.assertRaises(DuplicationError,
                           self._callFUT, ('foo',), foo=other_checker)
+
+
+class Test_InterfaceChecker(unittest.TestCase):
+
+    def _callFUT(self, *args, **kw):
+        from zope.security.checker import InterfaceChecker
+        return InterfaceChecker(*args, **kw)
+
+    def test_simple_iface_wo_kw(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.checker import CheckerPublic
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+        checker = self._callFUT(IFoo)
+        self.assertTrue(checker.permission_id('bar') is CheckerPublic)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_simple_iface_w_explicit_permission(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+        other_checker = object()
+        checker = self._callFUT(IFoo, other_checker)
+        self.assertTrue(checker.permission_id('bar') is other_checker)
+
+    def test_simple_iface_w_kw(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.checker import CheckerPublic
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+        other_checker = object()
+        checker = self._callFUT(IFoo, baz=other_checker)
+        self.assertTrue(checker.permission_id('bar') is CheckerPublic)
+        self.assertTrue(checker.permission_id('baz') is other_checker)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_derived_iface(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.checker import CheckerPublic
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+        class IBar(IFoo):
+            baz = Attribute('Baz')
+        checker = self._callFUT(IBar)
+        self.assertTrue(checker.permission_id('bar') is CheckerPublic)
+        self.assertTrue(checker.permission_id('baz') is CheckerPublic)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_clash(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.checker import DuplicationError
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+            bam = Attribute('Bam')
+        other_checker = object()
+        self.assertRaises(DuplicationError,
+                          self._callFUT, IFoo, bar=other_checker)
+
 
 
 # Pre-geddon tests start here
@@ -1186,6 +1258,7 @@ def test_suite():
         unittest.makeSuite(TracebackSupplementTests),
         unittest.makeSuite(GlobalTests),
         unittest.makeSuite(Test_NamesChecker),
+        unittest.makeSuite(Test_InterfaceChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
