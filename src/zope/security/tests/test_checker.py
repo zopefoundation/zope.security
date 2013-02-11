@@ -1145,6 +1145,7 @@ def test_suite():
         unittest.makeSuite(CheckerTests),
         unittest.makeSuite(TracebackSupplementTests),
         unittest.makeSuite(GlobalTests),
+        # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
         unittest.makeSuite(TestCombinedChecker),
