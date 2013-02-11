@@ -1556,7 +1556,7 @@ def test_suite():
         unittest.makeSuite(Test_selectChecker),
         unittest.makeSuite(Test_getCheckerForInstancesOf),
         unittest.makeSuite(Test_defineChecker),
-        unittest.makeSuite(Test_defineChecker),
+        unittest.makeSuite(Test_undefineChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
