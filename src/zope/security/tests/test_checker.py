@@ -1273,6 +1273,31 @@ class Test__instanceChecker(unittest.TestCase):
             pass
         checker = _checkers[Foo] = object()
         self.assertTrue(self._callFUT(Foo()) is checker)
+
+
+class Test_moduleChecker(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, type_):
+        from zope.security.checker import moduleChecker
+        return moduleChecker(type_)
+
+    def test_miss(self):
+        from zope.interface import verify
+        self.assertTrue(self._callFUT(verify) is None)
+
+    def test_hit(self):
+        from zope.interface import verify
+        from zope.security.checker import _checkers
+        checker = _checkers[verify] = object()
+        self.assertTrue(self._callFUT(verify) is checker)
  
 
 # Pre-geddon tests start here
@@ -1954,6 +1979,7 @@ def test_suite():
         unittest.makeSuite(CombinedCheckerTests),
         unittest.makeSuite(CombinedCheckerTests),
         unittest.makeSuite(Test__instanceChecker),
+        unittest.makeSuite(Test_moduleChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
