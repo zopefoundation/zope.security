@@ -46,7 +46,7 @@ class ClassDirective(object):
     def __init__(self, _context, class_):
         self.__id = dottedName(class_)
         self.__class = class_
-        if isinstance(self.__class, ModuleType):
+        if isinstance(self.__class, ModuleType): #pragma NO COVER
             raise ConfigurationError('Content class attribute must be a class')
         self.__context = _context
 
