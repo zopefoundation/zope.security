@@ -668,6 +668,104 @@ class Test_MultiChecker(unittest.TestCase):
 
 
 
+class _SelectCheckerBase(object):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def test_w_basic_types_NoProxy(self):
+        import datetime
+        from zope.i18nmessageid import Message
+        msg = Message('msg')
+        for obj in [object(),
+                    42,
+                    3.14,
+                    None,
+                    u'text',
+                    b'binary',
+                    msg,
+                    True,
+                    datetime.timedelta(1),
+                    datetime.datetime.now(),
+                    datetime.date.today(),
+                    datetime.datetime.now().time(),
+                    datetime.tzinfo('UTC'),
+                   ]:
+            self.assertTrue(self._callFUT(obj) is None)
+
+    def test_w_checker_inst(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = _checkers[Foo] = Checker({})
+        self.assertTrue(self._callFUT(Foo()) is checker)
+
+    def test_w_factory_returning_checker(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = Checker({})
+        def _factory(obj):
+            return checker
+        _checkers[Foo] = _factory
+        self.assertTrue(self._callFUT(Foo()) is checker)
+
+    def test_w_factory_returning_NoProxy(self):
+        from zope.security.checker import NoProxy
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        def _factory(obj):
+            return NoProxy
+        _checkers[Foo] = _factory
+        self.assertTrue(self._callFUT(Foo()) is None)
+
+    def test_w_factory_returning_None(self):
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        def _factory(obj):
+            pass
+        _checkers[Foo] = _factory
+        self.assertTrue(self._callFUT(Foo()) is None)
+
+    def test_w_factory_factory(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = Checker({})
+        def _factory(obj):
+            return checker
+        def _factory_factory(obj):
+            return _factory
+        _checkers[Foo] = _factory_factory
+        self.assertTrue(self._callFUT(Foo()) is checker)
+
+
+
+class Test_selectCheckerPy(unittest.TestCase, _SelectCheckerBase):
+
+    def _callFUT(self, obj):
+        from zope.security.checker import selectCheckerPy
+        return selectCheckerPy(obj)
+
+
+
+class Test_selectChecker(unittest.TestCase, _SelectCheckerBase):
+
+    def _callFUT(self, obj):
+        from zope.security.checker import selectChecker
+        return selectChecker(obj)
+
+
 # Pre-geddon tests start here
 
 class Test(unittest.TestCase):
@@ -1339,6 +1437,8 @@ def test_suite():
         unittest.makeSuite(Test_NamesChecker),
         unittest.makeSuite(Test_InterfaceChecker),
         unittest.makeSuite(Test_MultiChecker),
+        unittest.makeSuite(Test_selectCheckerPy),
+        unittest.makeSuite(Test_selectChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),

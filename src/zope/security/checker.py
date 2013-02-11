@@ -357,7 +357,7 @@ def MultiChecker(specs):
 
     return Checker(data)
 
-def selectChecker(object):
+def selectCheckerPy(object):
     """Get a checker for the given object
 
     The appropriate checker is returned or None is returned. If the
@@ -388,6 +388,7 @@ def selectChecker(object):
             return None
 
     return checker
+selectChecker = selectCheckerPy # in case no C optimizations
 
 def getCheckerForInstancesOf(class_):
     return _checkers.get(class_)
