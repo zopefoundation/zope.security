@@ -1105,6 +1105,149 @@ class CombinedCheckerTests(unittest.TestCase):
             del thread_local.interaction
 
 
+class CheckerLoggingMixinTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from zope.security.checker import CheckerLoggingMixin
+        return CheckerLoggingMixin
+
+    def _makeOne(self, raising=None):
+        class _Checker(object):
+            def __init__(self, raising, stream):
+                self._file = stream
+                self._raising = raising
+            def check(self, object, name):
+                if self._raising:
+                    raise self._raising
+            check_getattr = check_setattr = check
+        class _Derived(self._getTargetClass(), _Checker):
+            pass
+        return _Derived(raising, self._makeStream())
+
+    def _makeStream(self):
+        class _Stream(list):
+            def write(self, msg):
+                self.append(msg)
+        return _Stream()
+
+    def _makeObject(self):
+        class _Object(object):
+            def __repr__(self):
+                return 'TESTING'
+        return _Object()
+
+    def test_check_ok_normal_verbosity(self):
+        checker = self._makeOne()
+        checker.check(self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 0)
+
+    def test_check_ok_raised_verbosity_available_by_default(self):
+        checker = self._makeOne()
+        checker.verbosity = 2
+        checker.check(self._makeObject(), '__name__')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] + Always available: __name__ on TESTING\n')
+
+    def test_check_ok_raised_verbosity_normal_name(self):
+        checker = self._makeOne()
+        checker.verbosity = 2
+        checker.check(self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] + Granted: name on TESTING\n')
+
+    def test_check_unauthorized(self):
+        from zope.security.interfaces import Unauthorized
+        checker = self._makeOne(Unauthorized)
+        self.assertRaises(Unauthorized,
+                          checker.check, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Unauthorized: name on TESTING\n')
+
+    def test_check_forbidden_attribute(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        checker = self._makeOne(ForbiddenAttribute)
+        self.assertRaises(ForbiddenAttribute,
+                          checker.check, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Forbidden: name on TESTING\n')
+
+    def test_check_getattr_ok_normal_verbosity(self):
+        checker = self._makeOne()
+        checker.check(self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 0)
+
+    def test_check_getattr_ok_raised_verbosity_available_by_default(self):
+        checker = self._makeOne()
+        checker.verbosity = 2
+        checker.check_getattr(self._makeObject(), '__name__')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] + Always available getattr: '
+                         '__name__ on TESTING\n')
+
+    def test_check_getattr_ok_raised_verbosity_normal_name(self):
+        checker = self._makeOne()
+        checker.verbosity = 2
+        checker.check_getattr(self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] + Granted getattr: name on TESTING\n')
+
+    def test_check_getattr_unauthorized(self):
+        from zope.security.interfaces import Unauthorized
+        checker = self._makeOne(Unauthorized)
+        self.assertRaises(Unauthorized,
+                          checker.check_getattr, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Unauthorized getattr: name on TESTING\n')
+
+    def test_check_getattr_forbidden_attribute(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        checker = self._makeOne(ForbiddenAttribute)
+        self.assertRaises(ForbiddenAttribute,
+                          checker.check_getattr, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Forbidden getattr: name on TESTING\n')
+
+    def test_check_setattr_ok_normal_verbosity(self):
+        checker = self._makeOne()
+        checker.check_setattr(self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 0)
+
+    def test_check_setattr_ok_raised_verbosity_normal_name(self):
+        checker = self._makeOne()
+        checker.verbosity = 2
+        checker.check_setattr(self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] + Granted setattr: name on TESTING\n')
+
+    def test_check_setattr_unauthorized(self):
+        from zope.security.interfaces import Unauthorized
+        checker = self._makeOne(Unauthorized)
+        self.assertRaises(Unauthorized,
+                          checker.check_setattr, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Unauthorized setattr: name on TESTING\n')
+
+    def test_check_setattr_forbidden_attribute(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        checker = self._makeOne(ForbiddenAttribute)
+        self.assertRaises(ForbiddenAttribute,
+                          checker.check_setattr, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Forbidden setattr: name on TESTING\n')
+
+ 
+
 # Pre-geddon tests start here
 
 class Test(unittest.TestCase):
@@ -1781,6 +1924,7 @@ def test_suite():
         unittest.makeSuite(Test_getCheckerForInstancesOf),
         unittest.makeSuite(Test_defineChecker),
         unittest.makeSuite(Test_undefineChecker),
+        unittest.makeSuite(CombinedCheckerTests),
         unittest.makeSuite(CombinedCheckerTests),
         # pre-geddon fossils
         unittest.makeSuite(Test),

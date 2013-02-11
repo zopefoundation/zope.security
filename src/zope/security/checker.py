@@ -501,23 +501,28 @@ class CheckerLoggingMixin(object):
     """
 
     verbosity = 1
+    _file = sys.stderr
+
+    def _log(self, msg, verbosity=1):
+        if verbosity >= self.verbosity:
+            self._file.write('%s\n' % msg)
 
     def check(self, object, name):
         try:
             super(CheckerLoggingMixin, self).check(object, name)
             if self.verbosity > 1:
                 if name in _available_by_default:
-                    print >> sys.stderr, (
-                        '[CHK] + Always available: %s on %r' % (name, object))
+                    self._log('[CHK] + Always available: %s on %r'
+                        % (name, object), 2)
                 else:
-                    print >> sys.stderr, (
-                        '[CHK] + Granted: %s on %r' % (name, object))
+                    self._log(
+                        '[CHK] + Granted: %s on %r' % (name, object), 2)
         except Unauthorized:
-            print >> sys.stderr, (
+            self._log(
                 '[CHK] - Unauthorized: %s on %r' % (name, object))
             raise
         except ForbiddenAttribute:
-            print >> sys.stderr, (
+            self._log(
                 '[CHK] - Forbidden: %s on %r' % (name, object))
             raise
 
@@ -526,19 +531,19 @@ class CheckerLoggingMixin(object):
             super(CheckerLoggingMixin, self).check(object, name)
             if self.verbosity > 1:
                 if name in _available_by_default:
-                    print >> sys.stderr, (
+                    self._log(
                         '[CHK] + Always available getattr: %s on %r'
-                        % (name, object))
+                        % (name, object), 2)
                 else:
-                    print >> sys.stderr, (
+                    self._log(
                         '[CHK] + Granted getattr: %s on %r'
-                        % (name, object))
+                        % (name, object), 2)
         except Unauthorized:
-            print >> sys.stderr, (
+            self._log(
                 '[CHK] - Unauthorized getattr: %s on %r' % (name, object))
             raise
         except ForbiddenAttribute:
-            print >> sys.stderr, (
+            self._log(
                 '[CHK] - Forbidden getattr: %s on %r' % (name, object))
             raise
 
@@ -546,19 +551,19 @@ class CheckerLoggingMixin(object):
         try:
             super(CheckerLoggingMixin, self).check_setattr(object, name)
             if self.verbosity > 1:
-                print >> sys.stderr, (
-                    '[CHK] + Granted setattr: %s on %r' % (name, object))
+                self._log(
+                    '[CHK] + Granted setattr: %s on %r' % (name, object), 2)
         except Unauthorized:
-            print >> sys.stderr, (
+            self._log(
                 '[CHK] - Unauthorized setattr: %s on %r' % (name, object))
             raise
         except ForbiddenAttribute:
-            print >> sys.stderr, (
+            self._log(
                 '[CHK] - Forbidden setattr: %s on %r' % (name, object))
             raise
 
 
-if WATCH_CHECKERS:
+if WATCH_CHECKERS: #pragma NO COVER
     class Checker(CheckerLoggingMixin, Checker):
         verbosity = WATCH_CHECKERS
     class CombinedChecker(CheckerLoggingMixin, CombinedChecker):
