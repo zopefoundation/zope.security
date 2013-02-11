@@ -853,6 +853,34 @@ class Test_defineChecker(unittest.TestCase):
         self.assertTrue(_checkers[Foo] is checker)
 
 
+class Test_undefineChecker(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, type_):
+        from zope.security.checker import undefineChecker
+        return undefineChecker(type_)
+
+    def test_miss(self):
+        class Foo(object):
+            pass
+        self.assertRaises(KeyError, self._callFUT, Foo)
+
+    def test_hit(self):
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker = _checkers[Foo] = object()
+        self._callFUT(Foo)
+        self.failIf(Foo in _checkers)
+
+
 # Pre-geddon tests start here
 
 class Test(unittest.TestCase):
@@ -1527,6 +1555,7 @@ def test_suite():
         unittest.makeSuite(Test_selectCheckerPy),
         unittest.makeSuite(Test_selectChecker),
         unittest.makeSuite(Test_getCheckerForInstancesOf),
+        unittest.makeSuite(Test_defineChecker),
         unittest.makeSuite(Test_defineChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
