@@ -793,6 +793,66 @@ class Test_getCheckerForInstancesOf(unittest.TestCase):
         self.assertTrue(self._callFUT(Foo) is checker)
 
 
+class Test_defineChecker(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, type_, checker):
+        from zope.security.checker import defineChecker
+        return defineChecker(type_, checker)
+
+    def test_w_wrong_type(self):
+        checker = object()
+        for obj in [object(),
+                    42,
+                    3.14,
+                    None,
+                    u'text',
+                    b'binary',
+                    True,
+                   ]:
+            self.assertRaises(TypeError, self._callFUT, obj, checker)
+
+    def test_w_duplicate(self):
+        from zope.exceptions import DuplicationError
+        from zope.security.checker import _checkers
+        class Foo(object):
+            pass
+        checker1, checker2 = object(), object()
+        _checkers[Foo] = checker1
+        self.assertRaises(DuplicationError, self._callFUT, Foo, checker2)
+
+    def test_w_newstyle_class(self):
+        from zope.security.checker import _checkers
+        checker = object()
+        class Foo(object):
+            pass
+        self._callFUT(Foo, checker)
+        self.assertTrue(_checkers[Foo] is checker)
+
+    def test_w_module(self):
+        import zope.interface
+        from zope.security.checker import _checkers
+        checker = object()
+        self._callFUT(zope.interface, checker)
+        self.assertTrue(_checkers[zope.interface] is checker)
+
+    @_skip_if_not_Py2
+    def test_w_oldstyle_class(self):
+        from zope.security.checker import _checkers
+        checker = object()
+        class Foo:
+            pass
+        self._callFUT(Foo, checker)
+        self.assertTrue(_checkers[Foo] is checker)
+
+
 # Pre-geddon tests start here
 
 class Test(unittest.TestCase):
@@ -1467,6 +1527,7 @@ def test_suite():
         unittest.makeSuite(Test_selectCheckerPy),
         unittest.makeSuite(Test_selectChecker),
         unittest.makeSuite(Test_getCheckerForInstancesOf),
+        unittest.makeSuite(Test_defineChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
