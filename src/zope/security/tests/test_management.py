@@ -48,50 +48,99 @@ class Test(unittest.TestCase):
         setSecurityPolicy(policy)
         self.assert_(getSecurityPolicy() is policy)
 
-    def test_query_new_end_restore_Interaction(self):
+    def test_getInteraction_none_present(self):
+        from zope.security.interfaces import NoInteraction
+        from zope.security.management import getInteraction
+        self.assertRaises(NoInteraction, getInteraction)
+
+    def test_queryInteraction_none_present(self):
         from zope.security.management import queryInteraction
         self.assertEquals(queryInteraction(), None)
 
+    def test_newInteraction(self):
         from zope.security.management import newInteraction
-
+        from zope.security.management import queryInteraction
         newInteraction()
-
         interaction = queryInteraction()
-        self.assert_(interaction is not None)
-        self.assertRaises(AssertionError, newInteraction)
+        self.assertTrue(interaction is not None)
 
+    def test_newInteraction_repeated_without_end(self):
+        from zope.security.management import ExistingInteraction
+        from zope.security.management import newInteraction
+        newInteraction()
+        self.assertRaises(ExistingInteraction, newInteraction)
+
+    def test_endInteraction(self):
         from zope.security.management import endInteraction
+        from zope.security.management import newInteraction
+        from zope.security.management import queryInteraction
+        newInteraction()
         endInteraction()
         self.assertEquals(queryInteraction(), None)
 
+    def test_endInteraction_repeated(self):
+        from zope.security.management import endInteraction
+        from zope.security.management import newInteraction
+        from zope.security.management import queryInteraction
+        newInteraction()
+        interaction = queryInteraction()
+        endInteraction()
+        self.assertEquals(queryInteraction(), None)
+        endInteraction()
+        self.assertEquals(queryInteraction(), None)
+
+    def test_restoreInteraction_after_end(self):
+        from zope.security.management import endInteraction
+        from zope.security.management import newInteraction
+        from zope.security.management import queryInteraction
         from zope.security.management import restoreInteraction
+        newInteraction()
+        interaction = queryInteraction()
+        endInteraction()
         restoreInteraction()
         self.assert_(interaction is queryInteraction())
 
-        endInteraction()
-        self.assertEquals(queryInteraction(), None)
-
-        endInteraction()
-        self.assertEquals(queryInteraction(), None)
-
+    def test_restoreInteraction_after_new(self):
+        from zope.security.management import newInteraction
+        from zope.security.management import queryInteraction
+        from zope.security.management import restoreInteraction
         newInteraction()
         self.assert_(queryInteraction() is not None)
-        
         restoreInteraction() # restore to no interaction
         self.assert_(queryInteraction() is None)
 
-    def test_checkPermission(self):
-        from zope.security import checkPermission
+    def test_restoreInteraction_after_neither(self):
+        from zope.security.management import queryInteraction
+        from zope.security.management import restoreInteraction
+        from zope.security._definitions import thread_local
+        try:
+            del thread_local.interaction
+        except AttributeError:
+            pass
+        try:
+            del thread_local.previous_interaction
+        except AttributeError:
+            pass
+        restoreInteraction()
+        self.assert_(queryInteraction() is None)
+
+    def test_checkPermission_w_no_interaction(self):
+        from zope.security.management import checkPermission
+        from zope.security.interfaces import NoInteraction
+        permission = 'zope.Test'
+        obj = object()
+        self.assertRaises(NoInteraction, checkPermission, permission, obj)
+
+    def test_checkPermission_w_interaction(self):
+        from zope.security.management import checkPermission
         from zope.security.management import setSecurityPolicy
         from zope.security.management import queryInteraction
-        from zope.security.management import newInteraction, endInteraction
-        from zope.security.interfaces import NoInteraction
+        from zope.security.management import newInteraction
 
         permission = 'zope.Test'
         obj = object()
 
         class PolicyStub(object):
-
             def checkPermission(s, p, o,):
                 self.assert_(p is permission)
                 self.assert_(o is obj)
@@ -102,11 +151,8 @@ class Test(unittest.TestCase):
         newInteraction()
         interaction = queryInteraction()
         self.assertEquals(checkPermission(permission, obj), True)
-        
-        endInteraction()
-        self.assertRaises(NoInteraction, checkPermission, permission, obj)
 
-    def test_checkPublicPermission(self):
+    def test_checkPermission_forbidden_policy(self):
         from zope.security import checkPermission
         from zope.security.checker import CheckerPublic
         from zope.security.management import setSecurityPolicy
@@ -115,7 +161,6 @@ class Test(unittest.TestCase):
         obj = object()
 
         class ForbiddenPolicyStub(object):
-
             def checkPermission(s, p, o):
                 return False
 

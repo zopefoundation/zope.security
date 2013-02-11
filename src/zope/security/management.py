@@ -14,19 +14,22 @@
 """Default 'ISecurityManagement' and 'IInteractionManagement' implementation
 """
 
+from zope.interface import moduleProvides
 
-import zope.interface
-
-from zope.security import interfaces
 from zope.security.checker import CheckerPublic
-from zope.security._definitions import thread_local, system_user
+from zope.security.interfaces import IInteractionManagement
+from zope.security.interfaces import ISecurityManagement
+from zope.security.interfaces import NoInteraction
 from zope.security.simplepolicies import ParanoidSecurityPolicy
+from zope.security._definitions import thread_local
+from zope.security._definitions import system_user # API?
+
 
 _defaultPolicy = ParanoidSecurityPolicy
 
-zope.interface.moduleProvides(
-    interfaces.ISecurityManagement,
-    interfaces.IInteractionManagement)
+moduleProvides(
+    ISecurityManagement,
+    IInteractionManagement)
 
 #
 #   ISecurityManagement implementation
@@ -62,18 +65,19 @@ def getInteraction():
     try:
         return thread_local.interaction
     except AttributeError:
-        raise interfaces.NoInteraction
+        raise NoInteraction
+
+class ExistingInteraction(ValueError,
+                          AssertionError, #BBB
+                         ):
+    pass
 
 def newInteraction(*participations):
     """Start a new interaction."""
-
     if queryInteraction() is not None:
-        raise AssertionError("newInteraction called"
+        raise ExistingInteraction("newInteraction called"
                              " while another interaction is active.")
-
-    interaction = getSecurityPolicy()(*participations)
-
-    thread_local.interaction = interaction
+    thread_local.interaction = getSecurityPolicy()(*participations)
 
 def endInteraction():
     """End the current interaction."""
@@ -122,7 +126,7 @@ def checkPermission(permission, object, interaction=None):
         try:
             interaction = thread_local.interaction
         except AttributeError:
-            raise interfaces.NoInteraction
+            raise NoInteraction
     return interaction.checkPermission(permission, object)
 
 
@@ -136,7 +140,7 @@ def _clear():
 # need for zope.testing.
 try:
     from zope.testing.cleanup import addCleanUp
-except ImportError:
+except ImportError: #pragma NO COVER
     pass
 else:
     addCleanUp(_clear)
