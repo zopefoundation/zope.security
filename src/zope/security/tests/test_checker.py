@@ -501,29 +501,29 @@ class Test_NamesChecker(unittest.TestCase):
         self.assertTrue(checker.permission_id('nonesuch') is None)
 
     def test_w_names_no_kw_explicit_permission(self):
-        other_checker = object()
+        other_perm = object()
         checker = self._callFUT(('foo', 'bar', 'baz'),
-                                permission_id=other_checker)
-        self.assertTrue(checker.permission_id('foo') is other_checker)
-        self.assertTrue(checker.permission_id('bar') is other_checker)
-        self.assertTrue(checker.permission_id('baz') is other_checker)
+                                permission_id=other_perm)
+        self.assertTrue(checker.permission_id('foo') is other_perm)
+        self.assertTrue(checker.permission_id('bar') is other_perm)
+        self.assertTrue(checker.permission_id('baz') is other_perm)
         self.assertTrue(checker.permission_id('nonesuch') is None)
 
     def test_w_names_w_kw_no_clash(self):
         from zope.security.checker import CheckerPublic
-        other_checker = object()
-        checker = self._callFUT(('foo', 'bar', 'baz'), bam=other_checker)
+        other_perm = object()
+        checker = self._callFUT(('foo', 'bar', 'baz'), bam=other_perm)
         self.assertTrue(checker.permission_id('foo') is CheckerPublic)
         self.assertTrue(checker.permission_id('bar') is CheckerPublic)
         self.assertTrue(checker.permission_id('baz') is CheckerPublic)
-        self.assertTrue(checker.permission_id('bam') is other_checker)
+        self.assertTrue(checker.permission_id('bam') is other_perm)
         self.assertTrue(checker.permission_id('nonesuch') is None)
 
     def test_w_names_w_kw_w_clash(self):
         from zope.security.checker import DuplicationError
-        other_checker = object()
+        other_perm = object()
         self.assertRaises(DuplicationError,
-                          self._callFUT, ('foo',), foo=other_checker)
+                          self._callFUT, ('foo',), foo=other_perm)
 
 
 class Test_InterfaceChecker(unittest.TestCase):
@@ -547,9 +547,9 @@ class Test_InterfaceChecker(unittest.TestCase):
         from zope.interface import Interface
         class IFoo(Interface):
             bar = Attribute('Bar')
-        other_checker = object()
-        checker = self._callFUT(IFoo, other_checker)
-        self.assertTrue(checker.permission_id('bar') is other_checker)
+        other_perm = object()
+        checker = self._callFUT(IFoo, other_perm)
+        self.assertTrue(checker.permission_id('bar') is other_perm)
 
     def test_simple_iface_w_kw(self):
         from zope.interface import Attribute
@@ -557,10 +557,10 @@ class Test_InterfaceChecker(unittest.TestCase):
         from zope.security.checker import CheckerPublic
         class IFoo(Interface):
             bar = Attribute('Bar')
-        other_checker = object()
-        checker = self._callFUT(IFoo, baz=other_checker)
+        other_perm = object()
+        checker = self._callFUT(IFoo, baz=other_perm)
         self.assertTrue(checker.permission_id('bar') is CheckerPublic)
-        self.assertTrue(checker.permission_id('baz') is other_checker)
+        self.assertTrue(checker.permission_id('baz') is other_perm)
         self.assertTrue(checker.permission_id('nonesuch') is None)
 
     def test_derived_iface(self):
@@ -583,9 +583,88 @@ class Test_InterfaceChecker(unittest.TestCase):
         class IFoo(Interface):
             bar = Attribute('Bar')
             bam = Attribute('Bam')
-        other_checker = object()
+        other_perm = object()
         self.assertRaises(DuplicationError,
-                          self._callFUT, IFoo, bar=other_checker)
+                          self._callFUT, IFoo, bar=other_perm)
+
+
+class Test_MultiChecker(unittest.TestCase):
+
+    def _callFUT(self, specs):
+        from zope.security.checker import MultiChecker
+        return MultiChecker(specs)
+
+    def test_empty(self):
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IChecker
+        checker = self._callFUT([])
+        verifyObject(IChecker, checker)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_spec_as_names(self):
+        from zope.security.checker import CheckerPublic
+        checker = self._callFUT([(('foo', 'bar', 'baz'), CheckerPublic)])
+        self.assertTrue(checker.permission_id('foo') is CheckerPublic)
+        self.assertTrue(checker.permission_id('bar') is CheckerPublic)
+        self.assertTrue(checker.permission_id('baz') is CheckerPublic)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_spec_as_iface(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+        other_perm = object()
+        checker = self._callFUT([(IFoo, other_perm)])
+        self.assertTrue(checker.permission_id('bar') is other_perm)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_spec_as_names_and_iface(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.checker import CheckerPublic
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+        other_perm = object()
+        checker = self._callFUT([(IFoo, other_perm), 
+                                 (('foo', 'baz'), CheckerPublic)])
+        self.assertTrue(checker.permission_id('foo') is CheckerPublic)
+        self.assertTrue(checker.permission_id('bar') is other_perm)
+        self.assertTrue(checker.permission_id('baz') is CheckerPublic)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_spec_as_names_and_iface_clash(self):
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import DuplicationError
+        class IFoo(Interface):
+            bar = Attribute('Bar')
+        other_perm = object()
+        self.assertRaises(DuplicationError,
+                          self._callFUT, [(IFoo, other_perm), 
+                                          (('foo', 'bar'), CheckerPublic)])
+
+    def test_w_spec_as_mapping(self):
+        from zope.security.checker import CheckerPublic
+        other_perm = object()
+        spec = {'foo': CheckerPublic,
+                'bar': other_perm,
+               }
+        checker = self._callFUT([spec])
+        self.assertTrue(checker.permission_id('foo') is CheckerPublic)
+        self.assertTrue(checker.permission_id('bar') is other_perm)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_spec_as_names_and_mapping_clash(self):
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import DuplicationError
+        other_perm = object()
+        spec = {'foo': other_perm,
+               }
+        self.assertRaises(DuplicationError,
+                          self._callFUT,
+                          [(('foo', 'bar'), CheckerPublic), spec])
 
 
 
@@ -1259,6 +1338,7 @@ def test_suite():
         unittest.makeSuite(GlobalTests),
         unittest.makeSuite(Test_NamesChecker),
         unittest.makeSuite(Test_InterfaceChecker),
+        unittest.makeSuite(Test_MultiChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
