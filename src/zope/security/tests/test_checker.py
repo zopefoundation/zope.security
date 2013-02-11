@@ -478,6 +478,45 @@ class GlobalTests(unittest.TestCase):
         glob = self._makeOne('foo', 'bar.baz')
         self.assertEqual(repr(glob), 'Global(foo,bar.baz)')
 
+
+class Test_NamesChecker(unittest.TestCase):
+
+    def _callFUT(self, *args, **kw):
+        from zope.security.checker import NamesChecker
+        return NamesChecker(*args, **kw)
+
+    def test_empty_names_no_kw(self):
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IChecker
+        checker = self._callFUT()
+        verifyObject(IChecker, checker)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_names_no_kw(self):
+        from zope.security.checker import CheckerPublic
+        checker = self._callFUT(('foo', 'bar', 'baz'))
+        self.assertTrue(checker.permission_id('foo') is CheckerPublic)
+        self.assertTrue(checker.permission_id('bar') is CheckerPublic)
+        self.assertTrue(checker.permission_id('baz') is CheckerPublic)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_names_w_kw_no_clash(self):
+        from zope.security.checker import CheckerPublic
+        other_checker = object()
+        checker = self._callFUT(('foo', 'bar', 'baz'), bam=other_checker)
+        self.assertTrue(checker.permission_id('foo') is CheckerPublic)
+        self.assertTrue(checker.permission_id('bar') is CheckerPublic)
+        self.assertTrue(checker.permission_id('baz') is CheckerPublic)
+        self.assertTrue(checker.permission_id('bam') is other_checker)
+        self.assertTrue(checker.permission_id('nonesuch') is None)
+
+    def test_w_names_w_kw_w_clash(self):
+        from zope.security.checker import DuplicationError
+        other_checker = object()
+        self.assertRaises(DuplicationError,
+                          self._callFUT, ('foo',), foo=other_checker)
+
+
 # Pre-geddon tests start here
 
 class Test(unittest.TestCase):
@@ -1146,6 +1185,7 @@ def test_suite():
         unittest.makeSuite(CheckerTests),
         unittest.makeSuite(TracebackSupplementTests),
         unittest.makeSuite(GlobalTests),
+        unittest.makeSuite(Test_NamesChecker),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
