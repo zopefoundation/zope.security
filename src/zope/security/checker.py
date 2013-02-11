@@ -429,7 +429,7 @@ _available_by_default = []
 # Get optimized versions
 try:
     import zope.security._zope_security_checker
-except ImportError:
+except ImportError: #pragma NO COVER
     pass
 else:
     from zope.security._zope_security_checker import _checkers, selectChecker

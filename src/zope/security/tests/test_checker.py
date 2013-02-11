@@ -881,6 +881,230 @@ class Test_undefineChecker(unittest.TestCase):
         self.failIf(Foo in _checkers)
 
 
+class CombinedCheckerTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from zope.security.checker import CombinedChecker
+        return CombinedChecker
+
+    def _makeOne(self, checker1=None, checker2=None):
+        if checker1 is None:
+            checker1 = self._makeOther()
+        if checker2 is None:
+            checker1 = self._makeOther()
+        return self._getTargetClass()(checker1, checker2)
+
+    def _makeOther(self, get_permissions=None, set_permissions=None):
+        from zope.security.checker import Checker
+        if get_permissions is None:
+            get_permissions = {}
+        if set_permissions is None:
+            set_permissions = {}
+        return Checker(get_permissions, set_permissions)
+
+    def test_class_conforms_to_IChecker(self):
+        from zope.interface.verify import verifyClass
+        from zope.security.interfaces import IChecker
+        verifyClass(IChecker, self._getTargetClass())
+
+    def test_instance_conforms_to_IChecker(self):
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IChecker
+        verifyObject(IChecker, self._makeOne())
+
+    def test_check_lhs_ok_rhs_not_called(self):
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import Checker
+        class _NeverCalled(Checker):
+            def check(self, *args, **kw):
+                raise AssertionError
+        obj = object()
+        lhs = self._makeOther({'name': CheckerPublic})
+        rhs = _NeverCalled({})
+        combined = self._makeOne(lhs, rhs)
+        combined.check(object(), 'name') # no raise
+
+    def test_check_lhs_unauth_rhs_ok(self):
+        from zope.security.checker import CheckerPublic
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther({'name': 'view'}) # unauth
+        rhs = self._makeOther({'name': CheckerPublic})
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            combined.check(object(), 'name') #no raise
+        finally:
+            del thread_local.interaction
+
+    def test_check_lhs_unauth_rhs_forbidden(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther({'name': 'view'}) # unauth
+        rhs = self._makeOther() # forbidden
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              combined.check, object(), 'name')
+        finally:
+            del thread_local.interaction
+
+    def test_check_lhs_unauth_rhs_unauth(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther({'name': 'view'}) # unauth
+        rhs = self._makeOther({'name': 'inspect'})
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              combined.check, object(), 'name')
+        finally:
+            del thread_local.interaction
+
+    def test_check_lhs_forbidden_rhs_ok(self):
+        from zope.security.checker import CheckerPublic
+        obj = object()
+        lhs = self._makeOther() # forbidden
+        rhs = self._makeOther({'name': CheckerPublic})
+        combined = self._makeOne(lhs, rhs)
+        combined.check(object(), 'name') # no raise
+
+    def test_check_lhs_forbidden_rhs_forbidden(self):
+        from zope.security.interfaces import Forbidden
+        obj = object()
+        lhs = self._makeOther() # forbidden
+        rhs = self._makeOther() # forbidden
+        combined = self._makeOne(lhs, rhs)
+        self.assertRaises(Forbidden,
+                          combined.check, object(), 'name')
+
+    def test_check_lhs_forbidden_rhs_unauth(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther() # Forbidden
+        rhs = self._makeOther({'name': 'inspect'})
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              combined.check, object(), 'name')
+        finally:
+            del thread_local.interaction
+
+    def test_check_setattr_lhs_ok_rhs_not_called(self):
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import Checker
+        class _NeverCalled(Checker):
+            def check_setattr(self, *args, **kw):
+                raise AssertionError
+        obj = object()
+        lhs = self._makeOther(set_permissions={'name': CheckerPublic})
+        rhs = _NeverCalled({})
+        combined = self._makeOne(lhs, rhs)
+        combined.check_setattr(object(), 'name') # no raise
+
+    def test_check_setattr_lhs_unauth_rhs_ok(self):
+        from zope.security.checker import CheckerPublic
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther(set_permissions={'name': 'update'}) # unauth
+        rhs = self._makeOther(set_permissions={'name': CheckerPublic})
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            combined.check_setattr(object(), 'name') # no raise
+        finally:
+            del thread_local.interaction
+
+    def test_check_setattr_lhs_unauth_rhs_forbidden(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther(set_permissions={'name': 'view'}) # unauth
+        rhs = self._makeOther() # forbidden
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              combined.check_setattr, object(), 'name')
+        finally:
+            del thread_local.interaction
+
+    def test_check_setattr_lhs_unauth_rhs_unauth(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther(set_permissions={'name': 'view'}) # unauth
+        rhs = self._makeOther(set_permissions={'name': 'inspect'}) # unauth
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              combined.check_setattr, object(), 'name')
+        finally:
+            del thread_local.interaction
+
+    def test_check_setattr_lhs_forbidden_rhs_ok(self):
+        from zope.security.checker import CheckerPublic
+        obj = object()
+        lhs = self._makeOther() # forbidden
+        rhs = self._makeOther(set_permissions={'name': CheckerPublic})
+        combined = self._makeOne(lhs, rhs)
+        combined.check_setattr(object(), 'name') # no raise
+
+    def test_check_setattr_lhs_forbidden_rhs_forbidden(self):
+        from zope.security.interfaces import Forbidden
+        obj = object()
+        lhs = self._makeOther() # forbidden
+        rhs = self._makeOther() # forbidden
+        combined = self._makeOne(lhs, rhs)
+        self.assertRaises(Forbidden,
+                          combined.check_setattr, object(), 'name')
+
+    def test_check_setattr_lhs_forbidden_rhs_unauth(self):
+        from zope.security.interfaces import Unauthorized
+        from zope.security._definitions import thread_local
+        class _Interaction(object):
+            def checkPermission(self, obj, perm):
+                return False
+        obj = object()
+        lhs = self._makeOther() # forbidden
+        rhs = self._makeOther(set_permissions={'name': 'inspect'}) # unauth
+        combined = self._makeOne(lhs, rhs)
+        thread_local.interaction = _Interaction()
+        try:
+            self.assertRaises(Unauthorized,
+                              combined.check_setattr, object(), 'name')
+        finally:
+            del thread_local.interaction
+
+
 # Pre-geddon tests start here
 
 class Test(unittest.TestCase):
@@ -1557,6 +1781,7 @@ def test_suite():
         unittest.makeSuite(Test_getCheckerForInstancesOf),
         unittest.makeSuite(Test_defineChecker),
         unittest.makeSuite(Test_undefineChecker),
+        unittest.makeSuite(CombinedCheckerTests),
         # pre-geddon fossils
         unittest.makeSuite(Test),
         unittest.makeSuite(TestCheckerPublic),
