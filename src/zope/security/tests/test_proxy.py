@@ -16,6 +16,57 @@
 import unittest
 
 
+class Test_getTestProxyItems(unittest.TestCase):
+
+    def _callFUT(self, proxy):
+        from zope.security.proxy import getTestProxyItems
+        return getTestProxyItems(proxy)
+
+    def test_w_empty_checker(self):
+        from zope.security.checker import Checker
+        from zope.security.proxy import Proxy
+        target = object()
+        proxy = Proxy(target, Checker({}))
+        self.assertEqual(self._callFUT(proxy), [])
+
+    def test_w_non_empty_checker(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import CheckerPublic
+        from zope.security.proxy import Proxy
+        target = object()
+        permission = object()
+        proxy = Proxy(target,
+                      Checker({'foo': CheckerPublic, 'bar': permission}))
+        self.assertEqual(self._callFUT(proxy),
+                         [('bar', permission), ('foo', CheckerPublic)])
+
+
+class Test_isinstance(unittest.TestCase):
+
+    def _callFUT(self, object, cls):
+        from zope.security.proxy import isinstance
+        return isinstance(object, cls)
+
+    def test_w_unproxied_object(self):
+        class Foo(object):
+            pass
+        target = Foo()
+        self.assertTrue(self._callFUT(target, Foo))
+        self.assertFalse(self._callFUT(target, int))
+
+    def test_w_proxied_object(self):
+        from zope.security.checker import Checker
+        from zope.security.proxy import Proxy
+        class Foo(object):
+            pass
+        target = Foo()
+        proxy = Proxy(target, Checker({}))
+        self.assertTrue(self._callFUT(proxy, Foo))
+        self.assertFalse(self._callFUT(proxy, int))
+
+
+# pre-geddon
+
 class Checker(object):
 
     ok = 1
@@ -448,7 +499,7 @@ def test_using_mapping_slots_hack():
     """
 
 
-class TestLocationProxySecurityChecker(unittest.TestCase):
+class LocationProxySecurityCheckerTests(unittest.TestCase):
 
     def test_LocationProxy_gets_a_security_checker_when_importing_z_s_proxy(
             self):
@@ -473,6 +524,9 @@ class TestLocationProxySecurityChecker(unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
+        unittest.makeSuite(Test_getTestProxyItems),
+        unittest.makeSuite(Test_isinstance),
+        # pre-geddon
         unittest.makeSuite(ProxyTests),
-        unittest.makeSuite(TestLocationProxySecurityChecker),
+        unittest.makeSuite(LocationProxySecurityCheckerTests),
     ))
