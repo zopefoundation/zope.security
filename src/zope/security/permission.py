@@ -15,10 +15,14 @@
 """
 __docformat__ = "reStructuredText"
 
-from zope.interface import implementer, directlyProvides
-from zope.component import queryUtility, getUtilitiesFor
+from zope.component import getUtilitiesFor
+from zope.component import queryUtility
+from zope.interface import directlyProvides
+from zope.interface import implementer
+
 from zope.schema.interfaces import IVocabularyFactory
-from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
+from zope.schema.vocabulary import SimpleTerm
+from zope.schema.vocabulary import SimpleVocabulary
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IPermission
 
