@@ -11,11 +11,13 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Make assertions about permissions needed to access class instances
-attributes
+"""Make assertions about permissions needed to access instance attributes
 """
-from zope.security.checker import defineChecker, getCheckerForInstancesOf
-from zope.security.checker import Checker, CheckerPublic
+
+from zope.security.checker import Checker
+from zope.security.checker import CheckerPublic
+from zope.security.checker import defineChecker
+from zope.security.checker import getCheckerForInstancesOf
 
 
 def protectName(class_, name, permission):
