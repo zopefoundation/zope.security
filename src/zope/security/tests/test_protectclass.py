@@ -16,157 +16,131 @@
 import unittest
 
 
-NOTSET = ()
-
-P1 = "extravagant"
-P2 = "paltry"
-
-class Test(unittest.TestCase):
+class Test_protectName(unittest.TestCase):
 
     def setUp(self):
-        try:
-            from zope.component.testing import setUp
-        except ImportError:
-            pass
-        else:
-            setUp()
+        from zope.security.checker import _clear
+        _clear()
 
     def tearDown(self):
-        from zope.security.tests.modulehookup import TestModule
-        TestModule.test_class = None
-        try:
-            from zope.component.testing import tearDown
-        except ImportError:
-            pass
-        else:
-            tearDown()
+        from zope.security.checker import _clear
+        _clear()
 
-    def _populateModule(self):
-        from zope.interface import implementer
-        from zope.component import provideUtility
-        from zope.security.permission import Permission
-        from zope.security.interfaces import IPermission
-        from zope.security.tests.modulehookup import I
-        from zope.security.tests.modulehookup import TestModule
-
-        provideUtility(Permission(P1), IPermission, P1)
-        provideUtility(Permission(P2), IPermission, P2)
-
-        class B(object):
-            def m1(self):
-                return "m1"
-            def m2(self):
-                return "m2"
-
-        @implementer(I)
-        class C(B):
-            def m3(self):
-                return "m3"
-            def m4(self):
-                return "m4"
-
-        TestModule.test_base = B
-        TestModule.test_class = C
-        TestModule.test_instance = C()
-        self.assertState(TestModule)
-        return TestModule
-
-    def assertState(self, module, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
-        "Verify that class, instance, and methods have expected permissions."
-        from zope.security.checker import selectChecker
-        checker = selectChecker(module.test_instance)
-        self.assertEqual(checker.permission_id('m1'), (m1P or None))
-        self.assertEqual(checker.permission_id('m2'), (m2P or None))
-        self.assertEqual(checker.permission_id('m3'), (m3P or None))
-
-    def assertSetattrState(self, module, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
-        "Verify that class, instance, and methods have expected permissions."
-        from zope.security.checker import selectChecker
-        checker = selectChecker(module.test_instance)
-        self.assertEqual(checker.setattr_permission_id('m1'), (m1P or None))
-        self.assertEqual(checker.setattr_permission_id('m2'), (m2P or None))
-        self.assertEqual(checker.setattr_permission_id('m3'), (m3P or None))
-
-    # "testSimple*" exercises tags that do NOT have children.  This mode
-    # inherently sets the instances as well as the class attributes.
-
-    def testSimpleMethodsPlural(self):
+    def _callFUT(self, class_, name, permission):
         from zope.security.protectclass import protectName
-        module = self._populateModule()
-        protectName(module.test_class, 'm1', P1)
-        protectName(module.test_class, 'm3', P1)
-        self.assertState(module, m1P=P1, m3P=P1)
+        return protectName(class_, name, permission)
 
-    def testLikeUntoOnly(self):
+    def test_wo_existing_checker_w_zope_Public(self):
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import _checkers
+        self._callFUT(Foo, 'bar', 'zope.Public')
+        self.assertTrue(_checkers[Foo].get_permissions['bar'] is CheckerPublic)
+
+    def test_w_existing_checker(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import _checkers
+        checker = _checkers[Foo] = Checker({})
+        permission = object()
+        self._callFUT(Foo, 'bar', permission)
+        self.assertTrue(_checkers[Foo] is checker)
+        self.assertTrue(checker.get_permissions['bar'] is permission)
+
+
+class Test_protectSetAttribute(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, class_, name, permission):
+        from zope.security.protectclass import protectSetAttribute
+        return protectSetAttribute(class_, name, permission)
+
+    def test_wo_existing_checker_w_zope_Public(self):
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import _checkers
+        self._callFUT(Foo, 'bar', 'zope.Public')
+        self.assertTrue(_checkers[Foo].set_permissions['bar'] is CheckerPublic)
+
+    def test_w_existing_checker(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import _checkers
+        checker = _checkers[Foo] = Checker({})
+        permission = object()
+        self._callFUT(Foo, 'bar', permission)
+        self.assertTrue(_checkers[Foo] is checker)
+        self.assertTrue(checker.set_permissions['bar'] is permission)
+
+
+class Test_protectLikeUnto(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, class_, like_unto):
         from zope.security.protectclass import protectLikeUnto
-        from zope.security.protectclass import protectName
-        from zope.security.protectclass import protectSetAttribute
-        module = self._populateModule()
-        protectName(module.test_base, 'm1', P1)
-        protectName(module.test_base, 'm2', P1)
-        protectSetAttribute(module.test_base, 'm1', P1)
-        protectSetAttribute(module.test_base, 'm2', P1)
-        protectLikeUnto(module.test_class, module.test_base)
-        # m1 and m2 are in the interface, so should be set, and m3 should not:
-        self.assertState(module, m1P=P1, m2P=P1)
-        self.assertSetattrState(module, m1P=P1, m2P=P1)
+        return protectLikeUnto(class_, like_unto)
 
-    def testSetattr(self):
-        from zope.security.protectclass import protectSetAttribute
-        module = self._populateModule()
-        protectSetAttribute(module.test_class, 'm1', P1)
-        protectSetAttribute(module.test_class, 'm3', P1)
-        self.assertSetattrState(module, m1P=P1, m3P=P1)
+    def test_wo_existing_like_unto_checker(self):
+        from zope.security.checker import _checkers
+        self.assertFalse(Foo in _checkers)
+        self._callFUT(Bar, Foo)
+        self.assertFalse(Foo in _checkers)
+        self.assertFalse(Bar in _checkers)
 
-    def testLikeUntoAsDefault(self):
-        from zope.security.protectclass import protectLikeUnto
-        from zope.security.protectclass import protectName
-        from zope.security.protectclass import protectSetAttribute
-        module = self._populateModule()
-        protectName(module.test_base, 'm1', P1)
-        protectName(module.test_base, 'm2', P1)
-        protectSetAttribute(module.test_base, 'm1', P1)
-        protectSetAttribute(module.test_base, 'm2', P1)
-        protectLikeUnto(module.test_class, module.test_base)
-        protectName(module.test_class, 'm2', P2)
-        protectName(module.test_class, 'm3', P2)
-        protectSetAttribute(module.test_class, 'm2', P2)
-        protectSetAttribute(module.test_class, 'm3', P2)
-        # m1 and m2 are in the interface, so should be set, and m3 should not:
-        self.assertState(module, m1P=P1, m2P=P2, m3P=P2)
-        self.assertSetattrState(module, m1P=P1, m2P=P2, m3P=P2)
+    def test_w_existing_like_unto_checker_wo_existing_checker(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import defineChecker
+        from zope.security.checker import _checkers
+        permission = object()
+        foo_checker = Checker({'bar': CheckerPublic}, {'bar': permission})
+        defineChecker(Foo, foo_checker)
+        self._callFUT(Bar, Foo)
+        bar_checker = _checkers[Bar]
+        self.assertEqual(bar_checker.get_permissions,
+                         foo_checker.get_permissions)
+        self.assertEqual(bar_checker.set_permissions,
+                         foo_checker.set_permissions)
 
-    def testInherited(self):
-        from zope.component import provideUtility
-        from zope.security.checker import selectChecker
-        from zope.security.interfaces import IPermission
-        from zope.security.permission import Permission
-        from zope.security.protectclass import protectName
+    def test_w_existing_like_unto_checker_w_existing_checker(self):
+        from zope.security.checker import Checker
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import defineChecker
+        from zope.security.checker import _checkers
+        permission1, permission2 = object(), object()
+        foo_checker = Checker({'bar': CheckerPublic}, {'bar': permission2})
+        defineChecker(Foo, foo_checker)
+        bar_checker = Checker({'bar': permission1, 'baz': CheckerPublic}, {})
+        defineChecker(Bar, bar_checker)
+        self._callFUT(Bar, Foo)
+        bar_checker = _checkers[Bar]
+        self.assertEqual(bar_checker.get_permissions,
+                         {'bar': CheckerPublic, 'baz': CheckerPublic})
+        self.assertEqual(bar_checker.set_permissions,
+                         foo_checker.set_permissions)
 
-        class B1(object):
-            def g(self): return 'B1.g'
 
-        class B2(object):
-            def h(self): return 'B2.h'
+class Foo(object):
+    bar = 'Bar'
 
-        class S(B1, B2):
-            pass
 
-        provideUtility(Permission('B1', ''), IPermission, 'B1')
-        provideUtility(Permission('S', ''), IPermission, 'S')
-        protectName(B1, 'g', 'B1')
-        protectName(S, 'g', 'S')
-        protectName(S, 'h', 'S')
+class Bar(Foo):
+    baz = 'Baz'
 
-        self.assertEqual(selectChecker(B1()).permission_id('g'), 'B1')
-        self.assertEqual(selectChecker(B2()).permission_id('h'), None)
-        self.assertEqual(selectChecker(S()).permission_id('g'), 'S')
-        self.assertEqual(selectChecker(S()).permission_id('h'), 'S')
-
-        self.assertEqual(S().g(), 'B1.g')
-        self.assertEqual(S().h(), 'B2.h')
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(Test),
+        unittest.makeSuite(Test_protectName),
+        unittest.makeSuite(Test_protectSetAttribute),
+        unittest.makeSuite(Test_protectLikeUnto),
     ))
