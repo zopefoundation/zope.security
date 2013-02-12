@@ -25,9 +25,12 @@ from zope.interface import classImplements
 from zope.schema.interfaces import IField
 from zope.configuration.exceptions import ConfigurationError
 
-from zope.security.checker import moduleChecker, Checker, defineChecker
+from zope.security.checker import Checker
 from zope.security.checker import CheckerPublic
-from zope.security.protectclass import protectLikeUnto, protectName
+from zope.security.checker import defineChecker
+from zope.security.checker import moduleChecker
+from zope.security.protectclass import protectLikeUnto
+from zope.security.protectclass import protectName
 from zope.security.protectclass import protectSetAttribute
 
 PublicPermission = 'zope.Public'
