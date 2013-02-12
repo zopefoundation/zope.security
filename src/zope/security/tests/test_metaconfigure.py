@@ -15,19 +15,58 @@
 """
 import unittest
 
-class Test(unittest.TestCase):
+class Test_dottedName(unittest.TestCase):
+
+    def _callFUT(self, obj):
+        from zope.security.metaconfigure import dottedName
+        return dottedName(obj)
 
     def test_dottted_name_w_None(self):
-        from zope.security.metaconfigure import dottedName
-        self.assertEqual(dottedName(None), 'None')
+        self.assertEqual(self._callFUT(None), 'None')
 
     def test_dottted_name_w_class(self):
-        from zope.security.metaconfigure import dottedName
-        self.assertEqual(dottedName(Test),
-                         'zope.security.tests.test_metaconfigure.Test')
+        self.assertEqual(self._callFUT(Test_dottedName),
+                         'zope.security.tests.test_metaconfigure.' +
+                         'Test_dottedName')
+
+
+class Test_protectModule(unittest.TestCase):
+
+    def setUp(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def tearDown(self):
+        from zope.security.checker import _clear
+        _clear()
+
+    def _callFUT(self, module, name, permission):
+        from zope.security.metaconfigure import protectModule
+        return protectModule(module, name, permission)
+
+    def test_check_wo_existing_module_checker(self):
+        from zope.security import tests as module
+        from zope.security.checker import _checkers
+        perm = object()
+        self._callFUT(module, 'name', perm)
+        checker = _checkers[module]
+        self.assertTrue(checker.get_permissions['name'] is perm)
+
+    def test_check_w_existing_module_checker_zope_Public(self):
+        from zope.security import tests as module
+        from zope.security.checker import Checker
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import _checkers
+        before = _checkers[module] = Checker({'other': CheckerPublic})
+        self._callFUT(module, 'name', 'zope.Public')
+        checker = _checkers[module]
+        self.assertTrue(checker is before)
+        self.assertTrue(checker.get_permissions['name'] is CheckerPublic)
+
 
 def test_suite():
     return unittest.TestSuite([
-        unittest.makeSuite(Test),
+        unittest.makeSuite(Test_dottedName),
+        unittest.makeSuite(Test_protectModule),
     ])
 
