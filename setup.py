@@ -127,7 +127,6 @@ setup(name='zope.security',
       test_suite = 'zope.security',
       tests_require=TESTS_REQUIRE,
       extras_require = dict(
-          untrustedpython=["RestrictedPython"],
           pytz=["pytz"],
           zcml=['zope.configuration'],
           test=TESTS_REQUIRE,

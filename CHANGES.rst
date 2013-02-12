@@ -5,6 +5,8 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- zope.security.untrustedpython moved to separate project: zope.untrustedpython
+
 - Converted use of ``assert`` in non-test code to apprpriate error types:
 
   - Non-dict's passed to ``Checker.__init__``.
