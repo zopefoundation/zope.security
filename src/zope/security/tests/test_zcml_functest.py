@@ -413,6 +413,22 @@ class TestRequireDirective(unittest.TestCase):
     # inherently sets the instances as well as the class attributes.
 
     @_skip_wo_zope_configuration
+    def test_wo_any_attributes(self):
+        from zope.configuration.exceptions import ConfigurationError
+        from zope.security.tests import module
+        declaration = ('''<class class="%s">
+                            <require
+                                permission="%s" />
+                          </class>'''
+                       % (_pfx("test_class"), P1))
+        self.assertRaises(ConfigurationError,
+                          apply_declaration,
+                          module.template_bracket % declaration)
+
+    # "testSimple*" exercises tags that do NOT have children.  This mode
+    # inherently sets the instances as well as the class attributes.
+
+    @_skip_wo_zope_configuration
     def testSimpleMethodsPlural(self):
         declaration = ('''<class class="%s">
                             <require
