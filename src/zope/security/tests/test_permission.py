@@ -162,10 +162,56 @@ class Test_PermissionsVocabulary(unittest.TestCase):
                          ['testing', 'zope.Public'])
 
 
+class Test_PermissionIdsVocabulary(unittest.TestCase):
+
+    def setUp(self):
+        from zope.component.testing import setUp
+        setUp()
+
+    def tearDown(self):
+        from zope.component.testing import tearDown
+        tearDown()
+
+    def _callFUT(self):
+        from zope.security.permission import PermissionIdsVocabulary
+        return PermissionIdsVocabulary()
+
+    def test_empty(self):
+        from zope.schema.vocabulary import SimpleVocabulary
+        vocabulary = self._callFUT()
+        self.assertTrue(isinstance(vocabulary, SimpleVocabulary))
+        self.assertEqual(list(vocabulary), [])
+
+    def test_w_registration(self):
+        self.assertEqual(list(self._callFUT()), [])
+        from zope.component import provideUtility
+        from zope.security.interfaces import IPermission
+        permission = object()
+        provideUtility(permission, IPermission, 'testing')
+        vocabulary = self._callFUT()
+        self.assertEqual([x.value for x in vocabulary], ['testing'])
+        self.assertEqual([x.token for x in vocabulary], ['testing'])
+
+    def test_includes_zope_Public(self):
+        self.assertEqual(list(self._callFUT()), [])
+        from zope.component import provideUtility
+        from zope.security.checker import CheckerPublic
+        from zope.security.interfaces import IPermission
+        permission = object()
+        provideUtility(permission, IPermission, 'testing')
+        provideUtility(CheckerPublic, IPermission, 'zope.Public')
+        vocabulary = self._callFUT()
+        self.assertEqual([x.value for x in vocabulary],
+                         [CheckerPublic, 'testing'])
+        self.assertEqual([x.token for x in vocabulary],
+                         ['zope.Public', 'testing'])
+
+
 def test_suite():
     return unittest.TestSuite([
             unittest.makeSuite(PermissionTests),
             unittest.makeSuite(Test_checkPermission),
             unittest.makeSuite(Test_allPermissions),
             unittest.makeSuite(Test_PermissionsVocabulary),
+            unittest.makeSuite(Test_PermissionIdsVocabulary),
         ])
