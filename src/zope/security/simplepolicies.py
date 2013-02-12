@@ -14,9 +14,12 @@
 """Simple 'ISecurityPolicy' implementations.
 """
 import zope.interface
+
 from zope.security.checker import CheckerPublic
-from zope.security.interfaces import IInteraction, ISecurityPolicy
+from zope.security.interfaces import IInteraction
+from zope.security.interfaces import ISecurityPolicy
 from zope.security._definitions import system_user
+
 
 @zope.interface.implementer(IInteraction)
 @zope.interface.provider(ISecurityPolicy)
@@ -51,6 +54,7 @@ class ParanoidSecurityPolicy(object):
                  if p.principal is not system_user]
 
         return not users
+
 
 @zope.interface.provider(ISecurityPolicy)
 class PermissiveSecurityPolicy(ParanoidSecurityPolicy):
