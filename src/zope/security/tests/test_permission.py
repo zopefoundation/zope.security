@@ -84,8 +84,45 @@ class Test_checkPermission(unittest.TestCase):
         self._callFUT(None, 'testing') # no raise
 
 
+class Test_allPermissions(unittest.TestCase):
+
+    def setUp(self):
+        from zope.component.testing import setUp
+        setUp()
+
+    def tearDown(self):
+        from zope.component.testing import tearDown
+        tearDown()
+
+    def _callFUT(self):
+        from zope.security.permission import allPermissions
+        return allPermissions()
+
+    def test_empty(self):
+        self.assertEqual(list(self._callFUT()), [])
+
+    def test_w_registration(self):
+        self.assertEqual(list(self._callFUT()), [])
+        from zope.component import provideUtility
+        from zope.security.interfaces import IPermission
+        permission = object()
+        provideUtility(permission, IPermission, 'testing')
+        self.assertEqual(list(self._callFUT()), ['testing'])
+
+    def test_skips_zope_Public(self):
+        self.assertEqual(list(self._callFUT()), [])
+        from zope.component import provideUtility
+        from zope.security.checker import CheckerPublic
+        from zope.security.interfaces import IPermission
+        permission = object()
+        provideUtility(permission, IPermission, 'testing')
+        provideUtility(CheckerPublic, IPermission, 'zope.Public')
+        self.assertEqual(list(self._callFUT()), ['testing'])
+
+
 def test_suite():
     return unittest.TestSuite([
             unittest.makeSuite(PermissionTests),
             unittest.makeSuite(Test_checkPermission),
+            unittest.makeSuite(Test_allPermissions),
         ])
