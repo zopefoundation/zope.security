@@ -15,15 +15,18 @@
 """
 __docformat__ = 'restructuredtext'
 
-import zope.schema
-from zope.interface import Interface, implementer
+from zope.configuration.fields import GlobalObject
+from zope.configuration.fields import MessageID
+from zope.interface import Interface
+from zope.interface import implementer
+from zope.schema import Id
 from zope.schema.interfaces import IFromUnicode
+
 from zope.security.permission import checkPermission
 from zope.security.management import setSecurityPolicy
-from zope.configuration.fields import MessageID, GlobalObject
 
 @implementer(IFromUnicode)
-class Permission(zope.schema.Id):
+class Permission(Id):
     r"""This field describes a permission.
     """
 
@@ -69,7 +72,7 @@ def securityPolicy(_context, component):
 class IPermissionDirective(Interface):
     """Define a new security object."""
 
-    id = zope.schema.Id(
+    id = Id(
         title=u"Id",
         description=u"Id as which this object will be known and used.",
         required=True)
