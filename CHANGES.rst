@@ -7,7 +7,8 @@ CHANGES
 
 - 100% unit test coverage.
 
-- zope.security.untrustedpython moved to separate project: zope.untrustedpython
+- ``zope.security.untrustedpython`` moved to separate project:
+  ``zope.untrustedpython``
 
 - Converted use of ``assert`` in non-test code to apprpriate error types:
 
