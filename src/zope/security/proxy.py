@@ -31,15 +31,10 @@ removeSecurityProxy = getObject
 from zope.security.checker import ProxyFactory
 
 def getTestProxyItems(proxy):
-    """Try to get checker names and permissions for testing
-
-    If this succeeds, a sorted sequence of items is returned,
-    otherwise, None is returned.
+    """Return a sorted sequence of checker names and permissions for testing
     """
     checker = getChecker(proxy)
-    items = checker.get_permissions.items()
-    items.sort()
-    return items
+    return sorted(checker.get_permissions.items())
 
 
 builtin_isinstance = None
