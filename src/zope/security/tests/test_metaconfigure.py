@@ -30,6 +30,387 @@ class Test_dottedName(unittest.TestCase):
                          'Test_dottedName')
 
 
+class ClassDirectiveTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from zope.security.metaconfigure import ClassDirective
+        return ClassDirective
+
+    def _makeOne(self, _context, class_):
+        return self._getTargetClass()(_context, class_)
+
+    #def test_ctor_non_class(self): TODO  needs better guard in __init__
+
+    def test_implements_empty(self):
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.implements(context, [])
+        self.assertEqual(len(context._actions), 0)
+
+    def test_implements_single_interface(self):
+        from zope.component.interface import provideInterface
+        from zope.interface import Interface
+        from zope.interface import classImplements
+        class IFoo(Interface):
+            pass
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.implements(context, [IFoo])
+        self.assertEqual(len(context._actions), 2)
+        self.assertEqual(context._actions[0]['discriminator'][:2],
+                         ('ContentDirective', Foo, )) #3rd is object()
+        self.assertTrue(context._actions[0]['callable'] is classImplements)
+        self.assertEqual(context._actions[0]['args'], (Foo, IFoo))
+        self.assertTrue(context._actions[1]['discriminator'] is None)
+        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertEqual(context._actions[1]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+
+    def test_implements_multiple_interfaces(self):
+        from zope.component.interface import provideInterface
+        from zope.interface import Interface
+        from zope.interface import classImplements
+        class IFoo(Interface):
+            pass
+        class IBar(Interface):
+            pass
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.implements(context, [IFoo, IBar])
+        self.assertEqual(len(context._actions), 4)
+        self.assertEqual(context._actions[0]['discriminator'][:2],
+                         ('ContentDirective', Foo, )) #3rd is object()
+        self.assertTrue(context._actions[0]['callable'] is classImplements)
+        self.assertEqual(context._actions[0]['args'], (Foo, IFoo))
+        self.assertTrue(context._actions[1]['discriminator'] is None)
+        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertEqual(context._actions[1]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+        self.assertEqual(context._actions[2]['discriminator'][:2],
+                         ('ContentDirective', Foo, )) #3rd is object()
+        self.assertTrue(context._actions[2]['callable'] is classImplements)
+        self.assertEqual(context._actions[2]['args'], (Foo, IBar))
+        self.assertTrue(context._actions[3]['discriminator'] is None)
+        self.assertTrue(context._actions[3]['callable'] is provideInterface)
+        self.assertEqual(context._actions[3]['args'],
+                         ('zope.security.tests.test_metaconfigure.IBar', IBar))
+
+    def test_require_only_like_class(self):
+        from zope.security.protectclass import protectLikeUnto
+        class Bar(object):
+            pass
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, like_class=Bar)
+        self.assertEqual(len(context._actions), 1)
+        self.assertEqual(context._actions[0]['discriminator'][:2],
+                         ('mimic', Foo, )) #3rd is object()
+        self.assertTrue(context._actions[0]['callable'] is protectLikeUnto)
+        self.assertEqual(context._actions[0]['args'], (Foo, Bar))
+
+    def test_require_only_permission(self):
+        from zope.configuration.exceptions import ConfigurationError
+        class Bar(object):
+            pass
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        self.assertRaises(ConfigurationError,
+                          directive.require, context, permission='testing')
+
+    def test_require_no_like_class_wo_permission(self):
+        from zope.configuration.exceptions import ConfigurationError
+        class Bar(object):
+            pass
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        self.assertRaises(ConfigurationError,
+                          directive.require, context, attributes=('foo', 'bar'))
+
+    def test_require_w_single_interface(self):
+        from zope.component.interface import provideInterface
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.protectclass import protectName
+        class IFoo(Interface):
+            bar = Attribute("Bar")
+            baz = Attribute("Baz")
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, permission='testing', interface=[IFoo])
+        self.assertEqual(len(context._actions), 3)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectName', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
+        self.assertEqual(context._actions[1]['discriminator'],
+                         ('protectName', Foo, 'baz'))
+        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
+        self.assertTrue(context._actions[2]['discriminator'] is None)
+        self.assertTrue(context._actions[2]['callable'] is provideInterface)
+        self.assertEqual(context._actions[2]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+
+    def test_require_w_multiple_interfaces(self):
+        from zope.component.interface import provideInterface
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.protectclass import protectName
+        class IFoo(Interface):
+            bar = Attribute("Bar")
+        class IBar(Interface):
+            baz = Attribute("Baz")
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, permission='testing', interface=[IFoo, IBar])
+        self.assertEqual(len(context._actions), 4)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectName', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
+        self.assertTrue(context._actions[1]['discriminator'] is None)
+        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertEqual(context._actions[1]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+        self.assertEqual(context._actions[2]['discriminator'],
+                         ('protectName', Foo, 'baz'))
+        self.assertTrue(context._actions[2]['callable'] is protectName)
+        self.assertEqual(context._actions[2]['args'], (Foo, 'baz', 'testing'))
+        self.assertTrue(context._actions[3]['discriminator'] is None)
+        self.assertTrue(context._actions[3]['callable'] is provideInterface)
+        self.assertEqual(context._actions[3]['args'],
+                         ('zope.security.tests.test_metaconfigure.IBar', IBar))
+
+    def test_require_w_attributes(self):
+        from zope.security.protectclass import protectName
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, permission='testing',
+                          attributes=['bar', 'baz'])
+        self.assertEqual(len(context._actions), 2)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectName', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
+        self.assertEqual(context._actions[1]['discriminator'],
+                         ('protectName', Foo, 'baz'))
+        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
+
+    def test_require_w_set_attributes(self):
+        from zope.security.protectclass import protectSetAttribute
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, permission='testing',
+                          set_attributes=['bar', 'baz'])
+        self.assertEqual(len(context._actions), 2)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectSetAttribute', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectSetAttribute)
+        self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
+        self.assertEqual(context._actions[1]['discriminator'],
+                         ('protectSetAttribute', Foo, 'baz'))
+        self.assertTrue(context._actions[1]['callable'] is protectSetAttribute)
+        self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
+
+    def test_require_w_set_schema_normal_fields(self):
+        from zope.component.interface import provideInterface
+        from zope.schema import Field
+        from zope.interface import Interface
+        from zope.security.protectclass import protectSetAttribute
+        class IFoo(Interface):
+            bar = Field(u"Bar")
+            baz = Field(u"Baz")
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, permission='testing', set_schema=[IFoo])
+        self.assertEqual(len(context._actions), 3)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectSetAttribute', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectSetAttribute)
+        self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
+        self.assertEqual(context._actions[1]['discriminator'],
+                         ('protectSetAttribute', Foo, 'baz'))
+        self.assertTrue(context._actions[1]['callable'] is protectSetAttribute)
+        self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
+        self.assertTrue(context._actions[2]['discriminator'] is None)
+        self.assertTrue(context._actions[2]['callable'] is provideInterface)
+        self.assertEqual(context._actions[2]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+
+    def test_require_w_set_schema_ignores_non_fields(self):
+        from zope.component.interface import provideInterface
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        class IFoo(Interface):
+            bar = Attribute("Bar")
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, permission='testing', set_schema=[IFoo])
+        self.assertEqual(len(context._actions), 1)
+        self.assertTrue(context._actions[0]['discriminator'] is None)
+        self.assertTrue(context._actions[0]['callable'] is provideInterface)
+        self.assertEqual(context._actions[0]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+
+    def test_require_w_set_schema_ignores_readonly_fields(self):
+        from zope.component.interface import provideInterface
+        from zope.schema import Field
+        from zope.interface import Interface
+        class IFoo(Interface):
+            bar = Field(u"Bar", readonly=True)
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.require(context, permission='testing', set_schema=[IFoo])
+        self.assertEqual(len(context._actions), 1)
+        self.assertTrue(context._actions[0]['discriminator'] is None)
+        self.assertTrue(context._actions[0]['callable'] is provideInterface)
+        self.assertEqual(context._actions[0]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+
+    def test_allow_no_attributes_or_interface(self):
+        from zope.configuration.exceptions import ConfigurationError
+        class Bar(object):
+            pass
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        self.assertRaises(ConfigurationError, directive.allow, context)
+
+    def test_allow_w_single_interface(self):
+        from zope.component.interface import provideInterface
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.protectclass import protectName
+        class IFoo(Interface):
+            bar = Attribute("Bar")
+            baz = Attribute("Baz")
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.allow(context, interface=[IFoo])
+        self.assertEqual(len(context._actions), 3)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectName', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertEqual(context._actions[0]['args'],
+                         (Foo, 'bar', 'zope.Public'))
+        self.assertEqual(context._actions[1]['discriminator'],
+                         ('protectName', Foo, 'baz'))
+        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertEqual(context._actions[1]['args'],
+                         (Foo, 'baz', 'zope.Public'))
+        self.assertTrue(context._actions[2]['discriminator'] is None)
+        self.assertTrue(context._actions[2]['callable'] is provideInterface)
+        self.assertEqual(context._actions[2]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+
+    def test_allow_w_multiple_interfaces(self):
+        from zope.component.interface import provideInterface
+        from zope.interface import Attribute
+        from zope.interface import Interface
+        from zope.security.protectclass import protectName
+        class IFoo(Interface):
+            bar = Attribute("Bar")
+        class IBar(Interface):
+            baz = Attribute("Baz")
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.allow(context, interface=[IFoo, IBar])
+        self.assertEqual(len(context._actions), 4)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectName', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertEqual(context._actions[0]['args'],
+                         (Foo, 'bar', 'zope.Public'))
+        self.assertTrue(context._actions[1]['discriminator'] is None)
+        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertEqual(context._actions[1]['args'],
+                         ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
+        self.assertEqual(context._actions[2]['discriminator'],
+                         ('protectName', Foo, 'baz'))
+        self.assertTrue(context._actions[2]['callable'] is protectName)
+        self.assertEqual(context._actions[2]['args'],
+                         (Foo, 'baz', 'zope.Public'))
+        self.assertTrue(context._actions[3]['discriminator'] is None)
+        self.assertTrue(context._actions[3]['callable'] is provideInterface)
+        self.assertEqual(context._actions[3]['args'],
+                         ('zope.security.tests.test_metaconfigure.IBar', IBar))
+
+    def test_allow_w_attributes(self):
+        from zope.security.protectclass import protectName
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        directive.allow(context, attributes=['bar', 'baz'])
+        self.assertEqual(len(context._actions), 2)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('protectName', Foo, 'bar'))
+        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertEqual(context._actions[0]['args'],
+                         (Foo, 'bar', 'zope.Public'))
+        self.assertEqual(context._actions[1]['discriminator'],
+                         ('protectName', Foo, 'baz'))
+        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertEqual(context._actions[1]['args'],
+                         (Foo, 'baz', 'zope.Public'))
+
+    def test___call__(self):
+        context = DummyZCMLContext()
+        directive = self._makeOne(context, Foo)
+        self.assertEqual(directive(), ())
+
+    def test_factory_wo_explicit_id(self):
+        from zope.component.interfaces import IFactory
+        from zope.component.interface import provideInterface
+        from zope.component.zcml import handler
+        context = DummyZCMLContext()
+        context.info = 'INFO'
+        directive = self._makeOne(context, Foo)
+        directive.factory(context, title='TITLE', description='DESCRIPTION')
+        self.assertEqual(len(context._actions), 2)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('utility', IFactory,
+                          'zope.security.tests.test_metaconfigure.Foo'))
+        self.assertTrue(context._actions[0]['callable'] is handler)
+        args = context._actions[0]['args']
+        self.assertEqual(args[0], 'registerUtility')
+        factory = args[1]
+        self.assertEqual(factory._callable, Foo)
+        self.assertEqual(factory.title, 'TITLE')
+        self.assertEqual(factory.description, 'DESCRIPTION')
+        self.assertEqual(args[2], IFactory)
+        self.assertEqual(args[3], 'zope.security.tests.test_metaconfigure.Foo')
+        self.assertEqual(args[4], 'INFO')
+        self.assertTrue(context._actions[1]['discriminator'] is None)
+        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertEqual(context._actions[1]['args'], ('', IFactory))
+
+    def test_factory_w_explicit_id(self):
+        from zope.component.interfaces import IFactory
+        from zope.component.interface import provideInterface
+        from zope.component.zcml import handler
+        context = DummyZCMLContext()
+        context.info = 'INFO'
+        directive = self._makeOne(context, Foo)
+        directive.factory(context, id='test_id')
+        self.assertEqual(len(context._actions), 2)
+        self.assertEqual(context._actions[0]['discriminator'],
+                         ('utility', IFactory, 'test_id'))
+        self.assertTrue(context._actions[0]['callable'] is handler)
+        args = context._actions[0]['args']
+        self.assertEqual(args[0], 'registerUtility')
+        factory = args[1]
+        self.assertEqual(factory._callable, Foo)
+        self.assertEqual(args[2], IFactory)
+        self.assertEqual(args[3], 'test_id')
+        self.assertEqual(args[4], 'INFO')
+        self.assertTrue(context._actions[1]['discriminator'] is None)
+        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertEqual(context._actions[1]['args'], ('', IFactory))
+
+
+class Foo(object):
+    pass
+
+
 class Test_protectModule(unittest.TestCase):
 
     def setUp(self):
@@ -269,6 +650,7 @@ class DummyZCMLContext(object):
 def test_suite():
     return unittest.TestSuite([
         unittest.makeSuite(Test_dottedName),
+        unittest.makeSuite(ClassDirectiveTests),
         unittest.makeSuite(Test_protectModule),
         unittest.makeSuite(Test_allow),
         unittest.makeSuite(Test_allow),
