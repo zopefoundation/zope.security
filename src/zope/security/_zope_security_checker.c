@@ -592,11 +592,15 @@ MOD_INIT(_zope_security_checker)
 
   CheckerType.tp_new = PyType_GenericNew;
   if (PyType_Ready(&CheckerType) < 0)
+  {
     return MOD_ERROR_VAL;
+  }
 
   _defaultChecker = PyObject_CallFunction((PyObject*)&CheckerType, "{}");
   if (_defaultChecker == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
 
 #define INIT_STRING(S) \
 if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
@@ -606,48 +610,75 @@ if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
   INIT_STRING(interaction);
 
   if ((_checkers = PyDict_New()) == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
 
   NoProxy = PyObject_CallObject((PyObject*)&PyBaseObject_Type, NULL);
   if (NoProxy == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
 
   if ((m = PyImport_ImportModule("zope.security._proxy")) == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   if ((Proxy = PyObject_GetAttrString(m, "_Proxy")) == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   Py_DECREF(m);
 
   if ((m = PyImport_ImportModule("zope.security._definitions")) == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   thread_local = PyObject_GetAttrString(m, "thread_local");
-  if (thread_local == NULL) return MOD_ERROR_VAL;
+  if (thread_local == NULL)
+  {
+    return MOD_ERROR_VAL;
+  }
   Py_DECREF(m);
 
   if ((m = PyImport_ImportModule("zope.security.interfaces")) == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   ForbiddenAttribute = PyObject_GetAttrString(m, "ForbiddenAttribute");
   if (ForbiddenAttribute == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   Unauthorized = PyObject_GetAttrString(m, "Unauthorized");
   if (Unauthorized == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   Py_DECREF(m);
 
   if ((m = PyImport_ImportModule("zope.security.checker")) == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   CheckerPublic = PyObject_GetAttrString(m, "CheckerPublic");
   if (CheckerPublic == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
   Py_DECREF(m);
 
   if ((_available_by_default = PyList_New(0)) == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
 
-  MOD_DEF(m, "_proxy", module___doc__, module_functions)
+  MOD_DEF(m, "_zope_security_checker", module___doc__, module_functions)
 
   if (m == NULL)
+  {
     return MOD_ERROR_VAL;
+  }
 
 #define EXPORT(N) Py_INCREF(N); PyModule_AddObject(m, #N, N)
 
