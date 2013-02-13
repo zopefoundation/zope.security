@@ -15,6 +15,8 @@
 """
 __docformat__ = "reStructuredText"
 
+import operator
+
 from zope.component import getUtilitiesFor
 from zope.component import queryUtility
 from zope.interface import directlyProvides
@@ -75,14 +77,15 @@ def PermissionIdsVocabulary(context=None):
     the first term.
     """
     terms = []
+    has_public = False
     for name, permission in getUtilitiesFor(IPermission, context):
         if name == 'zope.Public':
-            terms.append(
-                SimpleTerm(CheckerPublic, 'zope.Public', _u('Public')))
+            has_public = True
         else:
             terms.append(SimpleTerm(name, name, name))
-    terms.sort(cmp=lambda lhs, rhs: \
-               (lhs.token == 'zope.Public' and -1) or cmp(lhs.title, rhs.title))
+    terms = sorted(terms, key=operator.attrgetter('title'))
+    if has_public:
+        terms.insert(0, SimpleTerm(CheckerPublic, 'zope.Public', _u('Public')))
     return SimpleVocabulary(terms)
 
 directlyProvides(PermissionIdsVocabulary, IVocabularyFactory)

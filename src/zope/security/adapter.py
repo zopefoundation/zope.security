@@ -73,7 +73,7 @@ class LocatingTrustedAdapterFactory(object):
     def __call__(self, *args):
         for arg in args:
             if removeSecurityProxy(arg) is not arg:
-                args = map(removeSecurityProxy, args)
+                args = [removeSecurityProxy(x) for x in args]
                 adapter = self.factory(*args)
                 adapter = self._customizeProtected(adapter, args[0])
                 return ProxyFactory(adapter)

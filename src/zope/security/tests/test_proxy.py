@@ -15,6 +15,17 @@
 """
 import unittest
 
+from zope.security._compat import PYTHON2
+
+def _skip_if_not_Py2(testfunc):
+    from functools import update_wrapper
+    if not PYTHON2:
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    return testfunc
+
 
 class Test_getTestProxyItems(unittest.TestCase):
 
@@ -109,8 +120,9 @@ class Something:
         return 42
     def __iter__(self):
         return self
-    def next(self):
+    def __next__(self):
         return 42 # Infinite sequence
+    next = __next__
     def __len__(self):
         return 42
     def __nonzero__(self):
@@ -234,6 +246,7 @@ class ProxyTests(unittest.TestCase):
     def testNextFail(self):
         self.shouldFail(self.p.next)
 
+    @_skip_if_not_Py2
     def testCompareOK(self):
         self.assertEqual(cmp(self.p, self.x), 0)
 
@@ -258,6 +271,7 @@ class ProxyTests(unittest.TestCase):
     def testLenFail(self):
         self.shouldFail(len, self.p)
 
+    @_skip_if_not_Py2
     def testSliceOK(self):
         from zope.security.proxy import removeSecurityProxy
         self.assertEqual(removeSecurityProxy(self.p[:]), [42])
@@ -302,10 +316,9 @@ class ProxyTests(unittest.TestCase):
         pC = ProxyFactory(C, self.c)
         self.assertEqual(d[pC], d[C])
 
-    unops = [
-        "-x", "+x", "abs(x)", "~x",
-        "int(x)", "long(x)", "float(x)",
-        ]
+    unops = ["-x", "+x", "abs(x)", "~x", "int(x)", "float(x)"]
+    if PYTHON2:
+        unops.append("long(x)")
 
     def test_unops(self):
         # We want the starting value of the expressions to be a proxy,
@@ -314,7 +327,9 @@ class ProxyTests(unittest.TestCase):
         # aren't proxied.
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
-        self.c.unproxied_types = str, int, long, float
+        self.c.unproxied_types = [str, int, float]
+        if PYTHON2:
+            self.c.unproxied_types.append(long)
         for expr in self.unops:
             x = 1
             y = eval(expr)
@@ -325,6 +340,7 @@ class ProxyTests(unittest.TestCase):
                              "x=%r; expr=%r" % (x, expr))
             self.shouldFail(lambda x: eval(expr), x)
 
+    @_skip_if_not_Py2
     def test_odd_unops(self):
         # unops that don't return a proxy
         P = self.c.proxy
@@ -384,6 +400,7 @@ class ProxyTests(unittest.TestCase):
             pa **= 2
         self.shouldFail(doit)
 
+    @_skip_if_not_Py2
     def test_coerce(self):
         from zope.security.proxy import removeSecurityProxy
         P = self.c.proxy
@@ -517,20 +534,21 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
         # Regression test for a problem introduced in 3.8.1 and fixed in
         # 3.8.3. For details see change log.
         import sys
-        import zope.location.location
+        from zope.location.location import LocationProxy
         import zope.security.proxy
+        from zope.security._compat import reload
         # This attribute is set when zope.security.decorator is imported, to
         # show that it will be set too, if zope.security.proxy is imported
         # we set it to a different value at first:
-        del zope.location.location.LocationProxy.__Security_checker__
+        del LocationProxy.__Security_checker__
         self.assertFalse(
-            hasattr(zope.location.location.LocationProxy, '__Security_checker__'))
+            hasattr(LocationProxy, '__Security_checker__'))
         # After deleting zope.security.decorator and reloading
         # zope.security.proxy the attribute is set again:
         del sys.modules["zope.security.decorator"]
         reload(zope.security.proxy)
         self.assertTrue(
-            hasattr(zope.location.location.LocationProxy, '__Security_checker__'))
+            hasattr(LocationProxy, '__Security_checker__'))
 
 
 def test_suite():

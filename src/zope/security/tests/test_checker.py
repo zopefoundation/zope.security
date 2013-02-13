@@ -421,6 +421,7 @@ class TracebackSupplementTests(unittest.TestCase):
         return self._getTargetClass()(obj)
 
     def test_getInfo_builtin_types(self):
+        from zope.security._compat import _BUILTINS
         for val, typ in [('', 'str'),
                          (0, 'int'),
                          (1.0, 'float'),
@@ -430,8 +431,8 @@ class TracebackSupplementTests(unittest.TestCase):
                         ]:
             tbs = self._makeOne(val)
             self.assertEqual(tbs.getInfo().splitlines(),
-                            ['   - class: __builtin__.%s' % typ,
-                             '   - type: __builtin__.%s' % typ,
+                            ['   - class: %s.%s' % (_BUILTINS, typ),
+                             '   - type: %s.%s' % (_BUILTINS, typ),
                             ])
 
     def test_getInfo_newstyle_instance(self):
@@ -1377,19 +1378,32 @@ class Test(unittest.TestCase):
                 return permission == 'test_allowed'
         return SecurityPolicy
 
-    def test_typesAcceptedByDefineChecker(self):
+    @_skip_if_not_Py2
+    def test_defineChecker_oldstyle_class(self):
         import types
-        import zope.security
         from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
         class ClassicClass:
             __metaclass__ = types.ClassType
+        defineChecker(ClassicClass, NamesChecker())
+
+    def test_defineChecker_newstyle_class(self):
+        from zope.security.checker import defineChecker
+        from zope.security.checker import NamesChecker
         class NewStyleClass:
             __metaclass__ = type
-        not_a_type = object()
-        defineChecker(ClassicClass, NamesChecker())
         defineChecker(NewStyleClass, NamesChecker())
+
+    def test_defineChecker_module(self):
+        import zope.security
+        from zope.security.checker import defineChecker
+        from zope.security.checker import NamesChecker
         defineChecker(zope.security, NamesChecker())
+
+    def test_defineChecker_error(self):
+        from zope.security.checker import defineChecker
+        from zope.security.checker import NamesChecker
+        not_a_type = object()
         self.assertRaises(TypeError,
                 defineChecker, not_a_type, NamesChecker())
 
@@ -1425,6 +1439,7 @@ class Test(unittest.TestCase):
     # - no attribute there
     # - method
     # - allow and disallow by permission
+    @_skip_if_not_Py2
     def test_check_getattr(self):
         from zope.security.interfaces import Forbidden
         from zope.security.interfaces import Unauthorized
@@ -1475,6 +1490,7 @@ class Test(unittest.TestCase):
             self.assertRaises(Forbidden, checker.check_getattr, inst, 'e')
             self.assertRaises(Forbidden, checker.check_getattr, inst, 'f')
 
+    @_skip_if_not_Py2
     def test_check_setattr(self):
         from zope.security.interfaces import Forbidden
         from zope.security.interfaces import Unauthorized
@@ -1515,6 +1531,7 @@ class Test(unittest.TestCase):
             self.assertRaises(Forbidden, checker.check_setattr, inst, 'e')
             self.assertRaises(Forbidden, checker.check_setattr, inst, 'f')
 
+    @_skip_if_not_Py2
     def test_proxy(self):
         from zope.security.proxy import getChecker
         from zope.security.proxy import removeSecurityProxy
@@ -1654,6 +1671,7 @@ class Test(unittest.TestCase):
         self.assertEqual(checker.check(C, '__name__'), None)
         self.assertEqual(checker.check(C, '__parent__'), None)
 
+    @_skip_if_not_Py2
     def test_setattr(self):
         from zope.security.interfaces import Forbidden
         from zope.security.checker import NamesChecker
@@ -1826,9 +1844,9 @@ class Test(unittest.TestCase):
 class TestCheckerPublic(unittest.TestCase):
 
     def test_that_pickling_CheckerPublic_retains_identity(self):
-        import pickle
+        from zope.security._compat import _pickle
         from zope.security.checker import CheckerPublic
-        self.assert_(pickle.loads(pickle.dumps(CheckerPublic))
+        self.assert_(_pickle.loads(_pickle.dumps(CheckerPublic))
                      is
                      CheckerPublic)
 
@@ -1993,12 +2011,16 @@ class TestBasicTypes(unittest.TestCase):
         # Of course, BasicTypes is a full dictionary. This dictionary is by
         # default filled with several entries:
         keys = BasicTypes.keys()
-        keys.sort()
         self.assert_(bool in keys)
         self.assert_(int in keys)
         self.assert_(float in keys)
         self.assert_(str in keys)
-        self.assert_(unicode in keys)
+        try:
+            unicode
+        except NameError: #pragma NO COVER Py3k
+            pass
+        else:             #pragma NO COVER Python2
+            self.assert_(unicode in keys)
         self.assert_(object in keys)
         # ...
 

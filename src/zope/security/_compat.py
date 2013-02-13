@@ -18,22 +18,38 @@ import types
 
 if sys.version_info[0] < 3: #pragma NO COVER
 
+    from StringIO import StringIO
+    import cPickle as _pickle
+
+    reload = reload
+
     def _u(s):
         return unicode(s, 'unicode_escape')
 
     CLASS_TYPES = (type, types.ClassType)
+    _BUILTINS = '__builtin__'
 
     PYTHON3 = False
     PYTHON2 = True
 
+    TEXT = unicode
+
 else: #pragma NO COVER
+
+    from io import StringIO
+    import pickle as _pickle
+
+    from imp import reload
 
     def _u(s):
         return s
 
     CLASS_TYPES = (type,)
+    _BUILTINS = 'builtins'
 
     PYTHON3 = True
     PYTHON2 = False
+
+    TEXT = str
 
 _BLANK = _u('')

@@ -47,6 +47,7 @@ from zope.security.interfaces import ISecurityProxyFactory
 from zope.security.interfaces import ForbiddenAttribute
 from zope.security.interfaces import Unauthorized
 from zope.security._definitions import thread_local
+from zope.security._compat import CLASS_TYPES
 from zope.security._compat import PYTHON2
 from zope.security._compat import _u
 from zope.security._proxy import _Proxy as Proxy
@@ -290,6 +291,7 @@ class Global(object):
 
 # Marker for public attributes
 CheckerPublic = Global('CheckerPublic')
+CP_HACK_XXX = CheckerPublic
 
 # Now we wrap it in a security proxy so that it retains it's
 # identity when it needs to be security proxied.
@@ -395,13 +397,14 @@ selectChecker = selectCheckerPy # in case no C optimizations
 def getCheckerForInstancesOf(class_):
     return _checkers.get(class_)
 
+DEFINABLE_TYPES = CLASS_TYPES + (types.ModuleType,)
 def defineChecker(type_, checker):
     """Define a checker for a given type of object
 
     The checker can be a Checker, or a function that, when called with
     an object, returns a Checker.
     """
-    if not isinstance(type_, (type, types.ClassType, types.ModuleType)):
+    if not isinstance(type_, DEFINABLE_TYPES):
         raise TypeError(
                 'type_ must be a type, class or module, not a %s' % type_)
     if type_ in _checkers:
@@ -627,11 +630,10 @@ _basic_types = {
     object: NoProxy,
     int: NoProxy,
     float: NoProxy,
-    long: NoProxy,
     complex: NoProxy,
-    types.NoneType: NoProxy,
+    type(None): NoProxy,
     str: NoProxy,
-    unicode: NoProxy,
+    bytes: NoProxy,
     Message: NoProxy, # Messages are immutable, so it's okay
     bool: NoProxy,
     datetime.timedelta: NoProxy,
@@ -640,6 +642,10 @@ _basic_types = {
     datetime.time: NoProxy,
     datetime.tzinfo: NoProxy,
 }
+if PYTHON2:
+    _basic_types[long] = NoProxy
+    _basic_types[unicode] = NoProxy
+
 try:
     import pytz
 except ImportError:
@@ -656,8 +662,8 @@ BasicTypes_examples = {
     int: 65536,
     float: -1.4142,
     complex: -1.4142j,
-    types.NoneType: None,
-    str: 'abc',
+    type(None): None,
+    bytes: b'abc',
     bool: True,
     datetime.timedelta: datetime.timedelta(3),
     datetime.datetime: datetime.datetime(2003, 1, 1),
@@ -716,24 +722,18 @@ _default_checkers = {
     tuple: NamesChecker(['__getitem__', '__getslice__', '__add__', '__radd__',
                          '__contains__', '__len__', '__iter__',
                          '__str__']),
-    types.InstanceType: _instanceChecker,
     Proxy: NoProxy,
     type(weakref.ref(_Sequence())): NamesChecker(['__call__']),
-    types.ClassType: _typeChecker,
     types.FunctionType: _callableChecker,
     types.MethodType: _callableChecker,
     types.BuiltinFunctionType: _callableChecker,
     types.BuiltinMethodType: _callableChecker,
-    type(().__getslice__): _callableChecker, # slot description
     type: _typeChecker,
     types.ModuleType: lambda module: _checkers.get(module, _namedChecker),
     type(iter([])): _iteratorChecker, # Same types in Python 2.2.1,
     type(iter(())): _iteratorChecker, # different in Python 2.3.
     type(iter({})): _iteratorChecker,
     type(iter(set())): _iteratorChecker,
-    type({}.iteritems()): _iteratorChecker,
-    type({}.iterkeys()): _iteratorChecker,
-    type({}.itervalues()): _iteratorChecker,
     type(iter(_Sequence())): _iteratorChecker,
     type(f()): _iteratorChecker,
     type(Interface): InterfaceChecker(
@@ -748,7 +748,14 @@ _default_checkers = {
     zope.interface.declarations.Declaration: _Declaration_checker,
     abc.ABCMeta: _typeChecker,
 }
-
+if PYTHON2:
+    _default_checkers[types.ClassType] = _typeChecker
+    _default_checkers[types.InstanceType] = _instanceChecker
+    # slot description
+    _default_checkers[type(().__getslice__)] = _callableChecker
+    _default_checkers[type({}.iteritems())] = _iteratorChecker
+    _default_checkers[type({}.iterkeys())] = _iteratorChecker
+    _default_checkers[type({}.itervalues())] = _iteratorChecker
 
 def _clear():
     _checkers.clear()

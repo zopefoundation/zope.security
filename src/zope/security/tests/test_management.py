@@ -172,6 +172,7 @@ class Test(unittest.TestCase):
 
     def test_system_user(self):
         from zope.security.management import system_user
+        from zope.security._compat import TEXT
         from zope.security._compat import _u
         self.assertEquals(system_user.id,
                           _u('zope.security.management.system_user'))
@@ -179,7 +180,7 @@ class Test(unittest.TestCase):
         self.assertEquals(system_user.title, _u('System'))
 
         for name in 'id', 'title', 'description':
-            self.assert_(isinstance(getattr(system_user, name), unicode))
+            self.assert_(isinstance(getattr(system_user, name), TEXT))
 
 def test_suite():
     return unittest.TestSuite((

@@ -30,7 +30,7 @@ def _skip_wo_zope_configuration(testfunc):
 
 
 def configfile(s):
-    from StringIO import StringIO
+    from zope.security._compat import StringIO
     return StringIO("""<configure
       xmlns='http://namespaces.zope.org/zope'
       i18n_domain='zope'>
@@ -270,7 +270,7 @@ class Context(object):
         self.actions += ((discriminator, callable, args), )
 
     def __repr__(self):
-        from cStringIO import StringIO
+        from zope.security._compat import StringIO
         import re
         import pprint
         atre = re.compile(' at [0-9a-fA-Fx]+')
@@ -339,7 +339,7 @@ def _pfx(name):
     return module.__name__ + '.' + name
 
 def defineDirectives():
-    from cStringIO import StringIO
+    from zope.security._compat import StringIO
     from zope.configuration.xmlconfig import XMLConfig
     from zope.configuration.xmlconfig import xmlconfig
     import zope.security
@@ -655,7 +655,7 @@ class TestRequireDirective(unittest.TestCase):
 
 def apply_declaration(declaration):
     '''Apply the xmlconfig machinery.'''
-    from cStringIO import StringIO
+    from zope.security._compat import StringIO
     from zope.configuration.xmlconfig import xmlconfig
     return xmlconfig(StringIO(declaration))
 
