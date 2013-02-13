@@ -664,9 +664,10 @@ def apply_declaration(declaration):
 def make_dummy():
     from zope.interface import Interface
     import zope.security.zcml
+    from zope.security._compat import _u
     global IDummy
     class IDummy(Interface):
-        perm = zope.security.zcml.Permission(title=u'')
+        perm = zope.security.zcml.Permission(title=_u(''))
 
 
 perms = []

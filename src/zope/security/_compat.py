@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2005 Zope Foundation and Contributors.
+# Copyright (c) 2013 Zope Foundation and Contributors.
 # All Rights Reserved.
 #
 # This software is subject to the provisions of the Zope Public License,
@@ -11,18 +11,29 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Common definitions to avoid circular imports
+""" Python 2 / 3 compatibility
 """
-import threading
-import zope.interface
+import sys
+import types
 
-from zope.security import interfaces
-from zope.security._compat import _u
+if sys.version_info[0] < 3: #pragma NO COVER
 
-thread_local = threading.local()
+    def _u(s):
+        return unicode(s, 'unicode_escape')
 
-@zope.interface.provider(interfaces.IPrincipal)
-class system_user(object):
-    id = _u('zope.security.management.system_user')
-    title = _u('System')
-    description = _u('')
+    CLASS_TYPES = (type, types.ClassType)
+
+    PYTHON3 = False
+    PYTHON2 = True
+
+else: #pragma NO COVER
+
+    def _u(s):
+        return s
+
+    CLASS_TYPES = (type,)
+
+    PYTHON3 = True
+    PYTHON2 = False
+
+_BLANK = _u('')

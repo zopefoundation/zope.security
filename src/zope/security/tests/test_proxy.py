@@ -449,37 +449,46 @@ def test_using_mapping_slots_hack():
     access:
 
       >>> from zope.security.proxy import ProxyFactory
+      >>> log = []
+      >>> def dump():
+      ...     out = '\\n'.join(log)
+      ...     del log[:]
+      ...     return out
       >>> class Checker(object):
       ...     def check(self, object, name):
-      ...         print 'check', name
+      ...         log.append(('check %s' % name))
       ...     def check_getattr(self, object, name):
-      ...         print 'check_getattr', name
+      ...         log.append(('check_getattr %s' % name))
       ...     def proxy(self, object):
       ...         return 1
       >>> def f():
       ...     pass
       >>> p = ProxyFactory(f, Checker())
       >>> p.__name__
-      check_getattr __name__
       1
+      >>> dump()
+      'check_getattr __name__'
       >>> p()
-      check __call__
       1
+      >>> dump()
+      'check __call__'
 
     But, if the checker has a __setitem__ method:
 
       >>> def __setitem__(self, object, name):
-      ...     print '__setitem__', name
+      ...     log.append(('__setitem__ %s' % name))
       >>> Checker.__setitem__ = __setitem__
 
     It will be used rather than either check or check_getattr:
 
       >>> p.__name__
-      __setitem__ __name__
       1
+      >>> dump()
+      '__setitem__ __name__'
       >>> p()
-      __setitem__ __call__
       1
+      >>> dump()
+      '__setitem__ __call__'
 
     If a checker has a __getitem__ method:
 
@@ -490,11 +499,13 @@ def test_using_mapping_slots_hack():
     It will be used rather than it's proxy method:
 
       >>> p.__name__
-      __setitem__ __name__
       2
+      >>> dump()
+      '__setitem__ __name__'
       >>> p()
-      __setitem__ __call__
       2
+      >>> dump()
+      '__setitem__ __call__'
 
     """
 

@@ -24,6 +24,7 @@ from zope.schema.interfaces import IFromUnicode
 
 from zope.security.permission import checkPermission
 from zope.security.management import setSecurityPolicy
+from zope.security._compat import _u
 
 @implementer(IFromUnicode)
 class Permission(Id):
@@ -59,8 +60,8 @@ class ISecurityPolicyDirective(Interface):
     """Defines the security policy that will be used for Zope."""
 
     component = GlobalObject(
-        title=u"Component",
-        description=u"Pointer to the object that will handle the security.",
+        title=_u("Component"),
+        description=_u("Pointer to the object that will handle the security."),
         required=True)
 
 def securityPolicy(_context, component):
@@ -73,18 +74,18 @@ class IPermissionDirective(Interface):
     """Define a new security object."""
 
     id = Id(
-        title=u"Id",
-        description=u"Id as which this object will be known and used.",
+        title=_u("Id"),
+        description=_u("Id as which this object will be known and used."),
         required=True)
 
     title = MessageID(
-        title=u"Title",
-        description=u"Provides a title for the object.",
+        title=_u("Title"),
+        description=_u("Provides a title for the object."),
         required=True)
 
     description = MessageID(
-        title=u"Description",
-        description=u"Provides a description for the object.",
+        title=_u("Description"),
+        description=_u("Provides a description for the object."),
         required=False)
 
 def permission(_context, id, title, description=''):
@@ -98,13 +99,13 @@ class IRedefinePermission(Interface):
     """Define a permission to replace another permission."""
 
     from_ = Permission(
-        title=u"Original permission",
-        description=u"Original permission id to redefine.",
+        title=_u("Original permission"),
+        description=_u("Original permission id to redefine."),
         required=True)
 
     to = Permission(
-        title=u"Substituted permission",
-        description=u"Substituted permission id.",
+        title=_u("Substituted permission"),
+        description=_u("Substituted permission id."),
         required=True)
 
 def redefinePermission(_context, from_, to):

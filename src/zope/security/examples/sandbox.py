@@ -235,12 +235,12 @@ class TimeGenerator(object):
                 self.setupAgent(a)
                 try:
                     a.action()
-                except Exception, e:
-                    print '-- Exception --'
-                    print '"%s" in "%s" not allow to "%s"' %(a, h,
-                                                             a._action.__name__)
-                    print e
-                    print 
+                except Exception as e:
+                    print('-- Exception --')
+                    print('"%s" in "%s" not allow to "%s"'
+                            % (a, h, a._action.__name__))
+                    print(e)
+                    print()
                 self.teardownAgent(a)
 
             agents = filter(WanderLust, agents)
@@ -251,11 +251,11 @@ class TimeGenerator(object):
                     home = a.getHome()
                     new_home = GreenerPastures(a)
                     home.transportAgent(a, new_home)
-                except Exception, e:
-                    print '-- Exception --'
-                    print 'moving "%s" from "%s" to "%s"' %(a, h,` new_home`)
-                    print e
-                    print 
+                except Exception as e:
+                    print('-- Exception --')
+                    print('moving "%s" from "%s" to "%s"' %(a, h,` new_home`))
+                    print(e)
+                    print()
                 self.teardownAgent(a)
 
 
@@ -306,11 +306,11 @@ def main():
     world = TimeGenerator()
 
     for x in range(5):
-        print 'world turning'
+        print('world turning')
         world.turn()
 
     for h in _homes.values():
-        print h.getId(), h.getAgentIds()
+        print(h.getId(), h.getAgentIds())
 
 if __name__ == '__main__':
     main()

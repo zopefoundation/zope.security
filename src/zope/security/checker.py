@@ -31,10 +31,10 @@ import datetime
 import decimal
 import weakref
 
+from zope.i18nmessageid import Message
 import zope.interface.interface
 import zope.interface.interfaces
 import zope.interface.declarations
-from zope.i18nmessageid import Message
 from zope.interface import Interface
 from zope.interface import directlyProvides
 from zope.interface import implementer
@@ -47,6 +47,8 @@ from zope.security.interfaces import ISecurityProxyFactory
 from zope.security.interfaces import ForbiddenAttribute
 from zope.security.interfaces import Unauthorized
 from zope.security._definitions import thread_local
+from zope.security._compat import PYTHON2
+from zope.security._compat import _u
 from zope.security._proxy import _Proxy as Proxy
 from zope.security._proxy import getChecker
 
@@ -472,7 +474,7 @@ class CombinedChecker(Checker):
             Checker.check(self, object, name)
         except ForbiddenAttribute:
             self._checker2.check(object, name)
-        except Unauthorized, unauthorized_exception:
+        except Unauthorized as unauthorized_exception:
             try: self._checker2.check(object, name)
             except ForbiddenAttribute:
                 raise unauthorized_exception
@@ -485,7 +487,7 @@ class CombinedChecker(Checker):
             Checker.check_setattr(self, object, name)
         except ForbiddenAttribute:
             self._checker2.check_setattr(object, name)
-        except Unauthorized, unauthorized_exception:
+        except Unauthorized as unauthorized_exception:
             try: self._checker2.check_setattr(object, name)
             except ForbiddenAttribute:
                 raise unauthorized_exception
@@ -653,11 +655,9 @@ BasicTypes_examples = {
     object: object(),
     int: 65536,
     float: -1.4142,
-    long: 65536l,
     complex: -1.4142j,
     types.NoneType: None,
     str: 'abc',
-    unicode: u'uabc',
     bool: True,
     datetime.timedelta: datetime.timedelta(3),
     datetime.datetime: datetime.datetime(2003, 1, 1),
@@ -665,6 +665,10 @@ BasicTypes_examples = {
     datetime.time: datetime.time(23, 58),
     Message: Message('message', domain='hello')
 }
+
+if PYTHON2:
+    BasicTypes_examples[unicode] = _u('uabc')
+    BasicTypes_examples[long] = long(65536)
 
 
 class _Sequence(object): #pragma NO COVER

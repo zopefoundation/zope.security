@@ -218,9 +218,10 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.schema import Field
         from zope.interface import Interface
         from zope.security.protectclass import protectSetAttribute
+        from zope.security._compat import _u
         class IFoo(Interface):
-            bar = Field(u"Bar")
-            baz = Field(u"Baz")
+            bar = Field(_u("Bar"))
+            baz = Field(_u("Baz"))
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
@@ -257,8 +258,9 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.schema import Field
         from zope.interface import Interface
+        from zope.security._compat import _u
         class IFoo(Interface):
-            bar = Field(u"Bar", readonly=True)
+            bar = Field(_u("Bar"), readonly=True)
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
