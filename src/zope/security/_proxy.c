@@ -19,6 +19,56 @@ Security Proxy Implementation
 
 static PyObject *__class__str = 0, *__name__str = 0, *__module__str = 0;
 
+// Compatibility with Python 2
+#if PY_MAJOR_VERSION < 3
+  #define IS_STRING PyString_Check
+
+  #define MAKE_STRING(name) PyString_AS_STRING(name)
+
+  #define FROM_STRING PyString_FromString
+
+  #define FROM_STRING_FORMAT PyString_FromFormat
+
+  #define INTERN PyString_InternFromString
+
+  #define MOD_ERROR_VAL
+
+  #define MOD_SUCCESS_VAL(val)
+
+  #define MOD_INIT(name) void init##name(void)
+
+  #define MOD_DEF(ob, name, doc, methods) \
+          ob = Py_InitModule3(name, methods, doc);
+
+#else
+
+  #define PyInt_FromLong PyLong_FromLong
+
+  #define IS_STRING PyUnicode_Check
+
+  #define MAKE_STRING(name) PyBytes_AS_STRING( \
+          PyUnicode_AsUTF8String(name))
+
+  #define FROM_STRING PyUnicode_FromString
+
+  #define FROM_STRING_FORMAT PyUnicode_FromFormat
+
+  #define INTERN PyUnicode_InternFromString
+
+  #define MOD_ERROR_VAL NULL
+
+  #define MOD_SUCCESS_VAL(val) val
+
+  #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
+
+  #define MOD_DEF(ob, name, doc, methods) \
+          static struct PyModuleDef moduledef = { \
+            PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+          ob = PyModule_Create(&moduledef);
+
+  #define statichere static
+#endif
+
 #define DECLARE_STRING(N) static PyObject *str_##N
 
 DECLARE_STRING(__3pow__);
@@ -47,7 +97,9 @@ DECLARE_STRING(op_floordiv);
 DECLARE_STRING(op_hex);
 DECLARE_STRING(op_iadd);
 DECLARE_STRING(op_iand);
+#if PY_MAJOR_VERSION < 3
 DECLARE_STRING(op_idiv);
+#endif
 DECLARE_STRING(op_ifloordiv);
 DECLARE_STRING(op_ilshift);
 DECLARE_STRING(op_imod);
@@ -102,7 +154,7 @@ typedef struct {
 
 #undef Proxy_Check
 #define Proxy_Check(proxy) \
-	PyObject_TypeCheck(proxy, &SecurityProxyType)
+    PyObject_TypeCheck(proxy, &SecurityProxyType)
 
 static PyTypeObject SecurityProxyType;
 
@@ -207,7 +259,7 @@ check2(PyObject *self, PyObject *other,
 
 static PyObject *
 check2i(SecurityProxy *self, PyObject *other,
-	PyObject *opname, binaryfunc operation)
+    PyObject *opname, binaryfunc operation)
 {
   PyObject *result = NULL;
 
@@ -229,16 +281,16 @@ check2i(SecurityProxy *self, PyObject *other,
 }
 
 #define UNOP(NAME, CALL) \
-	static PyObject *proxy_##NAME(PyObject *self) \
-	{ return check1((SecurityProxy *)self, str_op_##NAME, CALL); }
+    static PyObject *proxy_##NAME(PyObject *self) \
+    { return check1((SecurityProxy *)self, str_op_##NAME, CALL); }
 
 #define BINOP(NAME, CALL) \
-	static PyObject *proxy_##NAME(PyObject *self, PyObject *other) \
-	{ return check2(self, other, str_op_##NAME, str_op_r##NAME, CALL); }
+    static PyObject *proxy_##NAME(PyObject *self, PyObject *other) \
+    { return check2(self, other, str_op_##NAME, str_op_r##NAME, CALL); }
 
 #define INPLACE(NAME, CALL) \
-	static PyObject *proxy_i##NAME(PyObject *self, PyObject *other) \
-	{ return check2i((SecurityProxy *)self, other, str_op_i##NAME, CALL); }
+    static PyObject *proxy_i##NAME(PyObject *self, PyObject *other) \
+    { return check2i((SecurityProxy *)self, other, str_op_i##NAME, CALL); }
 
 
 /*
@@ -377,21 +429,21 @@ default_repr(PyObject *object)
   name  = PyObject_GetAttr(klass, __name__str);
   if (name == NULL)
     goto err;
-  sname = PyString_AsString(name);
+  sname = MAKE_STRING(name);
   if (sname == NULL)
     goto err;
 
   module = PyObject_GetAttr(klass, __module__str);
   if (module != NULL) {
-    smodule = PyString_AsString(module);
+    smodule = MAKE_STRING(module);
     if (smodule == NULL)
       goto err;
-    result = PyString_FromFormat("<security proxied %s.%s instance at %p>",
+    result = FROM_STRING_FORMAT("<security proxied %s.%s instance at %p>",
                                  smodule, sname, object);
   }
   else {
     PyErr_Clear();
-    result = PyString_FromFormat("<security proxied %s instance at %p>",
+    result = FROM_STRING_FORMAT("<security proxied %s instance at %p>",
                                  sname, object);
   }
 
@@ -435,11 +487,13 @@ proxy_repr(SecurityProxy *self)
   return result;
 }
 
+#if PY_MAJOR_VERSION < 3
 static int
 proxy_compare(SecurityProxy *self, PyObject *other)
 {
   return PyObject_Compare(self->proxy.proxy_object, other);
 }
+#endif
 
 static long
 proxy_hash(SecurityProxy *self)
@@ -478,10 +532,12 @@ call_##M(PyObject *self) \
 }
 
 NUMBER_METHOD(int)
-NUMBER_METHOD(long)
 NUMBER_METHOD(float)
+#if PY_MAJOR_VERSION < 3
+NUMBER_METHOD(long)
 NUMBER_METHOD(oct)
 NUMBER_METHOD(hex)
+#endif
 
 static PyObject *
 call_ipow(PyObject *self, PyObject *other)
@@ -493,7 +549,9 @@ call_ipow(PyObject *self, PyObject *other)
 BINOP(add, PyNumber_Add)
 BINOP(sub, PyNumber_Subtract)
 BINOP(mul, PyNumber_Multiply)
+#if PY_MAJOR_VERSION < 3
 BINOP(div, PyNumber_Divide)
+#endif
 BINOP(mod, PyNumber_Remainder)
 BINOP(divmod, PyNumber_Divmod)
 
@@ -543,6 +601,7 @@ BINOP(and, PyNumber_And)
 BINOP(xor, PyNumber_Xor)
 BINOP(or, PyNumber_Or)
 
+#if PY_MAJOR_VERSION < 3
 static int
 proxy_coerce(PyObject **p_self, PyObject **p_other)
 {
@@ -588,6 +647,7 @@ proxy_coerce(PyObject **p_self, PyObject **p_other)
     }
   return -1;
 }
+#endif
 
 UNOP(neg, PyNumber_Negative)
 UNOP(pos, PyNumber_Positive)
@@ -601,15 +661,19 @@ proxy_nonzero(PyObject *self)
 
 UNOP(invert, PyNumber_Invert)
 UNOP(int, call_int)
-UNOP(long, call_long)
 UNOP(float, call_float)
+#if PY_MAJOR_VERSION < 3
+UNOP(long, call_long)
 UNOP(oct, call_oct)
 UNOP(hex, call_hex)
+#endif
 
 INPLACE(add, PyNumber_InPlaceAdd)
 INPLACE(sub, PyNumber_InPlaceSubtract)
 INPLACE(mul, PyNumber_InPlaceMultiply)
+#if PY_MAJOR_VERSION < 3
 INPLACE(div, PyNumber_InPlaceDivide)
+#endif
 INPLACE(mod, PyNumber_InPlaceRemainder)
 INPLACE(pow, call_ipow)
 INPLACE(lshift, PyNumber_InPlaceLshift)
@@ -731,69 +795,81 @@ proxy_setitem(SecurityProxy *self, PyObject *key, PyObject *value)
 
 static PyNumberMethods
 proxy_as_number = {
-	proxy_add,				/* nb_add */
-	proxy_sub,				/* nb_subtract */
-	proxy_mul,				/* nb_multiply */
-	proxy_div,				/* nb_divide */
-	proxy_mod,				/* nb_remainder */
-	proxy_divmod,				/* nb_divmod */
-	proxy_pow,				/* nb_power */
-	proxy_neg,				/* nb_negative */
-	proxy_pos,				/* nb_positive */
-	proxy_abs,				/* nb_absolute */
-	proxy_nonzero,				/* nb_nonzero */
-	proxy_invert,				/* nb_invert */
-	proxy_lshift,				/* nb_lshift */
-	proxy_rshift,				/* nb_rshift */
-	proxy_and,				/* nb_and */
-	proxy_xor,				/* nb_xor */
-	proxy_or,				/* nb_or */
-	proxy_coerce,				/* nb_coerce */
-	proxy_int,				/* nb_int */
-	proxy_long,				/* nb_long */
-	proxy_float,				/* nb_float */
-	proxy_oct,				/* nb_oct */
-	proxy_hex,				/* nb_hex */
+    proxy_add,                      /* nb_add */
+    proxy_sub,                      /* nb_subtract */
+    proxy_mul,                      /* nb_multiply */
+#if PY_MAJOR_VERSION < 3
+    proxy_div,                      /* nb_divide */
+#endif
+    proxy_mod,                      /* nb_remainder */
+    proxy_divmod,                   /* nb_divmod */
+    proxy_pow,                      /* nb_power */
+    proxy_neg,                      /* nb_negative */
+    proxy_pos,                      /* nb_positive */
+    proxy_abs,                      /* nb_absolute */
+    proxy_nonzero,                  /* nb_nonzero */
+    proxy_invert,                   /* nb_invert */
+    proxy_lshift,                   /* nb_lshift */
+    proxy_rshift,                   /* nb_rshift */
+    proxy_and,                      /* nb_and */
+    proxy_xor,                      /* nb_xor */
+    proxy_or,                       /* nb_or */
+#if PY_MAJOR_VERSION < 3
+    proxy_coerce,                   /* nb_coerce */
+#endif
+    proxy_int,                      /* nb_int */
+#if PY_MAJOR_VERSION < 3
+    proxy_long,                     /* nb_long */
+#else
+    0,                              /* nb_reserved */
+#endif
+    proxy_float,                    /* nb_float */
+#if PY_MAJOR_VERSION < 3
+    proxy_oct,                      /* nb_oct */
+    proxy_hex,                      /* nb_hex */
+#endif
 
-	/* Added in release 2.0 */
-	/* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
-	proxy_iadd,				/* nb_inplace_add */
-	proxy_isub,				/* nb_inplace_subtract */
-	proxy_imul,				/* nb_inplace_multiply */
-	proxy_idiv,				/* nb_inplace_divide */
-	proxy_imod,				/* nb_inplace_remainder */
-	(ternaryfunc)proxy_ipow,		/* nb_inplace_power */
-	proxy_ilshift,				/* nb_inplace_lshift */
-	proxy_irshift,				/* nb_inplace_rshift */
-	proxy_iand,				/* nb_inplace_and */
-	proxy_ixor,				/* nb_inplace_xor */
-	proxy_ior,				/* nb_inplace_or */
+    /* Added in release 2.0 */
+    /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
+    proxy_iadd,                     /* nb_inplace_add */
+    proxy_isub,                     /* nb_inplace_subtract */
+    proxy_imul,                     /* nb_inplace_multiply */
+#if PY_MAJOR_VERSION < 3
+    proxy_idiv,                     /* nb_inplace_divide */
+#endif
+    proxy_imod,                     /* nb_inplace_remainder */
+    (ternaryfunc)proxy_ipow,        /* nb_inplace_power */
+    proxy_ilshift,                  /* nb_inplace_lshift */
+    proxy_irshift,                  /* nb_inplace_rshift */
+    proxy_iand,                     /* nb_inplace_and */
+    proxy_ixor,                     /* nb_inplace_xor */
+    proxy_ior,                      /* nb_inplace_or */
 
-	/* Added in release 2.2 */
-	/* These require the Py_TPFLAGS_HAVE_CLASS flag */
-	proxy_floordiv,				/* nb_floor_divide */
-	proxy_truediv,				/* nb_true_divide */
-	proxy_ifloordiv,			/* nb_inplace_floor_divide */
-	proxy_itruediv,				/* nb_inplace_true_divide */
+    /* Added in release 2.2 */
+    /* These require the Py_TPFLAGS_HAVE_CLASS flag */
+    proxy_floordiv,                 /* nb_floor_divide */
+    proxy_truediv,                  /* nb_true_divide */
+    proxy_ifloordiv,                /* nb_inplace_floor_divide */
+    proxy_itruediv,                 /* nb_inplace_true_divide */
 };
 
 static PySequenceMethods
 proxy_as_sequence = {
-  (lenfunc)proxy_length,			/* sq_length */
-  0,					/* sq_concat */
-  0,					/* sq_repeat */
-  (ssizeargfunc)proxy_igetitem,		        /* sq_item */
-  (ssizessizeargfunc)proxy_slice,	       	/* sq_slice */
-  (ssizeobjargproc)proxy_isetitem,	/* sq_ass_item */
-  (ssizessizeobjargproc)proxy_ass_slice,	/* sq_ass_slice */
-  (objobjproc)proxy_contains,		/* sq_contains */
+  (lenfunc)proxy_length,                    /* sq_length */
+  0,                                        /* sq_concat */
+  0,                                        /* sq_repeat */
+  (ssizeargfunc)proxy_igetitem,             /* sq_item */
+  (ssizessizeargfunc)proxy_slice,           /* sq_slice */
+  (ssizeobjargproc)proxy_isetitem,          /* sq_ass_item */
+  (ssizessizeobjargproc)proxy_ass_slice,    /* sq_ass_slice */
+  (objobjproc)proxy_contains,               /* sq_contains */
 };
 
 static PyMappingMethods
 proxy_as_mapping = {
-  (lenfunc)proxy_length,				/* mp_length */
-  (binaryfunc)proxy_getitem,				/* mp_subscript */
-  (objobjargproc)proxy_setitem,				/* mp_ass_subscript */
+  (lenfunc)proxy_length,                /* mp_length */
+  (binaryfunc)proxy_getitem,                /* mp_subscript */
+  (objobjargproc)proxy_setitem,                /* mp_ass_subscript */
 };
 
 static char proxy_doc[] = "\
@@ -812,47 +888,58 @@ if one is needed, otherwise the object itself.\n\
 
 statichere PyTypeObject
 SecurityProxyType = {
-  PyObject_HEAD_INIT(NULL)
-  0,
+  PyVarObject_HEAD_INIT(NULL, 0)
   "zope.security._proxy._Proxy",
   sizeof(SecurityProxy),
   0,
-  (destructor)proxy_dealloc,				/* tp_dealloc */
-  0,					/* tp_print */
-  0,					/* tp_getattr */
-  0,					/* tp_setattr */
-  (cmpfunc)proxy_compare,				/* tp_compare */
-  (reprfunc)proxy_repr,				/* tp_repr */
-  &proxy_as_number,			/* tp_as_number */
-  &proxy_as_sequence,			/* tp_as_sequence */
-  &proxy_as_mapping,			/* tp_as_mapping */
-  (hashfunc)proxy_hash,				/* tp_hash */
-  (ternaryfunc)proxy_call,				/* tp_call */
-  (reprfunc)proxy_str,				/* tp_str */
-  (getattrofunc)proxy_getattro,				/* tp_getattro */
-  (setattrofunc)proxy_setattro,				/* tp_setattro */
-  0,					/* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_CHECKTYPES |
-  Py_TPFLAGS_HAVE_GC,		/* tp_flags */
-  proxy_doc,				/* tp_doc */
-  (traverseproc)proxy_traverse,				/* tp_traverse */
-  0,					/* tp_clear */
-  (richcmpfunc)proxy_richcompare,			/* tp_richcompare */
-  0,					/* tp_weaklistoffset */
-  (getiterfunc)proxy_iter,				/* tp_iter */
-  (iternextfunc)proxy_iternext,				/* tp_iternext */
-  0,					/* tp_methods */
-  0,					/* tp_members */
-  0,					/* tp_getset */
-  0,					/* tp_base */
-  0,					/* tp_dict */
-  0,					/* tp_descr_get */
-  0,					/* tp_descr_set */
-  0,					/* tp_dictoffset */
-	proxy_init,				/* tp_init */
-	0, /*PyType_GenericAlloc,*/		/* tp_alloc */
-	proxy_new,				/* tp_new */
-	0, /*_PyObject_GC_Del,*/		/* tp_free */
+  (destructor)proxy_dealloc,                /* tp_dealloc */
+  0,                                        /* tp_print */
+  0,                                        /* tp_getattr */
+  0,                                        /* tp_setattr */
+#if PY_MAJOR_VERSION < 3
+  (cmpfunc)proxy_compare,                   /* tp_compare */
+#else
+    0,                                      /* tp_reserved */
+#endif
+  (reprfunc)proxy_repr,                     /* tp_repr */
+  &proxy_as_number,                         /* tp_as_number */
+  &proxy_as_sequence,                       /* tp_as_sequence */
+  &proxy_as_mapping,                        /* tp_as_mapping */
+  (hashfunc)proxy_hash,                     /* tp_hash */
+  (ternaryfunc)proxy_call,                  /* tp_call */
+  (reprfunc)proxy_str,                      /* tp_str */
+  (getattrofunc)proxy_getattro,             /* tp_getattro */
+  (setattrofunc)proxy_setattro,             /* tp_setattro */
+  0,                                        /* tp_as_buffer */
+#if PY_MAJOR_VERSION < 3
+  Py_TPFLAGS_DEFAULT |
+  Py_TPFLAGS_BASETYPE |
+  Py_TPFLAGS_CHECKTYPES |
+  Py_TPFLAGS_HAVE_GC,                       /* tp_flags */
+#else // Py_TPFLAGS_CHECKTYPES is always true in Python 3 and removed.
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_HAVE_GC |
+    Py_TPFLAGS_BASETYPE,                    /* tp_flags */
+#endif
+  proxy_doc,                                /* tp_doc */
+  (traverseproc)proxy_traverse,             /* tp_traverse */
+  0,                                        /* tp_clear */
+  (richcmpfunc)proxy_richcompare,           /* tp_richcompare */
+  0,                                        /* tp_weaklistoffset */
+  (getiterfunc)proxy_iter,                  /* tp_iter */
+  (iternextfunc)proxy_iternext,             /* tp_iternext */
+  0,                                        /* tp_methods */
+  0,                                        /* tp_members */
+  0,                                        /* tp_getset */
+  0,                                        /* tp_base */
+  0,                                        /* tp_dict */
+  0,                                        /* tp_descr_get */
+  0,                                        /* tp_descr_set */
+  0,                                        /* tp_dictoffset */
+  proxy_init,                               /* tp_init */
+  0, /*PyType_GenericAlloc,*/               /* tp_alloc */
+  proxy_new,                                /* tp_new */
+  0, /*_PyObject_GC_Del,*/                  /* tp_free */
 };
 
 static PyObject *
@@ -895,18 +982,17 @@ module_functions[] = {
 static char
 module___doc__[] = "Security proxy implementation.";
 
-void
-init_proxy(void)
+MOD_INIT(_proxy)
 {
   PyObject *m;
 
   if (Proxy_Import() < 0)
-    return;
+    return MOD_ERROR_VAL;
 
 #define INIT_STRING(S) \
-if((str_##S = PyString_InternFromString(#S)) == NULL) return
+if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
 #define INIT_STRING_OP(S) \
-if((str_op_##S = PyString_InternFromString("__" #S "__")) == NULL) return
+if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
 
   INIT_STRING(__3pow__);
   INIT_STRING(__call__);
@@ -934,7 +1020,9 @@ if((str_op_##S = PyString_InternFromString("__" #S "__")) == NULL) return
   INIT_STRING_OP(hex);
   INIT_STRING_OP(iadd);
   INIT_STRING_OP(iand);
+#if PY_MAJOR_VERSION < 3
   INIT_STRING_OP(idiv);
+#endif
   INIT_STRING_OP(ifloordiv);
   INIT_STRING_OP(ilshift);
   INIT_STRING_OP(imod);
@@ -981,26 +1069,30 @@ if((str_op_##S = PyString_InternFromString("__" #S "__")) == NULL) return
   INIT_STRING(__str__);
   
 
-  __class__str = PyString_FromString("__class__");
-  if (! __class__str) return;
+  __class__str = FROM_STRING("__class__");
+  if (! __class__str)
+     return MOD_ERROR_VAL;
   
-  __name__str = PyString_FromString("__name__");
-  if (! __name__str) return;
+  __name__str = FROM_STRING("__name__");
+  if (! __name__str)
+    return MOD_ERROR_VAL;
   
-  __module__str = PyString_FromString("__module__");
-  if (! __module__str) return;
+  __module__str = FROM_STRING("__module__");
+  if (! __module__str) return MOD_ERROR_VAL;
   
-  SecurityProxyType.ob_type = &PyType_Type;
   SecurityProxyType.tp_alloc = PyType_GenericAlloc;
-  SecurityProxyType.tp_free = _PyObject_GC_Del;
+  SecurityProxyType.tp_free = PyObject_GC_Del;
   SecurityProxyType.tp_base = &ProxyType;
   if (PyType_Ready(&SecurityProxyType) < 0)
-    return;
-  
-  m = Py_InitModule3("_proxy", module_functions, module___doc__);
+    return MOD_ERROR_VAL;
+
+  MOD_DEF(m, "_proxy", module___doc__, module_functions)
+
   if (m == NULL)
-    return;
+    return MOD_ERROR_VAL;
   
   Py_INCREF(&SecurityProxyType);
   PyModule_AddObject(m, "_Proxy", (PyObject *)&SecurityProxyType);
+
+  return MOD_SUCCESS_VAL(m);
 }
