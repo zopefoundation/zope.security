@@ -5,6 +5,8 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Added support for Python 3.2 and 3.3.
+
 - 100% unit test coverage.
 
 - ``zope.security.untrustedpython`` moved to separate project:
