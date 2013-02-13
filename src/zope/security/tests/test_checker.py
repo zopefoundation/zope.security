@@ -881,7 +881,7 @@ class Test_undefineChecker(unittest.TestCase):
             pass
         checker = _checkers[Foo] = object()
         self._callFUT(Foo)
-        self.failIf(Foo in _checkers)
+        self.assertFalse(Foo in _checkers)
 
 
 class CombinedCheckerTests(unittest.TestCase):
@@ -1546,14 +1546,14 @@ class Test(unittest.TestCase):
         rocks = tuple(BasicTypes_examples.values())
         for rock in rocks:
             proxy = checker.proxy(rock)
-            self.failUnless(proxy is rock, (rock, type(proxy)))
+            self.assertTrue(proxy is rock, (rock, type(proxy)))
 
         for class_ in OldInst, NewInst:
             inst = class_()
 
             for ob in inst, class_:
                 proxy = checker.proxy(ob)
-                self.failUnless(removeSecurityProxy(proxy) is ob)
+                self.assertTrue(removeSecurityProxy(proxy) is ob)
                 checker = getChecker(proxy)
                 if ob is inst:
                     self.assertEqual(checker.permission_id('__str__'),
@@ -1577,14 +1577,14 @@ class Test(unittest.TestCase):
             #       return getattr(ob, name)
             #for ob in inst, TransparentProxy(inst):
             #    proxy = checker.proxy(ob)
-            #    self.failUnless(removeSecurityProxy(proxy) is ob)
+            #    self.assertTrue(removeSecurityProxy(proxy) is ob)
             #
             #    checker = getChecker(proxy)
-            #    self.failUnless(checker is special,
+            #    self.assertTrue(checker is special,
             #                    checker.get_permissions)
             #
             #    proxy2 = checker.proxy(proxy)
-            #    self.failUnless(proxy2 is proxy, [proxy, proxy2])
+            #    self.assertTrue(proxy2 is proxy, [proxy, proxy2])
 
     def testLayeredProxies(self):
         #Test that a Proxy will not be re-proxied.
@@ -1599,13 +1599,13 @@ class Test(unittest.TestCase):
 
         # base is not proxied, so we expect a proxy
         proxy1 = checker.proxy(base)
-        self.assert_(type(proxy1) is Proxy)
-        self.assert_(getProxiedObject(proxy1) is base)
+        self.assertTrue(type(proxy1) is Proxy)
+        self.assertTrue(getProxiedObject(proxy1) is base)
 
         # proxy is a proxy, so we don't expect to get another
         proxy2 = checker.proxy(proxy1)
-        self.assert_(proxy2 is proxy1)
-        self.assert_(getProxiedObject(proxy2) is base)
+        self.assertTrue(proxy2 is proxy1)
+        self.assertTrue(getProxiedObject(proxy2) is base)
 
 
     def testMultiChecker(self):
@@ -1705,24 +1705,24 @@ class Test(unittest.TestCase):
         obj = SomeClass()
 
         proxy = ProxyFactory(obj)
-        self.assert_(type(proxy) is Proxy)
-        self.assert_(getChecker(proxy) is _defaultChecker)
+        self.assertTrue(type(proxy) is Proxy)
+        self.assertTrue(getChecker(proxy) is _defaultChecker)
 
         defineChecker(SomeClass, checker)
 
         proxy = ProxyFactory(obj)
-        self.assert_(type(proxy) is Proxy)
-        self.assert_(getChecker(proxy) is checker)
+        self.assertTrue(type(proxy) is Proxy)
+        self.assertTrue(getChecker(proxy) is checker)
 
         obj.__Security_checker__ = checker_as_magic_attr
 
         proxy = ProxyFactory(obj)
-        self.assert_(type(proxy) is Proxy)
-        self.assert_(getChecker(proxy) is checker_as_magic_attr)
+        self.assertTrue(type(proxy) is Proxy)
+        self.assertTrue(getChecker(proxy) is checker_as_magic_attr)
 
         proxy = ProxyFactory(obj, specific_checker)
-        self.assert_(type(proxy) is Proxy)
-        self.assert_(getChecker(proxy) is specific_checker)
+        self.assertTrue(type(proxy) is Proxy)
+        self.assertTrue(getChecker(proxy) is specific_checker)
 
     def test_define_and_undefineChecker(self):
         from zope.security.checker import defineChecker
@@ -1734,11 +1734,11 @@ class Test(unittest.TestCase):
 
         checker = NamesChecker()
         from zope.security.checker import _defaultChecker, selectChecker
-        self.assert_(selectChecker(obj) is _defaultChecker)
+        self.assertTrue(selectChecker(obj) is _defaultChecker)
         defineChecker(SomeClass, checker)
-        self.assert_(selectChecker(obj) is checker)
+        self.assertTrue(selectChecker(obj) is checker)
         undefineChecker(SomeClass)
-        self.assert_(selectChecker(obj) is _defaultChecker)
+        self.assertTrue(selectChecker(obj) is _defaultChecker)
 
     def test_ProxyFactory_using_proxy(self):
         from zope.security.checker import ProxyFactory
@@ -1750,7 +1750,7 @@ class Test(unittest.TestCase):
         proxy1 = ProxyFactory(obj)
 
         proxy2 = ProxyFactory(proxy1)
-        self.assert_(proxy1 is proxy2)
+        self.assertTrue(proxy1 is proxy2)
 
         # Trying to change the checker on a proxy.
         self.assertRaises(TypeError, ProxyFactory, proxy1, checker)
@@ -1758,7 +1758,7 @@ class Test(unittest.TestCase):
         # Setting exactly the same checker as the proxy already has.
         proxy1 = ProxyFactory(obj, checker)
         proxy2 = ProxyFactory(proxy1, checker)
-        self.assert_(proxy1 is proxy2)
+        self.assertTrue(proxy1 is proxy2)
 
     def test_canWrite_canAccess(self):
         # the canWrite and canAccess functions are conveniences.  Often code
@@ -1809,15 +1809,15 @@ class Test(unittest.TestCase):
         defineChecker(SomeClass, checker)
 
         # so, our hapless interaction may write and access foo...
-        self.assert_(canWrite(obj, 'foo'))
-        self.assert_(canAccess(obj, 'foo'))
+        self.assertTrue(canWrite(obj, 'foo'))
+        self.assertTrue(canAccess(obj, 'foo'))
 
         # ...may access, but not write, bar...
-        self.assert_(not canWrite(obj, 'bar'))
-        self.assert_(canAccess(obj, 'bar'))
+        self.assertTrue(not canWrite(obj, 'bar'))
+        self.assertTrue(canAccess(obj, 'bar'))
 
         # ...and may access baz.
-        self.assert_(not canAccess(obj, 'baz'))
+        self.assertTrue(not canAccess(obj, 'baz'))
 
         # there are no security assertions for writing or reading shazam, so
         # checking these actually raises Forbidden.  The rationale behind
@@ -1832,13 +1832,13 @@ class Test(unittest.TestCase):
         # it.  This is a very reasonable configuration.  Therefore, canWrite
         # will hide the Forbidden exception if and only if there is a
         # setting for accessing the attribute.
-        self.assert_(not canWrite(obj, 'baz'))
+        self.assertTrue(not canWrite(obj, 'baz'))
 
         # The reverse is not true at the moment: an unusal case like the
         # write-only 'bing' attribute will return a boolean for canWrite,
         # but canRead will simply raise a Forbidden exception, without checking
         # write settings.
-        self.assert_(not canWrite(obj, 'bing'))
+        self.assertTrue(not canWrite(obj, 'bing'))
         self.assertRaises(Forbidden, canAccess, obj, 'bing')
 
 class TestCheckerPublic(unittest.TestCase):
@@ -1846,14 +1846,14 @@ class TestCheckerPublic(unittest.TestCase):
     def test_that_pickling_CheckerPublic_retains_identity(self):
         from zope.security._compat import _pickle
         from zope.security.checker import CheckerPublic
-        self.assert_(_pickle.loads(_pickle.dumps(CheckerPublic))
+        self.assertTrue(_pickle.loads(_pickle.dumps(CheckerPublic))
                      is
                      CheckerPublic)
 
     def test_that_CheckerPublic_identity_works_even_when_proxied(self):
         from zope.security.checker import ProxyFactory
         from zope.security.checker import CheckerPublic
-        self.assert_(ProxyFactory(CheckerPublic) is CheckerPublic)
+        self.assertTrue(ProxyFactory(CheckerPublic) is CheckerPublic)
 
 
 class TestMixinDecoratedChecker(unittest.TestCase):
@@ -1895,26 +1895,26 @@ class TestMixinDecoratedChecker(unittest.TestCase):
         from zope.security.interfaces import ForbiddenAttribute
         o = self.obj
         checker.check_getattr(o, 'both_get_set')
-        self.assert_(self.interaction.checkChecked(['dc_get_permission']))
+        self.assertTrue(self.interaction.checkChecked(['dc_get_permission']))
         checker.check_getattr(o, 'c_only')
-        self.assert_(self.interaction.checkChecked(['get_permission']))
+        self.assertTrue(self.interaction.checkChecked(['get_permission']))
         checker.check_getattr(o, 'd_only')
-        self.assert_(self.interaction.checkChecked(['dc_get_permission']))
+        self.assertTrue(self.interaction.checkChecked(['dc_get_permission']))
         self.assertRaises(ForbiddenAttribute,
                           checker.check_getattr, o,
                           'completely_different_attr')
-        self.assert_(self.interaction.checkChecked([]))
+        self.assertTrue(self.interaction.checkChecked([]))
         checker.check(o, '__str__')
-        self.assert_(self.interaction.checkChecked(['get_permission']))
+        self.assertTrue(self.interaction.checkChecked(['get_permission']))
 
         checker.check_setattr(o, 'both_get_set')
-        self.assert_(self.interaction.checkChecked(['dc_set_permission']))
+        self.assertTrue(self.interaction.checkChecked(['dc_set_permission']))
         self.assertRaises(ForbiddenAttribute,
                           checker.check_setattr, o, 'c_only')
-        self.assert_(self.interaction.checkChecked([]))
+        self.assertTrue(self.interaction.checkChecked([]))
         self.assertRaises(ForbiddenAttribute,
                           checker.check_setattr, o, 'd_only')
-        self.assert_(self.interaction.checkChecked([]))
+        self.assertTrue(self.interaction.checkChecked([]))
 
     @property
     def originalChecker(self):
@@ -1953,7 +1953,7 @@ class TestCombinedChecker(TestMixinDecoratedChecker, unittest.TestCase):
         # checker.
         self.interaction.permissions['dc_get_permission'] = False
         cc.check_getattr(self.obj, 'both_get_set')
-        self.assert_(
+        self.assertTrue(
             self.interaction.checkChecked(['dc_get_permission',
                                            'get_permission'])
             )
@@ -1984,25 +1984,25 @@ class TestBasicTypes(unittest.TestCase):
         # When an item is added to the basic types, it should also be added to
         # the list of checkers.
         BasicTypes[MyType] = NoProxy
-        self.assert_(MyType in _checkers)
+        self.assertTrue(MyType in _checkers)
 
         # If we clear the checkers, the type should still be there
         _clear()
-        self.assert_(MyType in BasicTypes)
-        self.assert_(MyType in _checkers)
+        self.assertTrue(MyType in BasicTypes)
+        self.assertTrue(MyType in _checkers)
 
         # Now delete the type from the dictionary, will also delete it from
         # the checkers
         del BasicTypes[MyType]
-        self.assert_(MyType not in BasicTypes)
-        self.assert_(MyType not in _checkers)
+        self.assertTrue(MyType not in BasicTypes)
+        self.assertTrue(MyType not in _checkers)
 
         # The quick way of adding new types is using update
         BasicTypes.update({MyType: NoProxy, MyType2: NoProxy})
-        self.assert_(MyType in BasicTypes)
-        self.assert_(MyType2 in BasicTypes)
-        self.assert_(MyType in _checkers)
-        self.assert_(MyType2 in _checkers)
+        self.assertTrue(MyType in BasicTypes)
+        self.assertTrue(MyType2 in BasicTypes)
+        self.assertTrue(MyType in _checkers)
+        self.assertTrue(MyType2 in _checkers)
 
         # Let's remove the two new types
         del BasicTypes[MyType]
@@ -2011,17 +2011,17 @@ class TestBasicTypes(unittest.TestCase):
         # Of course, BasicTypes is a full dictionary. This dictionary is by
         # default filled with several entries:
         keys = BasicTypes.keys()
-        self.assert_(bool in keys)
-        self.assert_(int in keys)
-        self.assert_(float in keys)
-        self.assert_(str in keys)
+        self.assertTrue(bool in keys)
+        self.assertTrue(int in keys)
+        self.assertTrue(float in keys)
+        self.assertTrue(str in keys)
         try:
             unicode
         except NameError: #pragma NO COVER Py3k
             pass
         else:             #pragma NO COVER Python2
-            self.assert_(unicode in keys)
-        self.assert_(object in keys)
+            self.assertTrue(unicode in keys)
+        self.assertTrue(object in keys)
         # ...
 
         # Finally, the ``clear()`` method has been deactivated to avoid

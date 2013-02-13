@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
 
         policy = PermissiveSecurityPolicy
         setSecurityPolicy(policy)
-        self.assert_(getSecurityPolicy() is policy)
+        self.assertTrue(getSecurityPolicy() is policy)
 
     def test_getInteraction_none_present(self):
         from zope.security.interfaces import NoInteraction
@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
 
     def test_queryInteraction_none_present(self):
         from zope.security.management import queryInteraction
-        self.assertEquals(queryInteraction(), None)
+        self.assertEqual(queryInteraction(), None)
 
     def test_newInteraction(self):
         from zope.security.management import newInteraction
@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
         from zope.security.management import queryInteraction
         newInteraction()
         endInteraction()
-        self.assertEquals(queryInteraction(), None)
+        self.assertEqual(queryInteraction(), None)
 
     def test_endInteraction_repeated(self):
         from zope.security.management import endInteraction
@@ -85,9 +85,9 @@ class Test(unittest.TestCase):
         newInteraction()
         interaction = queryInteraction()
         endInteraction()
-        self.assertEquals(queryInteraction(), None)
+        self.assertEqual(queryInteraction(), None)
         endInteraction()
-        self.assertEquals(queryInteraction(), None)
+        self.assertEqual(queryInteraction(), None)
 
     def test_restoreInteraction_after_end(self):
         from zope.security.management import endInteraction
@@ -98,16 +98,16 @@ class Test(unittest.TestCase):
         interaction = queryInteraction()
         endInteraction()
         restoreInteraction()
-        self.assert_(interaction is queryInteraction())
+        self.assertTrue(interaction is queryInteraction())
 
     def test_restoreInteraction_after_new(self):
         from zope.security.management import newInteraction
         from zope.security.management import queryInteraction
         from zope.security.management import restoreInteraction
         newInteraction()
-        self.assert_(queryInteraction() is not None)
+        self.assertTrue(queryInteraction() is not None)
         restoreInteraction() # restore to no interaction
-        self.assert_(queryInteraction() is None)
+        self.assertTrue(queryInteraction() is None)
 
     def test_restoreInteraction_after_neither(self):
         from zope.security.management import queryInteraction
@@ -122,7 +122,7 @@ class Test(unittest.TestCase):
         except AttributeError:
             pass
         restoreInteraction()
-        self.assert_(queryInteraction() is None)
+        self.assertTrue(queryInteraction() is None)
 
     def test_checkPermission_w_no_interaction(self):
         from zope.security.management import checkPermission
@@ -142,15 +142,15 @@ class Test(unittest.TestCase):
 
         class PolicyStub(object):
             def checkPermission(s, p, o,):
-                self.assert_(p is permission)
-                self.assert_(o is obj)
-                self.assert_(s is queryInteraction() or s is interaction)
+                self.assertTrue(p is permission)
+                self.assertTrue(o is obj)
+                self.assertTrue(s is queryInteraction() or s is interaction)
                 return s is interaction
 
         setSecurityPolicy(PolicyStub)
         newInteraction()
         interaction = queryInteraction()
-        self.assertEquals(checkPermission(permission, obj), True)
+        self.assertEqual(checkPermission(permission, obj), True)
 
     def test_checkPermission_forbidden_policy(self):
         from zope.security import checkPermission
@@ -166,21 +166,21 @@ class Test(unittest.TestCase):
 
         setSecurityPolicy(ForbiddenPolicyStub)
         newInteraction()
-        self.assertEquals(checkPermission('zope.Test', obj), False)
-        self.assertEquals(checkPermission(None, obj), True)
-        self.assertEquals(checkPermission(CheckerPublic, obj), True)
+        self.assertEqual(checkPermission('zope.Test', obj), False)
+        self.assertEqual(checkPermission(None, obj), True)
+        self.assertEqual(checkPermission(CheckerPublic, obj), True)
 
     def test_system_user(self):
         from zope.security.management import system_user
         from zope.security._compat import TEXT
         from zope.security._compat import _u
-        self.assertEquals(system_user.id,
+        self.assertEqual(system_user.id,
                           _u('zope.security.management.system_user'))
 
-        self.assertEquals(system_user.title, _u('System'))
+        self.assertEqual(system_user.title, _u('System'))
 
         for name in 'id', 'title', 'description':
-            self.assert_(isinstance(getattr(system_user, name), TEXT))
+            self.assertTrue(isinstance(getattr(system_user, name), TEXT))
 
 def test_suite():
     return unittest.TestSuite((

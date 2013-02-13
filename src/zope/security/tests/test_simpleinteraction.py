@@ -37,8 +37,8 @@ class TestInteraction(unittest.TestCase):
         rq = RequestStub()
         interaction = ParanoidSecurityPolicy()
         interaction.add(rq)
-        self.assert_(rq in interaction.participations)
-        self.assert_(rq.interaction is interaction)
+        self.assertTrue(rq in interaction.participations)
+        self.assertTrue(rq.interaction is interaction)
 
         # rq already added
         self.assertRaises(ValueError, interaction.add, rq)
@@ -56,8 +56,8 @@ class TestInteraction(unittest.TestCase):
         interaction.add(rq)
 
         interaction.remove(rq)
-        self.assert_(rq not in interaction.participations)
-        self.assert_(rq.interaction is None)
+        self.assertTrue(rq not in interaction.participations)
+        self.assertTrue(rq.interaction is None)
 
     def testCreateInteraction(self):
         from zope.interface.verify import verifyObject
@@ -65,13 +65,13 @@ class TestInteraction(unittest.TestCase):
         from zope.security.simplepolicies import ParanoidSecurityPolicy
         i1 = ParanoidSecurityPolicy()
         verifyObject(IInteraction, i1)
-        self.assertEquals(list(i1.participations), [])
+        self.assertEqual(list(i1.participations), [])
 
         user = object()
         request = RequestStub(user)
         i2 = ParanoidSecurityPolicy(request)
         verifyObject(IInteraction, i2)
-        self.assertEquals(list(i2.participations), [request])
+        self.assertEqual(list(i2.participations), [request])
 
 
 def test_suite():

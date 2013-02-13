@@ -99,7 +99,7 @@ class TestClassDirective(unittest.TestCase):
 </class>
                        """)
         xmlconfig(f)
-        self.failUnless(IExample.implementedBy(ExampleClass))
+        self.assertTrue(IExample.implementedBy(ExampleClass))
 
         self.assertEqual(queryInterface(
             "zope.security.tests.exampleclass.IExample"), IExample)
@@ -127,8 +127,8 @@ class TestClassDirective(unittest.TestCase):
 </class>
                        """)
         xmlconfig(f)
-        self.failUnless(IExample.implementedBy(ExampleClass))
-        self.failUnless(IExample2.implementedBy(ExampleClass))
+        self.assertTrue(IExample.implementedBy(ExampleClass))
+        self.assertTrue(IExample2.implementedBy(ExampleClass))
 
         self.assertEqual(queryInterface(
             "zope.security.tests.exampleclass.IExample"), IExample)
@@ -214,8 +214,8 @@ class TestFactorySubdirective(unittest.TestCase):
                        """)
         xmlconfig(f)
         factory = getUtility(IFactory, 'test.Example')
-        self.assertEquals(factory.title, "Example content")
-        self.assertEquals(factory.description, "Example description")
+        self.assertEqual(factory.title, "Example content")
+        self.assertEqual(factory.description, "Example description")
 
     @_skip_wo_zope_configuration
     def testFactoryNoId(self):
@@ -239,8 +239,8 @@ class TestFactorySubdirective(unittest.TestCase):
                           IFactory, 'Example')
         factory = getUtility(
             IFactory, 'zope.security.tests.exampleclass.ExampleClass')
-        self.assertEquals(factory.title, "Example content")
-        self.assertEquals(factory.description, "Example description")
+        self.assertEqual(factory.title, "Example content")
+        self.assertEqual(factory.description, "Example description")
 
 
     @_skip_wo_zope_configuration
@@ -260,7 +260,7 @@ class TestFactorySubdirective(unittest.TestCase):
             """)
         xmlconfig(f)
         factory = getUtility(IFactory, 'test.Example')
-        self.assert_(hasattr(factory, '__Security_checker__'))
+        self.assertTrue(hasattr(factory, '__Security_checker__'))
 
 
 class Context(object):
@@ -330,7 +330,7 @@ class TestFactoryDirective(unittest.TestCase):
 </class>''')
         xmlconfig(f)
         obj = createObject('test.Example')
-        self.failUnless(proxy.isinstance(obj, exampleclass.ExampleClass))
+        self.assertTrue(proxy.isinstance(obj, exampleclass.ExampleClass))
 
 
 

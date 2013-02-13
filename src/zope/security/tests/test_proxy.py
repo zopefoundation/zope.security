@@ -151,7 +151,7 @@ class ProxyTests(unittest.TestCase):
 
     def testDerivation(self):
         from zope.proxy import ProxyBase
-        self.assert_(isinstance(self.p, ProxyBase))
+        self.assertTrue(isinstance(self.p, ProxyBase))
 
     def testStr(self):
         from zope.security.proxy import ProxyFactory
@@ -162,7 +162,7 @@ class ProxyTests(unittest.TestCase):
         c.ok = 0
         p = ProxyFactory(x, c)
         s = str(p)
-        self.failUnless(s.startswith(
+        self.assertTrue(s.startswith(
             "<security proxied %s.%s instance at"
             % (x.__class__.__module__, x.__class__.__name__)),
                         s)
@@ -177,7 +177,7 @@ class ProxyTests(unittest.TestCase):
         c.ok = 0
         p = ProxyFactory(x, c)
         s = repr(p)
-        self.failUnless(s.startswith(
+        self.assertTrue(s.startswith(
             "<security proxied %s.%s instance at"
             % (x.__class__.__module__, x.__class__.__name__)),
                         s)
@@ -228,7 +228,7 @@ class ProxyTests(unittest.TestCase):
         self.shouldFail(self.p, None)
 
     def testRichCompareOK(self):
-        self.failUnless(self.p == self.x)
+        self.assertTrue(self.p == self.x)
 
 ##     def testRichCompareFail(self):
 ##         self.shouldFail(lambda: self.p == self.x)
@@ -287,7 +287,7 @@ class ProxyTests(unittest.TestCase):
         self.shouldFail(doit)
 
     def testContainsOK(self):
-        self.failUnless(42 in self.p)
+        self.assertTrue(42 in self.p)
 
     def testContainsFail(self):
         self.shouldFail(lambda: 42 in self.p)
@@ -383,7 +383,7 @@ class ProxyTests(unittest.TestCase):
         a = [1, 2, 3]
         pa = qa = P(a)
         pa += [4, 5, 6]
-        self.failUnless(pa is qa)
+        self.assertTrue(pa is qa)
         self.assertEqual(a, [1, 2, 3, 4, 5, 6])
 
         def doit():
@@ -412,51 +412,51 @@ class ProxyTests(unittest.TestCase):
         x = P(1)
         y = P(2)
         a, b = coerce(x, y)
-        self.failUnless(a is x and b is y)
+        self.assertTrue(a is x and b is y)
 
         x = P(1)
         y = P(2.1)
         a, b = coerce(x, y)
-        self.failUnless(removeSecurityProxy(a) == 1.0 and b is y)
+        self.assertTrue(removeSecurityProxy(a) == 1.0 and b is y)
         if fixed_coerce:
-            self.failUnless(type(removeSecurityProxy(a)) is float and b is y)
+            self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
 
         x = P(1.1)
         y = P(2)
         a, b = coerce(x, y)
-        self.failUnless(a is x and removeSecurityProxy(b) == 2.0)
+        self.assertTrue(a is x and removeSecurityProxy(b) == 2.0)
         if fixed_coerce:
-            self.failUnless(a is x and type(removeSecurityProxy(b)) is float)
+            self.assertTrue(a is x and type(removeSecurityProxy(b)) is float)
 
         x = P(1)
         y = 2
         a, b = coerce(x, y)
-        self.failUnless(a is x and b is y)
+        self.assertTrue(a is x and b is y)
 
         x = P(1)
         y = 2.1
         a, b = coerce(x, y)
-        self.failUnless(type(removeSecurityProxy(a)) is float and b is y)
+        self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
 
         x = P(1.1)
         y = 2
         a, b = coerce(x, y)
-        self.failUnless(a is x and type(removeSecurityProxy(b)) is float)
+        self.assertTrue(a is x and type(removeSecurityProxy(b)) is float)
 
         x = 1
         y = P(2)
         a, b = coerce(x, y)
-        self.failUnless(a is x and b is y)
+        self.assertTrue(a is x and b is y)
 
         x = 1.1
         y = P(2)
         a, b = coerce(x, y)
-        self.failUnless(a is x and type(removeSecurityProxy(b)) is float)
+        self.assertTrue(a is x and type(removeSecurityProxy(b)) is float)
 
         x = 1
         y = P(2.1)
         a, b = coerce(x, y)
-        self.failUnless(type(removeSecurityProxy(a)) is float and b is y)
+        self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
 
 def test_using_mapping_slots_hack():
     """The security proxy will use mapping slots, on the checker to go faster
