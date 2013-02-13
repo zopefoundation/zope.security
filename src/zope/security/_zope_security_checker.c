@@ -17,6 +17,56 @@ static PyObject *_checkers, *_defaultChecker, *_available_by_default, *NoProxy;
 static PyObject *Proxy, *thread_local, *CheckerPublic;
 static PyObject *ForbiddenAttribute, *Unauthorized;
 
+// Compatibility with Python 2
+#if PY_MAJOR_VERSION < 3
+  #define IS_STRING PyString_Check
+
+  #define MAKE_STRING(name) PyString_AS_STRING(name)
+
+  #define FROM_STRING PyString_FromString
+
+  #define FROM_STRING_FORMAT PyString_FromFormat
+
+  #define INTERN PyString_InternFromString
+
+  #define MOD_ERROR_VAL
+
+  #define MOD_SUCCESS_VAL(val)
+
+  #define MOD_INIT(name) void init##name(void)
+
+  #define MOD_DEF(ob, name, doc, methods) \
+          ob = Py_InitModule3(name, methods, doc);
+
+#else
+
+  #define PyInt_FromLong PyLong_FromLong
+
+  #define IS_STRING PyUnicode_Check
+
+  #define MAKE_STRING(name) PyBytes_AS_STRING( \
+          PyUnicode_AsUTF8String(name))
+
+  #define FROM_STRING PyUnicode_FromString
+
+  #define FROM_STRING_FORMAT PyUnicode_FromFormat
+
+  #define INTERN PyUnicode_InternFromString
+
+  #define MOD_ERROR_VAL NULL
+
+  #define MOD_SUCCESS_VAL(val) val
+
+  #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
+
+  #define MOD_DEF(ob, name, doc, methods) \
+          static struct PyModuleDef moduledef = { \
+            PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+          ob = PyModule_Create(&moduledef);
+
+  #define statichere static
+#endif
+
 #define DECLARE_STRING(N) static PyObject *str_##N
 
 DECLARE_STRING(checkPermission);
@@ -26,7 +76,7 @@ DECLARE_STRING(interaction);
 #define CLEAR(O) if (O) {PyObject *t = O; O = 0; Py_DECREF(t); }
 
 typedef struct {
-	PyObject_HEAD
+    PyObject_HEAD
         PyObject *getperms, *setperms;
 } Checker;
 
@@ -133,9 +183,9 @@ Checker_check_int(Checker *self, PyObject *object, PyObject *name)
     }
 
 
-  operator = (PyString_Check(name)
-              && PyString_AS_STRING(name)[0] == '_'
-              && PyString_AS_STRING(name)[1] == '_');
+  operator = (IS_STRING(name)
+              && MAKE_STRING(name)[0] == '_'
+              && MAKE_STRING(name)[1] == '_');
 
   if (operator)
     {
@@ -151,7 +201,7 @@ Checker_check_int(Checker *self, PyObject *object, PyObject *name)
 /*             __traceback_supplement__ = (TracebackSupplement, object) */
 /*             raise ForbiddenAttribute, (name, object) */
 
-      if (strcmp("__iter__", PyString_AS_STRING(name)) == 0
+      if (strcmp("__iter__", MAKE_STRING(name)) == 0
           && ! PyObject_HasAttr(object, name))
         /* We want an attr error if we're asked for __iter__ and we don't
            have it. We'll get one by allowing the access. */
@@ -238,7 +288,7 @@ Checker_proxy(Checker *self, PyObject *value)
 
 /*        if type(value) is Proxy: */
 /*            return value */
-  if ((PyObject*)(value->ob_type) == Proxy)
+  if ((PyObject*)Py_TYPE(value) == Proxy)
     {
       Py_INCREF(value);
       return value;
@@ -304,7 +354,7 @@ static struct PyMethodDef Checker_methods[] = {
   {"proxy", (PyCFunction)Checker_proxy, METH_O,
    "proxy(object) -- Security-proxy an object"},
 
-  {NULL,  NULL} 	/* sentinel */
+  {NULL,  NULL}     /* sentinel */
 };
 
 static int
@@ -319,7 +369,7 @@ static void
 Checker_dealloc(Checker *self)
 {
   Checker_clear(self);
-  self->ob_type->tp_free((PyObject*)self);
+  Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
 static int
@@ -400,58 +450,56 @@ static PyGetSetDef Checker_getset[] = {
    in the same hack. */
 
 static PyMappingMethods Checker_as_mapping = {
-	/* mp_length        */ NULL,
-	/* mp_subscript     */ (binaryfunc)Checker_proxy,
-	/* mp_ass_subscript */ (objobjargproc)Checker_check_int,
+    /* mp_length        */ NULL,
+    /* mp_subscript     */ (binaryfunc)Checker_proxy,
+    /* mp_ass_subscript */ (objobjargproc)Checker_check_int,
 };
 
 
 
 static PyTypeObject CheckerType = {
-	PyObject_HEAD_INIT(NULL)
-	/* ob_size           */ 0,
-	/* tp_name           */ "zope.security.checker."
-                                "Checker",
-	/* tp_basicsize      */ sizeof(Checker),
-	/* tp_itemsize       */ 0,
-	/* tp_dealloc        */ (destructor)&Checker_dealloc,
-	/* tp_print          */ (printfunc)0,
-	/* tp_getattr        */ (getattrfunc)0,
-	/* tp_setattr        */ (setattrfunc)0,
-	/* tp_compare        */ (cmpfunc)0,
-	/* tp_repr           */ (reprfunc)0,
-	/* tp_as_number      */ 0,
-	/* tp_as_sequence    */ 0,
-	/* tp_as_mapping     */ &Checker_as_mapping,
-	/* tp_hash           */ (hashfunc)0,
-	/* tp_call           */ (ternaryfunc)0,
-	/* tp_str            */ (reprfunc)0,
-        /* tp_getattro       */ (getattrofunc)0,
-        /* tp_setattro       */ (setattrofunc)0,
-        /* tp_as_buffer      */ 0,
-        /* tp_flags          */ Py_TPFLAGS_DEFAULT
-				| Py_TPFLAGS_BASETYPE
-                          	| Py_TPFLAGS_HAVE_GC,
-	/* tp_doc            */ "Security checker",
-        /* tp_traverse       */ (traverseproc)Checker_traverse,
-        /* tp_clear          */ (inquiry)Checker_clear,
-        /* tp_richcompare    */ (richcmpfunc)0,
-        /* tp_weaklistoffset */ (long)0,
-        /* tp_iter           */ (getiterfunc)0,
-        /* tp_iternext       */ (iternextfunc)0,
-        /* tp_methods        */ Checker_methods,
-        /* tp_members        */ 0,
-        /* tp_getset         */ Checker_getset,
-        /* tp_base           */ 0,
-        /* tp_dict           */ 0, /* internal use */
-        /* tp_descr_get      */ (descrgetfunc)0,
-        /* tp_descr_set      */ (descrsetfunc)0,
-        /* tp_dictoffset     */ 0,
-        /* tp_init           */ (initproc)Checker_init,
-        /* tp_alloc          */ (allocfunc)0,
-        /* tp_new            */ (newfunc)0,
-	/* tp_free           */ 0, /* Low-level free-mem routine */
-	/* tp_is_gc          */ (inquiry)0, /* For PyObject_IS_GC */
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "zope.security.checker.Checker",
+    sizeof(Checker),
+    0,                                  /* tp_itemsize       */
+    (destructor)&Checker_dealloc,       /* tp_dealloc        */
+    0,                                  /* tp_print          */
+    0,                                  /* tp_getattr        */
+    0,                                  /* tp_setattr        */
+    0,                                  /* tp_compare        */
+    0,                                  /* tp_repr           */
+    0,                                  /* tp_as_number      */
+    0,                                  /* tp_as_sequence    */
+    &Checker_as_mapping,                /* tp_as_mapping     */
+    0,                                  /* tp_hash           */
+    0,                                  /* tp_call           */
+    0,                                  /* tp_str            */
+    0,                                  /* tp_getattro       */
+    0,                                  /* tp_setattro       */
+    0,                                  /* tp_as_buffer      */
+    Py_TPFLAGS_DEFAULT |
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_HAVE_GC,                 /* tp_flags          */
+    "Security checker",                 /* tp_doc            */
+    (traverseproc)Checker_traverse,     /* tp_traverse       */
+    (inquiry)Checker_clear,             /* tp_clear          */
+    0,                                  /* tp_richcompare    */
+    0,                                  /* tp_weaklistoffset */
+    0,                                  /* tp_iter           */
+    0,                                  /* tp_iternext       */
+    Checker_methods,                    /* tp_methods        */
+    0,                                  /* tp_members        */
+    Checker_getset,                     /* tp_getset         */
+    0,                                  /* tp_base           */
+    0, /* internal use */               /* tp_dict           */
+    0,                                  /* tp_descr_get      */
+    0,                                  /* tp_descr_set      */
+    0,                                  /* tp_dictoffset     */
+    (initproc)Checker_init,             /* tp_init           */
+    0,                                  /* tp_alloc          */
+    0,                                  /* tp_new            */
+    0, /* Low-level free-mem routine */ /* tp_free           */
+    0, /* For PyObject_IS_GC */         /* tp_is_gc          */
 };
 
 
@@ -478,7 +526,7 @@ selectChecker(PyObject *ignored, PyObject *object)
 
 /*     checker = _getChecker(type(object), _defaultChecker) */
 
-  checker = PyDict_GetItem(_checkers, (PyObject*)(object->ob_type));
+  checker = PyDict_GetItem(_checkers, (PyObject*)Py_TYPE(object));
   if (checker == NULL)
     checker = _defaultChecker;
 
@@ -528,70 +576,78 @@ selectChecker(PyObject *ignored, PyObject *object)
   return checker;
 }
 
+static char
+module___doc__[] = "C optimizations for zope.security.checker";
 
-static PyMethodDef module_methods[] = {
+
+static PyMethodDef
+module_functions[] = {
   {"selectChecker", (PyCFunction)selectChecker, METH_O, selectChecker_doc},
   {NULL}  /* Sentinel */
 };
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC
-init_zope_security_checker(void)
+MOD_INIT(_zope_security_checker)
 {
   PyObject* m;
 
   CheckerType.tp_new = PyType_GenericNew;
   if (PyType_Ready(&CheckerType) < 0)
-    return;
+    return MOD_ERROR_VAL;
 
   _defaultChecker = PyObject_CallFunction((PyObject*)&CheckerType, "{}");
   if (_defaultChecker == NULL)
-    return;
+    return MOD_ERROR_VAL;
 
 #define INIT_STRING(S) \
-if((str_##S = PyString_InternFromString(#S)) == NULL) return
+if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
 
   INIT_STRING(checkPermission);
   INIT_STRING(__Security_checker__);
   INIT_STRING(interaction);
 
   if ((_checkers = PyDict_New()) == NULL)
-    return;
+    return MOD_ERROR_VAL;
 
   NoProxy = PyObject_CallObject((PyObject*)&PyBaseObject_Type, NULL);
   if (NoProxy == NULL)
-    return;
+    return MOD_ERROR_VAL;
 
-  if ((m = PyImport_ImportModule("zope.security._proxy")) == NULL) return;
-  if ((Proxy = PyObject_GetAttrString(m, "_Proxy")) == NULL) return;
+  if ((m = PyImport_ImportModule("zope.security._proxy")) == NULL)
+    return MOD_ERROR_VAL;
+  if ((Proxy = PyObject_GetAttrString(m, "_Proxy")) == NULL)
+    return MOD_ERROR_VAL;
   Py_DECREF(m);
 
-  if ((m = PyImport_ImportModule("zope.security._definitions")) == NULL) return;
+  if ((m = PyImport_ImportModule("zope.security._definitions")) == NULL)
+    return MOD_ERROR_VAL;
   thread_local = PyObject_GetAttrString(m, "thread_local");
-  if (thread_local == NULL) return;
+  if (thread_local == NULL) return MOD_ERROR_VAL;
   Py_DECREF(m);
 
-  if ((m = PyImport_ImportModule("zope.security.interfaces")) == NULL) return;
+  if ((m = PyImport_ImportModule("zope.security.interfaces")) == NULL)
+    return MOD_ERROR_VAL;
   ForbiddenAttribute = PyObject_GetAttrString(m, "ForbiddenAttribute");
-  if (ForbiddenAttribute == NULL) return;
+  if (ForbiddenAttribute == NULL)
+    return MOD_ERROR_VAL;
   Unauthorized = PyObject_GetAttrString(m, "Unauthorized");
-  if (Unauthorized == NULL) return;
+  if (Unauthorized == NULL)
+    return MOD_ERROR_VAL;
   Py_DECREF(m);
 
-  if ((m = PyImport_ImportModule("zope.security.checker")) == NULL) return;
+  if ((m = PyImport_ImportModule("zope.security.checker")) == NULL)
+    return MOD_ERROR_VAL;
   CheckerPublic = PyObject_GetAttrString(m, "CheckerPublic");
-  if (CheckerPublic == NULL) return;
+  if (CheckerPublic == NULL)
+    return MOD_ERROR_VAL;
   Py_DECREF(m);
 
-  if ((_available_by_default = PyList_New(0)) == NULL) return;
+  if ((_available_by_default = PyList_New(0)) == NULL)
+    return MOD_ERROR_VAL;
 
-  m = Py_InitModule3("_zope_security_checker", module_methods,
-                     "C optimizations for zope.security.checker");
+  MOD_DEF(m, "_proxy", module___doc__, module_functions)
 
   if (m == NULL)
-    return;
+    return MOD_ERROR_VAL;
 
 #define EXPORT(N) Py_INCREF(N); PyModule_AddObject(m, #N, N)
 
@@ -602,4 +658,6 @@ if((str_##S = PyString_InternFromString(#S)) == NULL) return
 
   Py_INCREF(&CheckerType);
   PyModule_AddObject(m, "Checker", (PyObject *)&CheckerType);
+
+  return MOD_SUCCESS_VAL(m);
 }

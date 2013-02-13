@@ -65,8 +65,6 @@ static PyObject *__class__str = 0, *__name__str = 0, *__module__str = 0;
           static struct PyModuleDef moduledef = { \
             PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
           ob = PyModule_Create(&moduledef);
-
-  #define statichere static
 #endif
 
 #define DECLARE_STRING(N) static PyObject *str_##N
@@ -886,60 +884,59 @@ disallowed.  The proxy method should return a proxy for the object\n\
 if one is needed, otherwise the object itself.\n\
 ";
 
-statichere PyTypeObject
-SecurityProxyType = {
-  PyVarObject_HEAD_INIT(NULL, 0)
-  "zope.security._proxy._Proxy",
-  sizeof(SecurityProxy),
-  0,
-  (destructor)proxy_dealloc,                /* tp_dealloc */
-  0,                                        /* tp_print */
-  0,                                        /* tp_getattr */
-  0,                                        /* tp_setattr */
+static PyTypeObject SecurityProxyType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    "zope.security._proxy._Proxy",
+    sizeof(SecurityProxy),
+    0,
+    (destructor)proxy_dealloc,                /* tp_dealloc */
+    0,                                        /* tp_print */
+    0,                                        /* tp_getattr */
+    0,                                        /* tp_setattr */
 #if PY_MAJOR_VERSION < 3
-  (cmpfunc)proxy_compare,                   /* tp_compare */
+    (cmpfunc)proxy_compare,                   /* tp_compare */
 #else
-    0,                                      /* tp_reserved */
+        0,                                      /* tp_reserved */
 #endif
-  (reprfunc)proxy_repr,                     /* tp_repr */
-  &proxy_as_number,                         /* tp_as_number */
-  &proxy_as_sequence,                       /* tp_as_sequence */
-  &proxy_as_mapping,                        /* tp_as_mapping */
-  (hashfunc)proxy_hash,                     /* tp_hash */
-  (ternaryfunc)proxy_call,                  /* tp_call */
-  (reprfunc)proxy_str,                      /* tp_str */
-  (getattrofunc)proxy_getattro,             /* tp_getattro */
-  (setattrofunc)proxy_setattro,             /* tp_setattro */
-  0,                                        /* tp_as_buffer */
+    (reprfunc)proxy_repr,                     /* tp_repr */
+    &proxy_as_number,                         /* tp_as_number */
+    &proxy_as_sequence,                       /* tp_as_sequence */
+    &proxy_as_mapping,                        /* tp_as_mapping */
+    (hashfunc)proxy_hash,                     /* tp_hash */
+    (ternaryfunc)proxy_call,                  /* tp_call */
+    (reprfunc)proxy_str,                      /* tp_str */
+    (getattrofunc)proxy_getattro,             /* tp_getattro */
+    (setattrofunc)proxy_setattro,             /* tp_setattro */
+    0,                                        /* tp_as_buffer */
 #if PY_MAJOR_VERSION < 3
-  Py_TPFLAGS_DEFAULT |
-  Py_TPFLAGS_BASETYPE |
-  Py_TPFLAGS_CHECKTYPES |
-  Py_TPFLAGS_HAVE_GC,                       /* tp_flags */
-#else // Py_TPFLAGS_CHECKTYPES is always true in Python 3 and removed.
     Py_TPFLAGS_DEFAULT |
-    Py_TPFLAGS_HAVE_GC |
-    Py_TPFLAGS_BASETYPE,                    /* tp_flags */
+    Py_TPFLAGS_BASETYPE |
+    Py_TPFLAGS_CHECKTYPES |
+    Py_TPFLAGS_HAVE_GC,                       /* tp_flags */
+#else // Py_TPFLAGS_CHECKTYPES is always true in Python 3 and removed.
+        Py_TPFLAGS_DEFAULT |
+        Py_TPFLAGS_HAVE_GC |
+        Py_TPFLAGS_BASETYPE,                    /* tp_flags */
 #endif
-  proxy_doc,                                /* tp_doc */
-  (traverseproc)proxy_traverse,             /* tp_traverse */
-  0,                                        /* tp_clear */
-  (richcmpfunc)proxy_richcompare,           /* tp_richcompare */
-  0,                                        /* tp_weaklistoffset */
-  (getiterfunc)proxy_iter,                  /* tp_iter */
-  (iternextfunc)proxy_iternext,             /* tp_iternext */
-  0,                                        /* tp_methods */
-  0,                                        /* tp_members */
-  0,                                        /* tp_getset */
-  0,                                        /* tp_base */
-  0,                                        /* tp_dict */
-  0,                                        /* tp_descr_get */
-  0,                                        /* tp_descr_set */
-  0,                                        /* tp_dictoffset */
-  proxy_init,                               /* tp_init */
-  0, /*PyType_GenericAlloc,*/               /* tp_alloc */
-  proxy_new,                                /* tp_new */
-  0, /*_PyObject_GC_Del,*/                  /* tp_free */
+    proxy_doc,                                /* tp_doc */
+    (traverseproc)proxy_traverse,             /* tp_traverse */
+    0,                                        /* tp_clear */
+    (richcmpfunc)proxy_richcompare,           /* tp_richcompare */
+    0,                                        /* tp_weaklistoffset */
+    (getiterfunc)proxy_iter,                  /* tp_iter */
+    (iternextfunc)proxy_iternext,             /* tp_iternext */
+    0,                                        /* tp_methods */
+    0,                                        /* tp_members */
+    0,                                        /* tp_getset */
+    0,                                        /* tp_base */
+    0,                                        /* tp_dict */
+    0,                                        /* tp_descr_get */
+    0,                                        /* tp_descr_set */
+    0,                                        /* tp_dictoffset */
+    proxy_init,                               /* tp_init */
+    0, /*PyType_GenericAlloc,*/               /* tp_alloc */
+    proxy_new,                                /* tp_new */
+    0, /*_PyObject_GC_Del,*/                  /* tp_free */
 };
 
 static PyObject *
@@ -971,6 +968,9 @@ module_getObject(PyObject *self, PyObject *arg)
   return result;
 }
 
+static char
+module___doc__[] = "Security proxy implementation.";
+
 static PyMethodDef
 module_functions[] = {
   {"getChecker", module_getChecker, METH_O, "get checker from proxy"},
@@ -978,9 +978,6 @@ module_functions[] = {
    "Get the proxied object\n\nReturn the original object if not proxied."},
   {NULL}
 };
-
-static char
-module___doc__[] = "Security proxy implementation.";
 
 MOD_INIT(_proxy)
 {
