@@ -36,11 +36,7 @@ def _skip_if_Py2(testfunc):
     return testfunc
 
 
-class ProxyCTests(unittest.TestCase):
-
-    def _getTargetClass(self):
-        from zope.security.proxy import _Proxy
-        return _Proxy
+class ProxyTestBase(object):
 
     def _makeOne(self, object, checker):
         return self._getTargetClass()(object, checker)
@@ -1290,6 +1286,28 @@ class ProxyCTests(unittest.TestCase):
         self.assertEqual(checker._checked, '__setitem__')
 
 
+class ProxyCTests(unittest.TestCase, ProxyTestBase):
+
+    def _getTargetClass(self):
+        from zope.security.proxy import _Proxy
+        return _Proxy
+
+
+class ProxyPyTests(unittest.TestCase, ProxyTestBase):
+
+    def _getTargetClass(self):
+        from zope.security.proxy import ProxyPy
+        return ProxyPy
+
+    def test_ctor_w_checker(self):
+        # Can't access '_wrapped' / '_checker' in C version
+        target = object()
+        checker = object()
+        proxy = self._makeOne(target, checker)
+        self.assertTrue(proxy._wrapped is target)
+        self.assertTrue(proxy._checker is checker)
+
+
 class DummyChecker(object):
     _proxied = _checked = None
     def __init__(self, raising=None, allowed=()):
@@ -1832,6 +1850,7 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
+        unittest.makeSuite(ProxyPyTests),
         unittest.makeSuite(ProxyCTests),
         unittest.makeSuite(Test_getTestProxyItems),
         unittest.makeSuite(Test_isinstance),
