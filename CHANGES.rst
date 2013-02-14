@@ -2,8 +2,8 @@
 CHANGES
 =======
 
-4.0.0 (unreleased)
-------------------
+4.0.0a1 (2013-02-14)
+--------------------
 
 - Added support for Python 3.2 and 3.3.
 
