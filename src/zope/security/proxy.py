@@ -15,9 +15,11 @@
 """
 __docformat__ = 'restructuredtext'
 
+
 from zope.security._proxy import getChecker
 from zope.security._proxy import getObject
-from zope.security._proxy import _Proxy as Proxy
+from zope.security._proxy import _Proxy
+Proxy = _Proxy
 
 # We need the injection of DecoratedSecurityCheckerDescriptor into
 # zope.location's LocationProxy as soon someone uses security proxies by

@@ -26,6 +26,1285 @@ def _skip_if_not_Py2(testfunc):
         return dummy
     return testfunc
 
+def _skip_if_Py2(testfunc):
+    from functools import update_wrapper
+    if PYTHON2:
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    return testfunc
+
+
+class ProxyCTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from zope.security.proxy import _Proxy
+        return _Proxy
+
+    def _makeOne(self, object, checker):
+        return self._getTargetClass()(object, checker)
+
+    def test_ctor_w_checker_None(self):
+        self.assertRaises(ValueError, self._makeOne, object(), None)
+
+    def test___getattr___w_checker_ok(self):
+        class Foo(object):
+            bar = 'Bar'
+        target = Foo()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy.bar, 'Bar')
+        self.assertEqual(checker._checked, 'bar')
+        self.assertEqual(checker._proxied, 'Bar')
+
+    def test___getattr___w_checker_unauthorized(self):
+        from zope.security.interfaces import Unauthorized
+        class Foo(object):
+            bar = 'Bar'
+        target = Foo()
+        checker = DummyChecker(Unauthorized)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(Unauthorized, getattr, proxy, 'bar')
+        self.assertEqual(checker._checked, 'bar')
+
+    def test___getattr___w_checker_forbidden_attribute(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class Foo(object):
+            bar = 'Bar'
+        target = Foo()
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, getattr, proxy, 'bar')
+        self.assertEqual(checker._checked, 'bar')
+
+    def test___setattr___w_checker_ok(self):
+        class Foo(object):
+            bar = 'Bar'
+        target = Foo()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        proxy.bar = 'Baz'
+        self.assertEqual(target.bar, 'Baz')
+        self.assertEqual(checker._checked, 'bar')
+        self.assertEqual(checker._proxied, None)
+
+    def test___setattr___w_checker_unauthorized(self):
+        from zope.security.interfaces import Unauthorized
+        class Foo(object):
+            bar = 'Bar'
+        target = Foo()
+        checker = DummyChecker(Unauthorized)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(Unauthorized, setattr, proxy, 'bar', 'Baz')
+        self.assertEqual(checker._checked, 'bar')
+
+    def test___setattr___w_checker_forbidden_attribute(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class Foo(object):
+            bar = 'Bar'
+        target = Foo()
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, setattr, proxy, 'bar', 'Baz')
+        self.assertEqual(checker._checked, 'bar')
+
+    def test___delattr___w_checker_ok(self):
+        class Foo(object):
+            bar = None
+        target = Foo()
+        target.bar = 'Bar'
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        del proxy.bar
+        self.assertEqual(target.bar, None)
+        self.assertEqual(checker._checked, 'bar')
+        self.assertEqual(checker._proxied, None)
+
+    def test___delattr___w_checker_unauthorized(self):
+        from zope.security.interfaces import Unauthorized
+        class Foo(object):
+            pass
+        target = Foo()
+        target.bar = 'Bar'
+        checker = DummyChecker(Unauthorized)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(Unauthorized, delattr, proxy, 'bar')
+        self.assertEqual(target.bar, 'Bar')
+        self.assertEqual(checker._checked, 'bar')
+
+    def test___delattr___w_checker_forbidden_attribute(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class Foo(object):
+            pass
+        target = Foo()
+        target.bar = 'Bar'
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, delattr, proxy, 'bar')
+        self.assertEqual(target.bar, 'Bar')
+        self.assertEqual(checker._checked, 'bar')
+
+    def test___str___checker_allows_str(self):
+        target = object()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(str(proxy), str(target))
+
+    def test___str___checker_forbids_str(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        from zope.security._compat import _BUILTINS
+        target = object()
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(str(proxy),
+                         '<security proxied %s.object '
+                             'instance at 0x%0x>' % (_BUILTINS, id(target)))
+
+    def test___repr___checker_allows_str(self):
+        target = object()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(repr(proxy), repr(target))
+
+    def test___repr___checker_forbids_str(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        from zope.security._compat import _BUILTINS
+        target = object()
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(repr(proxy),
+                         '<security proxied %s.object '
+                             'instance at 0x%0x>' % (_BUILTINS, id(target)))
+
+    @_skip_if_not_Py2
+    def test___cmp___w_self(self):
+        target = object()
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(cmp(proxy, target), 0)
+
+    @_skip_if_not_Py2
+    def test___cmp___w_other(self):
+        target = object()
+        other = object()
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        self.assertNotEqual(cmp(proxy, other), 0)
+
+    def test___hash___w_self(self):
+        target = object()
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(hash(proxy), hash(target))
+
+    def test___call___w_checker_ok(self):
+        class Foo(object):
+            def __call__(self):
+                return 'Bar'
+        target = Foo()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy(), 'Bar')
+        self.assertEqual(checker._checked, '__call__')
+        self.assertEqual(checker._proxied, 'Bar')
+
+    def test___call___w_checker_unauthorized(self):
+        from zope.security.interfaces import Unauthorized
+        class Foo(object):
+            def __call__(self):
+                return 'Bar'
+        target = Foo()
+        checker = DummyChecker(Unauthorized, ['__name__'])
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(Unauthorized, proxy)
+        self.assertEqual(checker._checked, '__call__')
+
+    def test___call___w_checker_forbidden_attribute(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class Foo(object):
+            def __call__(self):
+                return 'Bar'
+        target = Foo()
+        checker = DummyChecker(ForbiddenAttribute, ['__name__'])
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, proxy)
+        self.assertEqual(checker._checked, '__call__')
+
+    def test___int___w_checker_allows(self):
+        target = 3.0
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(int(proxy), int(target))
+        self.assertEqual(checker._checked, '__int__')
+
+    def test___int___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3.0
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, int, proxy)
+        self.assertEqual(checker._checked, '__int__')
+
+    def test___float___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(float(proxy), float(target))
+        self.assertEqual(checker._checked, '__float__')
+
+    def test___float___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, float, proxy)
+        self.assertEqual(checker._checked, '__float__')
+
+    @_skip_if_not_Py2
+    def test___long___w_checker_allows(self):
+        target = 3.0
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(long(proxy), long(target))
+        self.assertEqual(checker._checked, '__long__')
+
+    @_skip_if_not_Py2
+    def test___long___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, long, proxy)
+        self.assertEqual(checker._checked, '__long__')
+
+    @_skip_if_not_Py2
+    def test___oct___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(oct(proxy), oct(target))
+        self.assertEqual(checker._checked, '__oct__')
+
+    @_skip_if_not_Py2
+    def test___oct___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, oct, proxy)
+        self.assertEqual(checker._checked, '__oct__')
+
+    @_skip_if_not_Py2
+    def test___hex___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(hex(proxy), hex(target))
+        self.assertEqual(checker._checked, '__hex__')
+
+    @_skip_if_not_Py2
+    def test___hex___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, hex, proxy)
+        self.assertEqual(checker._checked, '__hex__')
+
+    def test___add___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy + 2, target + 2)
+        self.assertEqual(checker._checked, '__add__')
+
+    def test___add___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy + 2)
+        self.assertEqual(checker._checked, '__add__')
+
+    def test___sub___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy - 2, target - 2)
+        self.assertEqual(checker._checked, '__sub__')
+
+    def test___sub___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy - 2)
+        self.assertEqual(checker._checked, '__sub__')
+
+    def test___mul___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy * 2, target * 2)
+        self.assertEqual(checker._checked, '__mul__')
+
+    def test___mul___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy * 2)
+        self.assertEqual(checker._checked, '__mul__')
+
+    @_skip_if_not_Py2
+    def test___div___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy / 2, target / 2)
+        self.assertEqual(checker._checked, '__div__')
+
+    @_skip_if_not_Py2
+    def test___div___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy / 2)
+        self.assertEqual(checker._checked, '__div__')
+
+    @_skip_if_Py2
+    def test___truediv___w_checker_allows(self):
+        target = 3.0
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy / 2, target / 2)
+        self.assertEqual(checker._checked, '__truediv__')
+
+    @_skip_if_Py2
+    def test___truediv___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3.0
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy / 2)
+        self.assertEqual(checker._checked, '__truediv__')
+
+    def test___floordiv___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy // 2, target // 2)
+        self.assertEqual(checker._checked, '__floordiv__')
+
+    def test___floordiv___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy // 2)
+        self.assertEqual(checker._checked, '__floordiv__')
+
+    def test___mod___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy % 2, target % 2)
+        self.assertEqual(checker._checked, '__mod__')
+
+    def test___mod___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy % 2)
+        self.assertEqual(checker._checked, '__mod__')
+
+    def test___divmod___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(divmod(proxy, 2), divmod(target, 2))
+        self.assertEqual(checker._checked, '__divmod__')
+
+    def test___divmod___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: divmod(proxy, 2))
+        self.assertEqual(checker._checked, '__divmod__')
+
+    def test___pow___w_x_proxied_allowed(self):
+        x, y, z = 3, 4, 7
+        checker = DummyChecker()
+        proxy = self._makeOne(x, checker)
+        self.assertEqual(pow(proxy, y, z), pow(x, y, z))
+        self.assertEqual(checker._checked, '__pow__')
+
+    def test___pow___w_x_proxied_forbidden(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        x, y, z = 3, 4, 7
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(y, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: pow(proxy, y, z))
+        self.assertEqual(checker._checked, '__pow__')
+
+    def test___pow___w_y_proxied_allowed(self):
+        x, y, z = 3, 4, 7
+        checker = DummyChecker()
+        proxy = self._makeOne(y, checker)
+        self.assertEqual(pow(x, proxy, z), pow(x, y, z))
+        self.assertEqual(checker._checked, '__rpow__')
+
+    def test___pow___w_y_proxied_forbidden(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        x, y, z = 3, 4, 7
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(y, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: pow(x, proxy, z))
+        self.assertEqual(checker._checked, '__rpow__')
+
+    def test___pow___w_z_proxied_allowed(self):
+        x, y, z = 3, 4, 7
+        checker = DummyChecker()
+        proxy = self._makeOne(z, checker)
+        self.assertEqual(pow(x, y, proxy), pow(x, y, z))
+        self.assertEqual(checker._checked, '__3pow__')
+
+    def test___pow___w_z_proxied_forbidden(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        x, y, z = 3, 4, 7
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(z, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: pow(x, y, proxy))
+        self.assertEqual(checker._checked, '__3pow__')
+
+    def test___neg___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(-proxy, -target)
+        self.assertEqual(checker._checked, '__neg__')
+
+    def test___neg___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: -proxy)
+        self.assertEqual(checker._checked, '__neg__')
+
+    def test___pos___w_checker_allows(self):
+        target = -3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(+proxy, +target)
+        self.assertEqual(checker._checked, '__pos__')
+
+    def test___pos___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = -3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: +proxy)
+        self.assertEqual(checker._checked, '__pos__')
+
+    def test___abs___w_checker_allows(self):
+        target = -3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(abs(proxy), abs(target))
+        self.assertEqual(checker._checked, '__abs__')
+
+    def test___abs___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = -3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, abs, proxy)
+        self.assertEqual(checker._checked, '__abs__')
+
+    def test___bool___(self):
+        target = 12
+        checker = object()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(bool(proxy), bool(target))
+
+    def test___invert___w_checker_allows(self):
+        target = 47
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(~proxy, ~target)
+        self.assertEqual(checker._checked, '__invert__')
+
+    def test___invert___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 47
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: ~proxy)
+        self.assertEqual(checker._checked, '__invert__')
+
+    def test___lshift___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy << 2, target << 2)
+        self.assertEqual(checker._checked, '__lshift__')
+
+    def test___lshift___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy << 2)
+        self.assertEqual(checker._checked, '__lshift__')
+
+    def test___rshift___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy >> 2, target >> 2)
+        self.assertEqual(checker._checked, '__rshift__')
+
+    def test___rshift___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy >> 2)
+        self.assertEqual(checker._checked, '__rshift__')
+
+    def test___and___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy & 2, target & 2)
+        self.assertEqual(checker._checked, '__and__')
+
+    def test___and___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy & 2)
+        self.assertEqual(checker._checked, '__and__')
+
+    def test___xor___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy ^ 2, target ^ 2)
+        self.assertEqual(checker._checked, '__xor__')
+
+    def test___xor___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy ^ 2)
+        self.assertEqual(checker._checked, '__xor__')
+
+    def test___or___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy | 2, target | 2)
+        self.assertEqual(checker._checked, '__or__')
+
+    def test___or___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy | 2)
+        self.assertEqual(checker._checked, '__or__')
+
+    @_skip_if_not_Py2
+    def test___coerce___w_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(coerce(proxy, 4.0), coerce(target, 4.0))
+        self.assertEqual(checker._checked, '__coerce__')
+
+    @_skip_if_not_Py2
+    def test___coerce___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, coerce, proxy, 4.0)
+        self.assertEqual(checker._checked, '__coerce__')
+
+    def test___iadd___not_inplace_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy += 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 6)
+        self.assertEqual(checker._checked, '__iadd__')
+
+    def test___iadd___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __iadd__(self, rhs):
+                self.value += rhs
+                return self
+        target = Foo(3)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy += 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 6)
+        self.assertEqual(checker._checked, '__iadd__')
+
+    def test___iadd___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy += 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__iadd__')
+
+    def test___isub___not_inplace_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy -= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 0)
+        self.assertEqual(checker._checked, '__isub__')
+
+    def test___isub___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __isub__(self, rhs):
+                self.value -= rhs
+                return self
+        target = Foo(3)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy -= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 0)
+        self.assertEqual(checker._checked, '__isub__')
+
+    def test___isub___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy -= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__isub__')
+
+    def test___imul___not_inplace_checker_allows(self):
+        target = 3
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy *= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 9)
+        self.assertEqual(checker._checked, '__imul__')
+
+    def test___imul___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __imul__(self, rhs):
+                self.value *= rhs
+                return self
+        target = Foo(3)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy *= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 9)
+        self.assertEqual(checker._checked, '__imul__')
+
+    def test___imul___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 3
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy *= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__imul__')
+
+    @_skip_if_not_Py2
+    def test___idiv___not_inplace_checker_allows(self):
+        target = 6
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy /= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 2)
+        self.assertEqual(checker._checked, '__idiv__')
+
+    @_skip_if_not_Py2
+    def test___idiv___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __idiv__(self, rhs):
+                self.value /= rhs
+                return self
+        target = Foo(6)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy /= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 2)
+        self.assertEqual(checker._checked, '__idiv__')
+
+    @_skip_if_not_Py2
+    def test___idiv___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 6
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy /= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__idiv__')
+
+    @_skip_if_Py2
+    def test___itruediv___not_inplace_checker_allows(self):
+        target = 6
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy /= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 2)
+        self.assertEqual(checker._checked, '__itruediv__')
+
+    @_skip_if_Py2
+    def test___itruediv___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __itruediv__(self, rhs):
+                self.value /= rhs
+                return self
+        target = Foo(6)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy /= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 2)
+        self.assertEqual(checker._checked, '__itruediv__')
+
+    @_skip_if_Py2
+    def test___itruediv___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 6
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy /= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__itruediv__')
+
+    def test___ifloordiv___not_inplace_checker_allows(self):
+        target = 6
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy //= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 2)
+        self.assertEqual(checker._checked, '__ifloordiv__')
+
+    def test___ifloordiv___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __ifloordiv__(self, rhs):
+                self.value //= rhs
+                return self
+        target = Foo(6)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy //= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 2)
+        self.assertEqual(checker._checked, '__ifloordiv__')
+
+    def test___ifloordiv___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 6
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy //= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__ifloordiv__')
+
+    def test___imod___not_inplace_checker_allows(self):
+        target = 6
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy %= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 0)
+        self.assertEqual(checker._checked, '__imod__')
+
+    def test___imod___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __imod__(self, rhs):
+                self.value %= rhs
+                return self
+        target = Foo(6)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy %= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 0)
+        self.assertEqual(checker._checked, '__imod__')
+
+    def test___imod___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 6
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy %= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__imod__')
+
+    def test___ipow___not_inplace_checker_allows(self):
+        target = 2
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy **= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 8)
+        self.assertEqual(checker._checked, '__ipow__')
+
+    def test___ipow___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __ipow__(self, rhs):
+                self.value **= rhs
+                return self
+        target = Foo(2)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy **= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 8)
+        self.assertEqual(checker._checked, '__ipow__')
+
+    def test___ipow___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 2
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy **= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__ipow__')
+
+    def test___ilshift___not_inplace_checker_allows(self):
+        target = 2
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy <<= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 16)
+        self.assertEqual(checker._checked, '__ilshift__')
+
+    def test___ilshift___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __ilshift__(self, rhs):
+                self.value <<= rhs
+                return self
+        target = Foo(2)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy <<= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 16)
+        self.assertEqual(checker._checked, '__ilshift__')
+
+    def test___ilshift___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 2
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy <<= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__ilshift__')
+
+    def test___irshift___not_inplace_checker_allows(self):
+        target = 16
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy >>= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 2)
+        self.assertEqual(checker._checked, '__irshift__')
+
+    def test___irshift___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __irshift__(self, rhs):
+                self.value >>= rhs
+                return self
+        target = Foo(16)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy >>= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 2)
+        self.assertEqual(checker._checked, '__irshift__')
+
+    def test___irshift___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 16
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy >>= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__irshift__')
+
+    def test___iand___not_inplace_checker_allows(self):
+        target = 7
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy &= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 3)
+        self.assertEqual(checker._checked, '__iand__')
+
+    def test___iand___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __iand__(self, rhs):
+                self.value &= rhs
+                return self
+        target = Foo(7)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy &= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 3)
+        self.assertEqual(checker._checked, '__iand__')
+
+    def test___iand___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 7
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy &= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__iand__')
+
+    def test___ixor___not_inplace_checker_allows(self):
+        target = 7
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy ^= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 4)
+        self.assertEqual(checker._checked, '__ixor__')
+
+    def test___ixor___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __ixor__(self, rhs):
+                self.value ^= rhs
+                return self
+        target = Foo(7)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy ^= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 4)
+        self.assertEqual(checker._checked, '__ixor__')
+
+    def test___ixor___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 7
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy ^= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__ixor__')
+
+    def test___ior___not_inplace_checker_allows(self):
+        target = 6
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy |= 3
+        self.assertFalse(proxy is before)
+        self.assertEqual(proxy, 7)
+        self.assertEqual(checker._checked, '__ior__')
+
+    def test___ior___inplace_checker_allows(self):
+        class Foo(object):
+            def __init__(self, value):
+                self.value = value
+            def __ior__(self, rhs):
+                self.value |= rhs
+                return self
+        target = Foo(6)
+        checker = DummyChecker()
+        proxy = before = self._makeOne(target, checker)
+        proxy |= 3
+        self.assertTrue(proxy is before)
+        self.assertEqual(target.value, 7)
+        self.assertEqual(checker._checked, '__ior__')
+
+    def test___ior___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = 6
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        try:
+            proxy |= 3
+        except ForbiddenAttribute:
+            pass
+        else:
+            self.fail()
+        self.assertEqual(checker._checked, '__ior__')
+
+    def test___len___w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(len(proxy), len(target))
+        self.assertEqual(checker._checked, '__len__')
+
+    def test___len___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = [0, 1, 2]
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, len, proxy)
+        self.assertEqual(checker._checked, '__len__')
+
+    def test___contains___hit_w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertTrue(1 in proxy)
+        self.assertEqual(checker._checked, '__contains__')
+
+    def test___contains___miss_w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertFalse(4 in proxy)
+        self.assertEqual(checker._checked, '__contains__')
+
+    def test___contains___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = [0, 1, 2]
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: 0 in proxy)
+        self.assertEqual(checker._checked, '__contains__')
+
+    def test___getitem___sequence_hit_w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy[1], 1)
+        self.assertEqual(checker._checked, '__getitem__')
+
+    def test___getitem___sequence_miss_w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(IndexError, lambda: proxy[4])
+        self.assertEqual(checker._checked, '__getitem__')
+
+    def test___getitem___sequence_w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = [0, 1, 2]
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy[0])
+        self.assertEqual(checker._checked, '__getitem__')
+
+    def test___setitem___sequence_hit_w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        proxy[1] = 7
+        self.assertEqual(target[1], 7)
+        self.assertEqual(checker._checked, '__setitem__')
+
+    def test___setitem___sequence_miss_w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        def _try():
+            proxy[4] = 7
+        self.assertRaises(IndexError, _try)
+        self.assertEqual(checker._checked, '__setitem__')
+
+    def test___setitem___sequence_w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = [0, 1, 2]
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        def _try():
+            proxy[4] = 7
+        self.assertRaises(ForbiddenAttribute, _try)
+        self.assertEqual(checker._checked, '__setitem__')
+
+    @_skip_if_not_Py2
+    def test___getslice___w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy[1:3], [1, 2])
+        self.assertEqual(checker._checked, '__getslice__')
+
+    @_skip_if_not_Py2
+    def test___getslice___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = [0, 1, 2]
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy[0:2])
+        self.assertEqual(checker._checked, '__getslice__')
+
+    @_skip_if_not_Py2
+    def test___setslice___w_checker_allows(self):
+        target = [0, 1, 2]
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        proxy[1:3] = [3, 4]
+        self.assertEqual(target, [0, 3, 4])
+        self.assertEqual(checker._checked, '__setslice__')
+
+    @_skip_if_not_Py2
+    def test___setslice___w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = [0, 1, 2]
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        def _try():
+            proxy[1:3] = [3, 4]
+        self.assertRaises(ForbiddenAttribute, _try)
+        self.assertEqual(checker._checked, '__setslice__')
+
+    def test___getitem___mapping_hit_w_checker_allows(self):
+        target = {'a': 0, 'b': 1, 'c': 2}
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(proxy['b'], 1)
+        self.assertEqual(checker._checked, '__getitem__')
+
+    def test___getitem___mapping_miss_w_checker_allows(self):
+        target = {'a': 0, 'b': 1, 'c': 2}
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(KeyError, lambda: proxy['d'])
+        self.assertEqual(checker._checked, '__getitem__')
+
+    def test___getitem___mapping_w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = {'a': 0, 'b': 1, 'c': 2}
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertRaises(ForbiddenAttribute, lambda: proxy['b'])
+        self.assertEqual(checker._checked, '__getitem__')
+
+    def test___setitem___mapping_hit_w_checker_allows(self):
+        target = {'a': 0, 'b': 1, 'c': 2}
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        proxy['a'] = 7
+        self.assertEqual(target['a'], 7)
+        self.assertEqual(checker._checked, '__setitem__')
+
+    def test___setitem___mapping_w_checker_forbids(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        target = {'a': 0, 'b': 1, 'c': 2}
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        def _try():
+            proxy['a'] = 7
+        self.assertRaises(ForbiddenAttribute, _try)
+        self.assertEqual(checker._checked, '__setitem__')
+
+
+class DummyChecker(object):
+    _proxied = _checked = None
+    def __init__(self, raising=None, allowed=()):
+        self._raising = raising
+        self._allowed = allowed
+    def check(self, target, name):
+        self._checked = name
+        if name not in self._allowed:
+            if self._raising is not None:
+                raise self._raising
+    check_getattr = check_setattr = check
+    def proxy(self, value):
+        self._proxied = value
+        return value
+
 
 class Test_getTestProxyItems(unittest.TestCase):
 
@@ -553,6 +1832,7 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
+        unittest.makeSuite(ProxyCTests),
         unittest.makeSuite(Test_getTestProxyItems),
         unittest.makeSuite(Test_isinstance),
         # pre-geddon
