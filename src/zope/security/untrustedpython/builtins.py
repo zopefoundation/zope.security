@@ -11,8 +11,12 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from zope.deprecation import moved
-moved('zope.untrustedpython.builtins', '4.1')
-del moved
+from warnings import warn
+warn('Import from zope.untrustedpython.builtins.  This BBB module will'
+     'be removed in zope.security 4.1', DeprecationWarning, 2)
+del warn
 
-from zope.untrustedpython.builtins import *
+try:
+    from zope.untrustedpython.builtins import *
+except ImportError:
+    pass
