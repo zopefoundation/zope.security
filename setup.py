@@ -88,7 +88,7 @@ else:
     ]
 
 setup(name='zope.security',
-      version='4.0.0dev',
+      version='4.0.0a2',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -138,6 +138,7 @@ setup(name='zope.security',
           test=TESTS_REQUIRE,
           testing=TESTS_REQUIRE + ['nose', 'coverage'],
           docs=['Sphinx', 'repoze.sphinx.autointerface'],
+          untrustedpython=['zope.untrustedpython', 'zope.deprecation'],
           ),
       include_package_data = True,
       zip_safe = False,

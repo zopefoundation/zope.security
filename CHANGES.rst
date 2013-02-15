@@ -2,16 +2,14 @@
 CHANGES
 =======
 
-4.0.0 (unreleased)
-------------------
 
-- TODO:  Add PyPy support
+4.0.0a2 (2013-02-15)
+--------------------
 
-- TODO:  add pure-Python implementations of:
-
-  - ``z.s._proxy.getChecker``
-  - ``z.s._proxy.getObject``
-  - ``z.s._proxy._Proxy``
+- Added back the ``untrustedpython`` extra:  now pulls in
+  ``zope.untrustedpython``.  Restored deprecated backward-compatible imports
+  for ``zope.security.untrustedpython.{builtins,interpreter,rcompile}``
+  (the extra and the imports are to be removed in version 4.1).
 
 
 4.0.0a1 (2013-02-14)
