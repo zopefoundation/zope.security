@@ -2,6 +2,17 @@
 CHANGES
 =======
 
+4.0.0 (unreleased)
+------------------
+
+- TODO:  Add PyPy support
+
+- TODO:  add pure-Python implementations of:
+
+  - ``z.s._proxy.getChecker``
+  - ``z.s._proxy.getObject``
+  - ``z.s._proxy._Proxy``
+
 
 4.0.0a2 (2013-02-15)
 --------------------
