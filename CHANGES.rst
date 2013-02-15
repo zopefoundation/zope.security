@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.0a3 (unreleased)
+4.0.0a3 (2013-02-15)
 --------------------
 
 - Fix test breakage in 4.0.0a2 due to deprecation strategy.
