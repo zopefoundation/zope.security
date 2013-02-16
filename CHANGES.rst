@@ -78,6 +78,24 @@ CHANGES
 - Added test convenience helper ``create_interaction`` and
   ``with interaction()``.
 
+3.9.0 (2012-12-21)
+------------------
+
+- Pin ``zope.proxy >= 4.1.0``
+
+- Ship with an included ``proxy.h`` header which is compatible with the
+  4.1.x version ov ``zope.proxy``.
+
+3.8.5 (2012-12-21)
+------------------
+
+- Ship with an included ``proxy.h`` header which is compatible with the
+  supported versions of ``zope.proxy``.
+
+3.8.4 (2012-12-20)
+------------------
+
+- Pin ``zope.proxy >= 3.4.2, <4.1dev``
 
 3.8.3 (2011-09-24)
 ------------------
