@@ -595,7 +595,7 @@ _typeChecker = NamesChecker(
      '__implemented__'])
 _namedChecker = NamesChecker(['__name__'])
 
-_iteratorChecker = NamesChecker(['next', '__iter__'])
+_iteratorChecker = NamesChecker(['next', '__iter__', '__len__'])
 
 _setChecker = NamesChecker(['__iter__', '__len__', '__str__', '__contains__',
                             'copy', 'difference', 'intersection', 'issubset',
@@ -645,6 +645,10 @@ _basic_types = {
 if PYTHON2:
     _basic_types[long] = NoProxy
     _basic_types[unicode] = NoProxy
+else:
+    _basic_types[type({}.values())] = NoProxy
+    _basic_types[type({}.keys())] = NoProxy
+    _basic_types[type({}.items())] = NoProxy
 
 try:
     import pytz

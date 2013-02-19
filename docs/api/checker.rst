@@ -227,11 +227,10 @@ Rocks are immuatle, non-callable objects without interesting methods.  They
 Additionally, check some python-2.x specific types.
 
 .. doctest::
-   >>> import sys
-   >>> PY2 = sys.version_info[0] == 2
-   >>> int(type(ProxyFactory(  long(1)  )) is long) if PY2 else 1
+   >>> from zope.security._compat import PYTHON2
+   >>> int(type(ProxyFactory(  long(1)  )) is long) if PYTHON2 else 1
    1
-   >>> int(type(ProxyFactory(  u'xxx'  )) is unicode) if PY2 else 1
+   >>> int(type(ProxyFactory(  u'xxx'  )) is unicode) if PYTHON2 else 1
    1
 
 Datetime-reltatd instances are rocks, too:
@@ -265,6 +264,7 @@ We can do everything we expect to be able to do with proxied dicts.
 
 .. doctest::
 
+   >>> from zope.security._compat import PYTHON2
    >>> d = ProxyFactory({'a': 1, 'b': 2})
    >>> check_forbidden_get(d, 'clear') # Verify that we are protected
    'ForbiddenAttribute: clear'
@@ -297,11 +297,11 @@ We can do everything we expect to be able to do with proxied dicts.
    [1, 2]
    >>> sorted(d.items())
    [('a', 1), ('b', 2)]
-   >>> sorted(d.iterkeys()) if PY2 else ['a', 'b']
+   >>> sorted(d.iterkeys()) if PYTHON2 else ['a', 'b']
    ['a', 'b']
-   >>> sorted(d.itervalues()) if PY2 else [1, 2]
+   >>> sorted(d.itervalues()) if PYTHON2 else [1, 2]
    [1, 2]
-   >>> sorted(d.iteritems()) if PY2 else [('a', 1), ('b', 2)]
+   >>> sorted(d.iteritems()) if PYTHON2 else [('a', 1), ('b', 2)]
    [('a', 1), ('b', 2)]
 
 Always available (note, that dicts in python-3.x are not orderable, so we are
@@ -309,15 +309,16 @@ not checking that under python > 2):
 
 .. doctest::
 
-    >>> int(d < d) if PY2 else 0
+    >>> from zope.security._compat import PYTHON2
+    >>> int(d < d) if PYTHON2 else 0
     0
-    >>> int(d > d) if PY2 else 0
+    >>> int(d > d) if PYTHON2 else 0
     0
-    >>> int(d <= d) if PY2 else 1
+    >>> int(d <= d) if PYTHON2 else 1
     1
-    >>> int(d >= d) if PY2 else 1
+    >>> int(d >= d) if PYTHON2 else 1
     1
-    >>> int(d == d) if PY2 else 1
+    >>> int(d == d) if PYTHON2 else 1
     1
     >>> int(d != d)
     0
@@ -784,6 +785,8 @@ iterators
 
 .. doctest::
 
+   >>> [a for a in ProxyFactory(iter([1, 2]))]
+   [1, 2]
    >>> list(ProxyFactory(iter([1, 2])))
    [1, 2]
    >>> list(ProxyFactory(iter((1, 2))))
@@ -820,7 +823,7 @@ We can iterate over sequences
 
    >>> from zope.security.checker import NamesChecker
    >>> from zope.security.checker import ProxyFactory
-   >>> c = NamesChecker(['__getitem__'])
+   >>> c = NamesChecker(['__getitem__', '__len__'])
    >>> p = ProxyFactory(x, c)
 
 Even if they are proxied
@@ -873,13 +876,14 @@ Always available:
 
 .. doctest::
 
-   >>> int(C < C) if PY2 else 0
+   >>> from zope.security._compat import PYTHON2
+   >>> int(C < C) if PYTHON2 else 0
    0
-   >>> int(C > C) if PY2 else 0
+   >>> int(C > C) if PYTHON2 else 0
    0
-   >>> int(C <= C) if PY2 else 1
+   >>> int(C <= C) if PYTHON2 else 1
    1
-   >>> int(C >= C) if PY2 else 1
+   >>> int(C >= C) if PYTHON2 else 1
    1
    >>> int(C == C)
    1
@@ -912,13 +916,14 @@ Always available:
 
 .. doctest::
 
-   >>> int(c < c) if PY2 else 0
+   >>> from zope.security._compat import PYTHON2
+   >>> int(c < c) if PYTHON2 else 0
    0
-   >>> int(c > c) if PY2 else 0
+   >>> int(c > c) if PYTHON2 else 0
    0
-   >>> int(c <= c) if PY2 else 1
+   >>> int(c <= c) if PYTHON2 else 1
    1
-   >>> int(c >= c) if PY2 else 1
+   >>> int(c >= c) if PYTHON2 else 1
    1
    >>> int(c == c)
    1
@@ -935,6 +940,7 @@ Classic Classes
 
 .. doctest::
 
+   >>> from zope.security._compat import PYTHON2
    >>> class C:
    ...    x = 1
    >>> C = ProxyFactory(C)
@@ -946,20 +952,21 @@ Classic Classes
    >>> s = repr(C)
    >>> int(C.__module__ == __name__)
    1
-   >>> len(C.__bases__) if PY2 else 0
+   >>> len(C.__bases__) if PYTHON2 else 0
    0
 
 Always available:
 
 .. doctest::
 
-   >>> int(C < C) if PY2 else 0
+   >>> from zope.security._compat import PYTHON2
+   >>> int(C < C) if PYTHON2 else 0
    0
-   >>> int(C > C) if PY2 else 0
+   >>> int(C > C) if PYTHON2 else 0
    0
-   >>> int(C <= C) if PY2 else 1
+   >>> int(C <= C) if PYTHON2 else 1
    1
-   >>> int(C >= C) if PY2 else 1
+   >>> int(C >= C) if PYTHON2 else 1
    1
    >>> int(C == C)
    1
@@ -989,13 +996,14 @@ Always available:
 
 .. doctest::
 
-   >>> int(c < c) if PY2 else 0
+   >>> from zope.security._compat import PYTHON2
+   >>> int(c < c) if PYTHON2 else 0
    0
-   >>> int(c > c) if PY2 else 0
+   >>> int(c > c) if PYTHON2 else 0
    0
-   >>> int(c <= c) if PY2 else 1
+   >>> int(c <= c) if PYTHON2 else 1
    1
-   >>> int(c >= c) if PY2 else 1
+   >>> int(c >= c) if PYTHON2 else 1
    1
    >>> int(c == c)
    1
@@ -1070,13 +1078,14 @@ Always available:
 
 .. doctest::
 
-   >>> int(PBar < PBar) if PY2 else 0
+   >>> from zope.security._compat import PYTHON2
+   >>> int(PBar < PBar) if PYTHON2 else 0
    0
-   >>> int(PBar > PBar) if PY2 else 0
+   >>> int(PBar > PBar) if PYTHON2 else 0
    0
-   >>> int(PBar <= PBar) if PY2 else 1
+   >>> int(PBar <= PBar) if PYTHON2 else 1
    1
-   >>> int(PBar >= PBar) if PY2 else 1
+   >>> int(PBar >= PBar) if PYTHON2 else 1
    1
    >>> int(PBar == PBar)
    1
@@ -1084,5 +1093,5 @@ Always available:
    0
    >>> int(bool(PBar))
    1
-   >>> int(PBar.__class__ == abc.ABCMeta) if PY2 else 1
+   >>> int(PBar.__class__ == abc.ABCMeta) if PYTHON2 else 1
    1
