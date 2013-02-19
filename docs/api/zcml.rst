@@ -11,8 +11,9 @@ a couple of permissions:
 
   >>> from zope.component import getGlobalSiteManager
   >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> from zope.component.testing import setUp
   >>> import zope.security
-
+  >>> setUp()  # clear global component registry
   >>> XMLConfig('permissions.zcml', zope.security)()
 
   >>> len(list(getGlobalSiteManager().registeredUtilities()))

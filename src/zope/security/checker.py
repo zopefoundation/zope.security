@@ -642,10 +642,10 @@ _basic_types = {
     datetime.time: NoProxy,
     datetime.tzinfo: NoProxy,
 }
-if PYTHON2:
+if PYTHON2: 
     _basic_types[long] = NoProxy
     _basic_types[unicode] = NoProxy
-else:
+else: #pragma NO COVER
     _basic_types[type({}.values())] = NoProxy
     _basic_types[type({}.keys())] = NoProxy
     _basic_types[type({}.items())] = NoProxy
