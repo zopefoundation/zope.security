@@ -64,10 +64,13 @@ Now let's see whether validation works alright
    >>> field._validate('zope.ManageCode')
    >>> context._actions[0]['args']
    (None, 'zope.foo')
-   >>> field._validate('3 foo')
-   Traceback (most recent call last):
-   ...
-   InvalidId: 3 foo
+
+   >>> from zope.schema.interfaces import InvalidId
+   >>> try:
+   ...     field._validate('3 foo')
+   ... except InvalidId as e:
+   ...     e
+   InvalidId('3 foo')
 
    zope.Public is always valid
    >>> field._validate('zope.Public')
