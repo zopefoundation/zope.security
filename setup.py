@@ -32,6 +32,21 @@ TESTS_REQUIRE = [
     'zope.location',
 ]
 
+def alltests():
+    import os
+    import sys
+    import unittest
+    # use the zope.testrunner machinery to find all the
+    # test suites we've put under ourselves
+    import zope.testrunner.find
+    import zope.testrunner.options
+    here = os.path.abspath(os.path.join(os.path.dirname(__file__), 'src'))
+    args = sys.argv[:]
+    defaults = ["--test-path", here]
+    options = zope.testrunner.options.get_options(args, defaults)
+    suites = list(zope.testrunner.find.find_suites(options))
+    return unittest.TestSuite(suites)
+
 here = os.path.abspath(os.path.dirname(__file__))
 def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
@@ -130,7 +145,7 @@ setup(name='zope.security',
                         'zope.proxy >= 4.1.0',
                         'zope.schema',
                         ],
-      test_suite = 'zope.security',
+      test_suite = '__main__.alltests',
       tests_require=TESTS_REQUIRE,
       extras_require = dict(
           pytz=["pytz"],

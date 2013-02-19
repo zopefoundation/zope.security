@@ -11,8 +11,9 @@ a couple of permissions:
 
   >>> from zope.component import getGlobalSiteManager
   >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> from zope.component.testing import setUp
   >>> import zope.security
-
+  >>> setUp()  # clear global component registry
   >>> XMLConfig('permissions.zcml', zope.security)()
 
   >>> len(list(getGlobalSiteManager().registeredUtilities()))
@@ -64,10 +65,13 @@ Now let's see whether validation works alright
    >>> field._validate('zope.ManageCode')
    >>> context._actions[0]['args']
    (None, 'zope.foo')
-   >>> field._validate('3 foo')
-   Traceback (most recent call last):
-   ...
-   InvalidId: 3 foo
+
+   >>> from zope.schema.interfaces import InvalidId
+   >>> try:
+   ...     field._validate('3 foo')
+   ... except InvalidId as e:
+   ...     e
+   InvalidId('3 foo')
 
    zope.Public is always valid
    >>> field._validate('zope.Public')
