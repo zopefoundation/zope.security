@@ -253,7 +253,7 @@ class TimeGenerator(object):
                     home.transportAgent(a, new_home)
                 except Exception as e:
                     print('-- Exception --')
-                    print('moving "%s" from "%s" to "%s"' %(a, h,` new_home`))
+                    print('moving "%s" from "%s" to "%s"' %(a, h, repr(new_home)))
                     print(e)
                     print()
                 self.teardownAgent(a)
