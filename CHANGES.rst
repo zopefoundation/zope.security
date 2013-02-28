@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.0a5 (unreleased)
+4.0.0a5 (2013-02-28)
 --------------------
 
 - Undo changes from 4.0.0a4. Instead, ``zope.untrustedpython`` is only
