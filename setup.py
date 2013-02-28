@@ -81,6 +81,7 @@ include = [ModuleHeaderDir('zope.proxy')]
 # Jython cannot build the C optimizations, while on PyPy they are
 # anti-optimizations (the C extension compatibility layer is known-slow,
 # and defeats JIT opportunities).
+py3 = sys.version_info[0] >= 3
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 pure_python = os.environ.get('PURE_PYTHON', False)
 is_pypy = py_impl() == 'PyPy'
@@ -149,6 +150,7 @@ setup(name='zope.security',
       tests_require=TESTS_REQUIRE,
       extras_require = dict(
           pytz=["pytz"],
+          untrustedpython=['zope.untrustedpython'] if not py3 else [],
           zcml=['zope.configuration'],
           test=TESTS_REQUIRE,
           testing=TESTS_REQUIRE + ['nose', 'coverage'],

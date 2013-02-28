@@ -5,7 +5,8 @@ CHANGES
 4.0.0a5 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Undo changes from 4.0.0a4. Instead, ``zope.untrustedpython`` is only
+  included during Python 2 installs.
 
 
 4.0.0a4 (2013-02-28)
