@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.0a4 (unreleased)
+4.0.0a4 (2013-02-28)
 --------------------
 
 - Remove ``untrustedpython`` extra again, since we do not want to support
