@@ -13,6 +13,13 @@ CHANGES
   - ``z.s._proxy.getObject``
   - ``z.s._proxy._Proxy``
 
+4.0.0a4 (unreleased)
+--------------------
+
+- Remove ``untrustedpython`` extra again, since we do not want to support
+  ``zope.untrustedpython`` in ZTK 2.0. If BBB is really needed, we will create
+  a 3.10.0 release.
+
 4.0.0a3 (2013-02-15)
 --------------------
 
