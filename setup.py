@@ -26,10 +26,11 @@ from setuptools import find_packages
 from setuptools import setup
 
 TESTS_REQUIRE = [
-    'zope.testing',
-    'zope.configuration',
     'zope.component',
+    'zope.configuration',
     'zope.location',
+    'zope.testing',
+    'zope.testrunner',
 ]
 
 def alltests():
