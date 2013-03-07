@@ -590,6 +590,13 @@ MOD_INIT(_zope_security_checker)
 {
   PyObject* m;
 
+  MOD_DEF(m, "_zope_security_checker", module___doc__, module_functions)
+
+  if (m == NULL)
+  {
+    return MOD_ERROR_VAL;
+  }
+
   CheckerType.tp_new = PyType_GenericNew;
   if (PyType_Ready(&CheckerType) < 0)
   {
@@ -669,13 +676,6 @@ if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
   Py_DECREF(m);
 
   if ((_available_by_default = PyList_New(0)) == NULL)
-  {
-    return MOD_ERROR_VAL;
-  }
-
-  MOD_DEF(m, "_zope_security_checker", module___doc__, module_functions)
-
-  if (m == NULL)
   {
     return MOD_ERROR_VAL;
   }

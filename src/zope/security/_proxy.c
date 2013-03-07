@@ -983,6 +983,11 @@ MOD_INIT(_proxy)
 {
   PyObject *m;
 
+  MOD_DEF(m, "_proxy", module___doc__, module_functions)
+
+  if (m == NULL)
+    return MOD_ERROR_VAL;
+
   if (Proxy_Import() < 0)
     return MOD_ERROR_VAL;
 
@@ -1083,11 +1088,6 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   if (PyType_Ready(&SecurityProxyType) < 0)
     return MOD_ERROR_VAL;
 
-  MOD_DEF(m, "_proxy", module___doc__, module_functions)
-
-  if (m == NULL)
-    return MOD_ERROR_VAL;
-  
   Py_INCREF(&SecurityProxyType);
   PyModule_AddObject(m, "_Proxy", (PyObject *)&SecurityProxyType);
 
