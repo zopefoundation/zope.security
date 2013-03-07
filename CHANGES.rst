@@ -5,7 +5,7 @@ CHANGES
 4.0.0a6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- fixed extension compilation on windows python 3.x
 
 
 4.0.0a5 (2013-02-28)
