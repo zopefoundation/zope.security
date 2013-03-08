@@ -48,13 +48,16 @@ Using `selectChecker()`, we can confirm that a `Foo` object uses
 .. doctest::
 
    >>> from zope.security.checker import selectChecker
+   >>> from zope.security.interfaces import ForbiddenAttribute
    >>> foo = Foo()
    >>> selectChecker(foo) is fooChecker
    True
    >>> fooChecker.check(foo, 'a')
-   >>> fooChecker.check(foo, 'b')  # doctest: +ELLIPSIS
-   Traceback (most recent call last):
-   ForbiddenAttribute: ('b', <zope.security.decorator.Foo object ...>)
+   >>> try:
+   ...     fooChecker.check(foo, 'b')  # doctest: +ELLIPSIS
+   ... except ForbiddenAttribute as e:
+   ...     e
+   ForbiddenAttribute('b', <Foo object ...>)
 
 and that a `Wrapper` object uses `wrappeChecker`:
 
@@ -64,9 +67,11 @@ and that a `Wrapper` object uses `wrappeChecker`:
    >>> selectChecker(wrapper) is wrapperChecker
    True
    >>> wrapperChecker.check(wrapper, 'b')
-   >>> wrapperChecker.check(wrapper, 'a')  # doctest: +ELLIPSIS
-   Traceback (most recent call last):
-   ForbiddenAttribute: ('a', <zope.security.decorator.Foo object ...>)
+   >>> try:
+   ...     wrapperChecker.check(wrapper, 'a')  # doctest: +ELLIPSIS
+   ... except ForbiddenAttribute as e:
+   ...     e
+   ForbiddenAttribute('a', <Foo object ...>)
 
 (Note that the object description says `Foo` because the object is a
 proxy and generally looks and acts like the object it's proxying.)
@@ -94,9 +99,11 @@ illustrate, we'll proxify `foo`:
    >>> secure_foo = ProxyFactory(foo)
    >>> secure_foo.a
    'a'
-   >>> secure_foo.b  # doctest: +ELLIPSIS
-   Traceback (most recent call last):
-   ForbiddenAttribute: ('b', <zope.security.decorator.Foo object ...>)
+   >>> try:
+   ...     secure_foo.b  # doctest: +ELLIPSIS
+   ... except ForbiddenAttribute as e:
+   ...     e
+   ForbiddenAttribute('b', <Foo object ...>)
 
 when we wrap the secured `foo`:
 

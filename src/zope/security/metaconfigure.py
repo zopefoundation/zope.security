@@ -109,7 +109,7 @@ class ClassDirective(object):
 
     def __protectByInterface(self, interface, permission_id):
         "Set a permission on names in an interface."
-        for n, d in interface.namesAndDescriptions(1):
+        for n, d in sorted(interface.namesAndDescriptions(1)):
             self.__protectName(n, permission_id)
         self.__context.action(
             discriminator = None,
@@ -143,7 +143,7 @@ class ClassDirective(object):
     def __protectSetSchema(self, schema, permission_id):
         "Set a permission on a bunch of names."
         _context = self.__context
-        for name in schema:
+        for name in sorted(schema):
             field = schema[name]
             if IField.providedBy(field) and not field.readonly:
                 _context.action(

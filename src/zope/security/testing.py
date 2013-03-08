@@ -15,13 +15,30 @@
 
 This module provides some helper/stub objects for setting up interactions.
 """
+import sys
+import re
 
 from zope import interface, component
 from zope.security import interfaces
 from zope.security.permission import Permission
 import contextlib
 import zope.security.management
+from zope.testing import renormalizing
 
+PY2 = sys.version_info[0] == 2
+
+if PY2:
+    _u = unicode
+    rules = [(re.compile("b('.*?')"), r"\1"),
+             (re.compile('b(".*?")'), r"\1"),
+            ]
+    output_checker = renormalizing.RENormalizing(rules)
+else:
+    _u = str
+    rules = [(re.compile("u('.*?')"), r"\1"),
+             (re.compile('u(".*?")'), r"\1"),
+            ]
+    output_checker = renormalizing.RENormalizing(rules)
 
 @interface.implementer(interfaces.IPrincipal)
 class Principal:

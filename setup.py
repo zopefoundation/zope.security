@@ -26,11 +26,27 @@ from setuptools import find_packages
 from setuptools import setup
 
 TESTS_REQUIRE = [
-    'zope.testing',
-    'zope.configuration',
     'zope.component',
+    'zope.configuration',
     'zope.location',
+    'zope.testing',
+    'zope.testrunner',
 ]
+
+def alltests():
+    import os
+    import sys
+    import unittest
+    # use the zope.testrunner machinery to find all the
+    # test suites we've put under ourselves
+    import zope.testrunner.find
+    import zope.testrunner.options
+    here = os.path.abspath(os.path.join(os.path.dirname(__file__), 'src'))
+    args = sys.argv[:]
+    defaults = ["--test-path", here]
+    options = zope.testrunner.options.get_options(args, defaults)
+    suites = list(zope.testrunner.find.find_suites(options))
+    return unittest.TestSuite(suites)
 
 here = os.path.abspath(os.path.dirname(__file__))
 def read(*rnames):
@@ -66,6 +82,7 @@ include = [ModuleHeaderDir('zope.proxy')]
 # Jython cannot build the C optimizations, while on PyPy they are
 # anti-optimizations (the C extension compatibility layer is known-slow,
 # and defeats JIT opportunities).
+py3 = sys.version_info[0] >= 3
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 pure_python = os.environ.get('PURE_PYTHON', False)
 is_pypy = py_impl() == 'PyPy'
@@ -88,7 +105,7 @@ else:
     ]
 
 setup(name='zope.security',
-      version='4.0.0dev',
+      version='4.0.0a6.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -130,10 +147,11 @@ setup(name='zope.security',
                         'zope.proxy >= 4.1.0',
                         'zope.schema',
                         ],
-      test_suite = 'zope.security',
+      test_suite = '__main__.alltests',
       tests_require=TESTS_REQUIRE,
       extras_require = dict(
           pytz=["pytz"],
+          untrustedpython=['zope.untrustedpython'] if not py3 else [],
           zcml=['zope.configuration'],
           test=TESTS_REQUIRE,
           testing=TESTS_REQUIRE + ['nose', 'coverage'],

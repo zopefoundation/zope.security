@@ -48,7 +48,7 @@ The :data:`zope.security.checker.CheckerPublic` permission always exists:
    >>> ids = list(allPermissions(None))
    >>> ids.sort()
    >>> ids
-   [u'x', u'y']
+   ['x', 'y']
 
 
 .. autofunction:: zope.security.permission.PermissionsVocabulary
@@ -100,9 +100,9 @@ The non-public permissions 'x' and 'y' are string values:
 .. doctest::
 
    >>> vocab.getTermByToken('x').value
-   u'x'
+   'x'
    >>> vocab.getTermByToken('y').value
-   u'y'
+   'y'
 
 However, the public permission value is CheckerPublic:
 
@@ -116,7 +116,7 @@ and its title is shortened:
 .. doctest::
 
    >>> vocab.getTermByToken('zope.Public').title
-   u'Public'
+   'Public'
 
 The terms are sorted by title except for the public permission, which is
 listed first:
@@ -124,7 +124,7 @@ listed first:
 .. doctest::
 
    >>> [term.title for term in vocab]
-   [u'Public', u'x', u'y']
+   ['Public', 'x', 'y']
 
 
 .. testcleanup::

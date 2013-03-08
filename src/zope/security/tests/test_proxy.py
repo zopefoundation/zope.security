@@ -14,6 +14,7 @@
 """Security proxy tests
 """
 import unittest
+import sys
 
 from zope.security._compat import PYTHON2
 
@@ -34,6 +35,15 @@ def _skip_if_Py2(testfunc):
         update_wrapper(dummy, testfunc)
         return dummy
     return testfunc
+
+def _fmt_address(obj):
+    # Try to replicate PyString_FromString("%p", obj), which actually uses
+    # the platform sprintf(buf, "%p", obj), which we cannot access from Python
+    # directly (and ctypes seems like overkill).
+    if sys.platform == 'win32':
+        return '0x%08x' % id(obj)
+    else:
+        return '0x%0x' % id(obj)
 
 
 class ProxyTestBase(object):
@@ -153,9 +163,10 @@ class ProxyTestBase(object):
         target = object()
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(target, checker)
+        address = _fmt_address(target)
         self.assertEqual(str(proxy),
                          '<security proxied %s.object '
-                             'instance at 0x%0x>' % (_BUILTINS, id(target)))
+                             'instance at %s>' % (_BUILTINS, address))
 
     def test___repr___checker_allows_str(self):
         target = object()
@@ -169,9 +180,10 @@ class ProxyTestBase(object):
         target = object()
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(target, checker)
+        address = _fmt_address(target)
         self.assertEqual(repr(proxy),
                          '<security proxied %s.object '
-                             'instance at 0x%0x>' % (_BUILTINS, id(target)))
+                             'instance at %s>' % (_BUILTINS, address))
 
     @_skip_if_not_Py2
     def test___cmp___w_self(self):

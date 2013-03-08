@@ -82,8 +82,7 @@ directly, or via interface:
 
    >>> context = AContext()
    >>> allow(context, attributes=['foo', 'bar'], interface=[I1, I2])
-   >>> context.actions.sort(
-   ...    lambda a, b: cmp(a['discriminator'], b['discriminator']))
+   >>> context.actions.sort(key=lambda a: a['discriminator'])
    >>> pprint(context.actions)
    [{'args': ('testmodule', 'a', 'zope.Public'),
      'callable': 1,
@@ -136,8 +135,7 @@ directly, or via interface:
    >>> require(context, attributes=['foo', 'bar'],
    ...         interface=[I1, I2], permission='p')
 
-   >>> context.actions.sort(
-   ...    lambda a, b: cmp(a['discriminator'], b['discriminator']))
+   >>> context.actions.sort(key=lambda a: a['discriminator'])
    >>> pprint(context.actions)
    [{'args': ('testmodule', 'a', 'p'),
      'callable': 1,
@@ -182,26 +180,26 @@ Protections for standard objects
    ...     from zope.security.interfaces import ForbiddenAttribute
    ...     try:
    ...         return getattr(object, attr)
-   ...     except ForbiddenAttribute, e:
-   ...         return 'ForbiddenAttribute: %s' % e[0]
+   ...     except ForbiddenAttribute as e:
+   ...         return 'ForbiddenAttribute: %s' % e.args[0]
    >>> def check_forbidden_setitem(object, item, value):
    ...     from zope.security.interfaces import ForbiddenAttribute
    ...     try:
    ...         object[item] = value
-   ...     except ForbiddenAttribute, e:
-   ...         return 'ForbiddenAttribute: %s' % e[0]
+   ...     except ForbiddenAttribute as e:
+   ...         return 'ForbiddenAttribute: %s' % e.args[0]
    >>> def check_forbidden_delitem(object, item):
    ...     from zope.security.interfaces import ForbiddenAttribute
    ...     try:
    ...         del object[item]
-   ...     except ForbiddenAttribute, e:
-   ...         return 'ForbiddenAttribute: %s' % e[0]
+   ...     except ForbiddenAttribute as e:
+   ...         return 'ForbiddenAttribute: %s' % e.args[0]
    >>> def check_forbidden_call(callable, *args): # **
    ...     from zope.security.interfaces import ForbiddenAttribute
    ...     try:
    ...         return callable(*args) # **
-   ...     except ForbiddenAttribute, e:
-   ...         return 'ForbiddenAttribute: %s' % e[0]
+   ...     except ForbiddenAttribute as e:
+   ...         return 'ForbiddenAttribute: %s' % e.args[0]
 
 Rocks
 #####
@@ -217,15 +215,11 @@ Rocks are immuatle, non-callable objects without interesting methods.  They
    1
    >>> int(type(ProxyFactory(  1.0  )) is float)
    1
-   >>> int(type(ProxyFactory(  1l  )) is long)
-   1
    >>> int(type(ProxyFactory(  1j  )) is complex)
    1
    >>> int(type(ProxyFactory(  None  )) is type(None))
    1
    >>> int(type(ProxyFactory(  'xxx'  )) is str)
-   1
-   >>> int(type(ProxyFactory(  u'xxx'  )) is unicode)
    1
    >>> int(type(ProxyFactory(  True  )) is type(True))
    1
@@ -270,18 +264,18 @@ We can do everything we expect to be able to do with proxied dicts.
    1
    >>> len(d)
    2
-   >>> list(d)
+   >>> sorted(list(d))
    ['a', 'b']
    >>> d.get('a')
    1
-   >>> int(d.has_key('a'))
+   >>> int('a' in d)
    1
    >>> c = d.copy()
    >>> check_forbidden_get(c, 'clear')
    'ForbiddenAttribute: clear'
    >>> int(str(c) in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}"))
    1
-   >>> int(`c` in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}"))
+   >>> int(repr(c) in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}"))
    1
    >>> def sorted(x):
    ...    x = list(x)
@@ -293,27 +287,12 @@ We can do everything we expect to be able to do with proxied dicts.
    [1, 2]
    >>> sorted(d.items())
    [('a', 1), ('b', 2)]
-   >>> sorted(d.iterkeys())
-   ['a', 'b']
-   >>> sorted(d.itervalues())
-   [1, 2]
-   >>> sorted(d.iteritems())
-   [('a', 1), ('b', 2)]
 
-Always available:
+Always available (note, that dicts in python-3.x are not orderable, so we are
+not checking that under python > 2):
 
 .. doctest::
 
-    >>> int(d < d)
-    0
-    >>> int(d > d)
-    0
-    >>> int(d <= d)
-    1
-    >>> int(d >= d)
-    1
-    >>> int(d == d)
-    1
     >>> int(d != d)
     0
     >>> int(bool(d))
@@ -351,7 +330,7 @@ We can do everything we expect to be able to do with proxied lists.
    1
    >>> str(l)
    '[1, 2]'
-   >>> `l`
+   >>> repr(l)
    '[1, 2]'
    >>> l + l
    [1, 2, 1, 2]
@@ -398,7 +377,7 @@ We can do everything we expect to be able to do with proxied tuples.
    1
    >>> str(l)
    '(1, 2)'
-   >>> `l`
+   >>> repr(l)
    '(1, 2)'
    >>> l + l
    (1, 2, 1, 2)
@@ -607,8 +586,8 @@ we can do everything we expect to be able to do with proxied frozensets.
    ...     from zope.security.interfaces import ForbiddenAttribute
    ...     try:
    ...         return getattr(object, attr)
-   ...     except ForbiddenAttribute, e:
-   ...         return 'ForbiddenAttribute: %s' % e[0]
+   ...     except ForbiddenAttribute as e:
+   ...         return 'ForbiddenAttribute: %s' % e.args[0]
    >>> from zope.security.checker import ProxyFactory
    >>> from zope.security.interfaces import ForbiddenAttribute
    >>> us = frozenset((1, 2))
@@ -779,6 +758,8 @@ iterators
 
 .. doctest::
 
+   >>> [a for a in ProxyFactory(iter([1, 2]))]
+   [1, 2]
    >>> list(ProxyFactory(iter([1, 2])))
    [1, 2]
    >>> list(ProxyFactory(iter((1, 2))))
@@ -815,7 +796,7 @@ We can iterate over sequences
 
    >>> from zope.security.checker import NamesChecker
    >>> from zope.security.checker import ProxyFactory
-   >>> c = NamesChecker(['__getitem__'])
+   >>> c = NamesChecker(['__getitem__', '__len__'])
    >>> p = ProxyFactory(x, c)
 
 Even if they are proxied
@@ -856,7 +837,7 @@ New-style classes
    >>> check_forbidden_get(C, '__dict__')
    'ForbiddenAttribute: __dict__'
    >>> s = str(C)
-   >>> s = `C`
+   >>> s = repr(C)
    >>> int(C.__module__ == __name__)
    1
    >>> len(C.__bases__)
@@ -868,14 +849,6 @@ Always available:
 
 .. doctest::
 
-   >>> int(C < C)
-   0
-   >>> int(C > C)
-   0
-   >>> int(C <= C)
-   1
-   >>> int(C >= C)
-   1
    >>> int(C == C)
    1
    >>> int(C != C)
@@ -907,14 +880,6 @@ Always available:
 
 .. doctest::
 
-   >>> int(c < c)
-   0
-   >>> int(c > c)
-   0
-   >>> int(c <= c)
-   1
-   >>> int(c >= c)
-   1
    >>> int(c == c)
    1
    >>> int(c != c)
@@ -938,24 +903,16 @@ Classic Classes
    >>> check_forbidden_get(C, '__dict__')
    'ForbiddenAttribute: __dict__'
    >>> s = str(C)
-   >>> s = `C`
+   >>> s = repr(C)
    >>> int(C.__module__ == __name__)
    1
    >>> len(C.__bases__)
-   0
+   1
 
 Always available:
 
 .. doctest::
 
-   >>> int(C < C)
-   0
-   >>> int(C > C)
-   0
-   >>> int(C <= C)
-   1
-   >>> int(C >= C)
-   1
    >>> int(C == C)
    1
    >>> int(C != C)
@@ -984,14 +941,6 @@ Always available:
 
 .. doctest::
 
-   >>> int(c < c)
-   0
-   >>> int(c > c)
-   0
-   >>> int(c <= c)
-   1
-   >>> int(c >= c)
-   1
    >>> int(c == c)
    1
    >>> int(c != c)
@@ -1055,7 +1004,7 @@ We work with the ABCMeta meta class:
    >>> check_forbidden_get(PBar, '__dict__')
    'ForbiddenAttribute: __dict__'
    >>> s = str(PBar)
-   >>> s = `PBar`
+   >>> s = repr(PBar)
    >>> int(PBar.__module__ == __name__)
    1
    >>> len(PBar.__bases__)
@@ -1065,19 +1014,11 @@ Always available:
 
 .. doctest::
 
-   >>> int(PBar < PBar)
-   0
-   >>> int(PBar > PBar)
-   0
-   >>> int(PBar <= PBar)
-   1
-   >>> int(PBar >= PBar)
-   1
    >>> int(PBar == PBar)
    1
    >>> int(PBar != PBar)
    0
    >>> int(bool(PBar))
    1
-   >>> int(PBar.__class__ == abc.ABCMeta)
+   >>> int(PBar.__class__ == type)
    1

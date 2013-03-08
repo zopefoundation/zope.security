@@ -2,16 +2,38 @@
 CHANGES
 =======
 
-4.0.0 (unreleased)
-------------------
+4.0.0a6 (unreleased)
+--------------------
 
-- TODO:  Add PyPy support
+- fixed extension compilation on windows python 3.x
 
-- TODO:  add pure-Python implementations of:
 
-  - ``z.s._proxy.getChecker``
-  - ``z.s._proxy.getObject``
-  - ``z.s._proxy._Proxy``
+4.0.0a5 (2013-02-28)
+--------------------
+
+- Undo changes from 4.0.0a4. Instead, ``zope.untrustedpython`` is only
+  included during Python 2 installs.
+
+
+4.0.0a4 (2013-02-28)
+--------------------
+
+- Remove ``untrustedpython`` extra again, since we do not want to support
+  ``zope.untrustedpython`` in ZTK 2.0. If BBB is really needed, we will create
+  a 3.10.0 release.
+
+4.0.0a3 (2013-02-15)
+--------------------
+
+- Fix test breakage in 4.0.0a2 due to deprecation strategy.
+
+4.0.0a2 (2013-02-15)
+--------------------
+
+- Added back the ``untrustedpython`` extra:  now pulls in
+  ``zope.untrustedpython``.  Restored deprecated backward-compatible imports
+  for ``zope.security.untrustedpython.{builtins,interpreter,rcompile}``
+  (the extra and the imports are to be removed in version 4.1).
 
 
 4.0.0a1 (2013-02-14)
@@ -65,6 +87,24 @@ CHANGES
 - Added test convenience helper ``create_interaction`` and
   ``with interaction()``.
 
+3.9.0 (2012-12-21)
+------------------
+
+- Pin ``zope.proxy >= 4.1.0``
+
+- Ship with an included ``proxy.h`` header which is compatible with the
+  4.1.x version ov ``zope.proxy``.
+
+3.8.5 (2012-12-21)
+------------------
+
+- Ship with an included ``proxy.h`` header which is compatible with the
+  supported versions of ``zope.proxy``.
+
+3.8.4 (2012-12-20)
+------------------
+
+- Pin ``zope.proxy >= 3.4.2, <4.1dev``
 
 3.8.3 (2011-09-24)
 ------------------
