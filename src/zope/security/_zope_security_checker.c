@@ -589,10 +589,11 @@ module_functions[] = {
 MOD_INIT(_zope_security_checker)
 {
   PyObject* m;
+  PyObject* mod;
 
-  MOD_DEF(m, "_zope_security_checker", module___doc__, module_functions)
+  MOD_DEF(mod, "_zope_security_checker", module___doc__, module_functions)
 
-  if (m == NULL)
+  if (mod == NULL)
   {
     return MOD_ERROR_VAL;
   }
@@ -680,7 +681,7 @@ if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
     return MOD_ERROR_VAL;
   }
 
-#define EXPORT(N) Py_INCREF(N); PyModule_AddObject(m, #N, N)
+#define EXPORT(N) Py_INCREF(N); PyModule_AddObject(mod, #N, N)
 
   EXPORT(_checkers);
   EXPORT(NoProxy);
@@ -688,7 +689,7 @@ if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
   EXPORT(_available_by_default);
 
   Py_INCREF(&CheckerType);
-  PyModule_AddObject(m, "Checker", (PyObject *)&CheckerType);
+  PyModule_AddObject(mod, "Checker", (PyObject *)&CheckerType);
 
-  return MOD_SUCCESS_VAL(m);
+  return MOD_SUCCESS_VAL(mod);
 }
