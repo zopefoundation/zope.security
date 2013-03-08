@@ -23,7 +23,6 @@ from zope.proxy import PyProxyBase
 
 def _check_name(meth):
     name = meth.__name__
-    func = meth.__func__
     def _wrapper(self, *args, **kw):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
@@ -33,14 +32,15 @@ def _check_name(meth):
 
 def _check_name_inplace(meth):
     name = meth.__name__
-    func = meth.__func__
     def _wrapper(self, *args, **kw):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
         checker.check_getattr(wrapped, name)
         w_meth = getattr(wrapped, name, None)
         if w_meth is not None:
-            return w_meth(*args, **kw)
+            # The proxy object cannot change; we are modifying in place.
+            self._wrapped = w_meth(*args, **kw)
+            return self
         x_name = '__%s__' %  name[3:-2]
         return ProxyPy(getattr(wrapped, x_name)(*args, **kw), checker)
     return functools.update_wrapper(_wrapper, meth)

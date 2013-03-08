@@ -1082,8 +1082,8 @@ class ProxyTestBase(object):
         proxy = before = self._makeOne(target, checker)
         proxy ^= 3
         self.assertFalse(proxy is before)
-        self.assertEqual(proxy, 4)
         self.assertEqual(checker._checked, '__ixor__')
+        self.assertEqual(proxy, 4)
 
     def test___ixor___inplace_checker_allows(self):
         class Foo(object):
