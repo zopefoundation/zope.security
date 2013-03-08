@@ -1358,7 +1358,11 @@ class DummyChecker(object):
         self._raising = raising
         self._allowed = allowed
     def check(self, target, name):
-        self._checked = name
+        # We only want to assign on the first call, since further checks might
+        # be needed for the tests, like__eq__. For some reason the C version
+        # of the proxy does not do that but the Python version does.
+        if self._checked is None:
+            self._checked = name
         if name not in self._allowed:
             if self._raising is not None:
                 raise self._raising
