@@ -190,6 +190,13 @@ class ProxyTestBase(object):
         target = object()
         checker = object() # checker not consulted
         proxy = self._makeOne(target, checker)
+        self.assertEqual(cmp(proxy, proxy), 0)
+
+    @_skip_if_not_Py2
+    def test___cmp___w_target(self):
+        target = object()
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
         self.assertEqual(cmp(proxy, target), 0)
 
     @_skip_if_not_Py2
@@ -199,6 +206,15 @@ class ProxyTestBase(object):
         checker = object() # checker not consulted
         proxy = self._makeOne(target, checker)
         self.assertNotEqual(cmp(proxy, other), 0)
+
+    @_skip_if_not_Py2
+    def test___cmp___w_other_proxy(self):
+        target = object()
+        other = object()
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        o_proxy = self._makeOne(target, checker)
+        self.assertNotEqual(cmp(proxy, o_proxy), 0)
 
     def test___hash___w_self(self):
         target = object()
@@ -1318,6 +1334,22 @@ class ProxyPyTests(unittest.TestCase, ProxyTestBase):
         proxy = self._makeOne(target, checker)
         self.assertTrue(proxy._wrapped is target)
         self.assertTrue(proxy._checker is checker)
+
+    def test___delattr___w__wrapped(self):
+        target = object()
+        checker = object()
+        proxy = self._makeOne(target, checker)
+        def test():
+            del proxy._wrapped
+        self.assertRaises(AttributeError, test)
+
+    def test___delattr___w__checker(self):
+        target = object()
+        checker = object()
+        proxy = self._makeOne(target, checker)
+        def test():
+            del proxy._checker
+        self.assertRaises(AttributeError, test)
 
 
 class DummyChecker(object):

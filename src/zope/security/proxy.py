@@ -88,7 +88,6 @@ class ProxyPy(PyProxyBase):
 
     def __cmp__(self, other):
         # no check
-        import pdb; pdb.set_trace()
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         return cmp(wrapped, other)
 
@@ -189,11 +188,11 @@ for name in ['__iadd__',
 
 try:
     from zope.security._proxy import _Proxy
-except ImportError:
+except ImportError: #pragma NO COVER PyPy
     #getChecker = getCheckerPy
     #getObject = getObjectPy
     Proxy = ProxyPy
-else:
+else: #pragma NO COVER CPython
     from zope.security._proxy import getChecker
     from zope.security._proxy import getObject
     Proxy = _Proxy
