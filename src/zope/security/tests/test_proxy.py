@@ -16,7 +16,7 @@
 import unittest
 import sys
 
-from zope.security._compat import PYTHON2
+from zope.security._compat import PYTHON2, PYPY
 
 def _skip_if_not_Py2(testfunc):
     from functools import update_wrapper
@@ -1313,6 +1313,25 @@ class ProxyTestBase(object):
         self.assertRaises(ForbiddenAttribute, _try)
         self.assertEqual(checker._checked, '__setitem__')
 
+    binops = [
+        "x+y", "x-y", "x*y", "x/y", "divmod(x, y)", "x**y", "x//y",
+        "x<<y", "x>>y", "x&y", "x|y", "x^y",
+        ]
+
+    def test_binops(self):
+        from zope.security.proxy import removeSecurityProxy
+        checker = DummyChecker()
+        for expr in self.binops:
+            first = 1
+            for x in [1, self._makeOne(1, checker)]:
+                for y in [2, self._makeOne(2, checker)]:
+                    if first:
+                        z = eval(expr)
+                        first = 0
+                    else:
+                        self.assertEqual(removeSecurityProxy(eval(expr)), z,
+                                         "x=%r; y=%r; expr=%r" % (x, y, expr))
+
 
 class ProxyCTests(unittest.TestCase, ProxyTestBase):
 
@@ -1328,7 +1347,6 @@ class ProxyPyTests(unittest.TestCase, ProxyTestBase):
         return ProxyPy
 
     def test_wrapper_checker_unaccessible(self):
-        from zope.security.proxy import _secret
         # Can't access '_wrapped' / '_checker' in C version
         target = object()
         checker = object()
@@ -1337,13 +1355,13 @@ class ProxyPyTests(unittest.TestCase, ProxyTestBase):
         self.assertRaises(AttributeError, getattr, proxy, '_checker')
 
     def test_ctor_w_checker(self):
-        from zope.security.proxy import _secret
+        from zope.security.proxy import getObjectPy, getCheckerPy
         # Can't access '_wrapped' / '_checker' in C version
         target = object()
         checker = object()
         proxy = self._makeOne(target, checker)
-        self.assertTrue(getattr(proxy, '_wrapped'+_secret) is target)
-        self.assertTrue(getattr(proxy, '_checker'+_secret) is checker)
+        self.assertTrue(getObjectPy(proxy) is target)
+        self.assertTrue(getCheckerPy(proxy) is checker)
 
     def test___delattr___w__wrapped(self):
         target = object()
@@ -1534,7 +1552,6 @@ class ProxyTests(unittest.TestCase):
             "<security proxied %s.%s instance at"
             % (x.__class__.__module__, x.__class__.__name__)),
                         s)
-
 
     def testRepr(self):
         from zope.security.proxy import ProxyFactory
@@ -1826,6 +1843,7 @@ class ProxyTests(unittest.TestCase):
         a, b = coerce(x, y)
         self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
 
+
 def test_using_mapping_slots_hack():
     """The security proxy will use mapping slots, on the checker to go faster
 
@@ -1920,12 +1938,14 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.TestSuite((
+    suite = unittest.TestSuite((
         unittest.makeSuite(ProxyPyTests),
-        unittest.makeSuite(ProxyCTests),
         unittest.makeSuite(Test_getTestProxyItems),
         unittest.makeSuite(Test_isinstance),
         # pre-geddon
         unittest.makeSuite(ProxyTests),
         unittest.makeSuite(LocationProxySecurityCheckerTests),
     ))
+    if not PYPY:
+        suite.addTest(unittest.makeSuite(ProxyCTests))
+    return suite

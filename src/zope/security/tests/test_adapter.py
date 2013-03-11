@@ -165,6 +165,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
     @_skip_wo_zope_location
     def test__call__w_non_ILocation_w_spacesuit(self):
         from zope.proxy import getProxiedObject
+        from zope.security.proxy import getObject
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
@@ -239,7 +240,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
     def test__call__w_ILocation_w_spacesuit(self):
         from zope.interface import directlyProvides
         from zope.location import ILocation
-        from zope.proxy import getProxiedObject
+        from zope.security.proxy import getObject
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
@@ -256,7 +257,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         self.assertFalse(returned is factory)
         ploc = removeSecurityProxy(returned)
         self.assertTrue(ploc.__parent__ is adapter)
-        unwrapped = getProxiedObject(ploc)
+        unwrapped = getObject(ploc)
         self.assertTrue(unwrapped is factory)
         after = dict([(k, v) for k, v in unwrapped.__dict__.items()
                          if k not in ('_called_with', '__parent__')])
@@ -268,7 +269,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
     def test__call__w_ILocation_w_spacesuit_w_existing_parent(self):
         from zope.interface import directlyProvides
         from zope.location import ILocation
-        from zope.proxy import getProxiedObject
+        from zope.security.proxy import getObject
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
@@ -286,7 +287,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         self.assertFalse(returned is factory)
         ploc = removeSecurityProxy(returned)
         self.assertTrue(ploc.__parent__ is parent)
-        unwrapped = getProxiedObject(ploc)
+        unwrapped = getObject(ploc)
         self.assertTrue(unwrapped is factory)
         after = dict([(k, v) for k, v in unwrapped.__dict__.items()
                          if k not in ('_called_with', '__parent__')])

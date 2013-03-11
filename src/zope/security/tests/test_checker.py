@@ -32,8 +32,7 @@ class Test_ProxyFactory(unittest.TestCase):
         return ProxyFactory(object, checker)
 
     def test_w_already_proxied_no_checker(self):
-        from zope.security._proxy import _Proxy as Proxy
-        from zope.security._proxy import getChecker
+        from zope.security.proxy import Proxy, getChecker
         obj = object()
         def _check(*x):
             pass
@@ -43,8 +42,7 @@ class Test_ProxyFactory(unittest.TestCase):
         self.assertTrue(getChecker(returned) is _check)
 
     def test_w_already_proxied_same_checker(self):
-        from zope.security._proxy import _Proxy as Proxy
-        from zope.security._proxy import getChecker
+        from zope.security.proxy import Proxy, getChecker
         obj = object()
         def _check(*x):
             pass
@@ -54,7 +52,7 @@ class Test_ProxyFactory(unittest.TestCase):
         self.assertTrue(getChecker(returned) is _check)
 
     def test_w_already_proxied_different_checker(self):
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         def _check(*x):
             pass
@@ -64,7 +62,7 @@ class Test_ProxyFactory(unittest.TestCase):
         self.assertRaises(TypeError, self._callFUT, proxy, _sneaky)
 
     def test_w_explicit_checker(self):
-        from zope.security._proxy import getChecker
+        from zope.security.proxy import getChecker
         obj = object()
         def _check(*x):
             pass
@@ -78,8 +76,7 @@ class Test_ProxyFactory(unittest.TestCase):
         self.assertTrue(returned is obj)
 
     def test_no_checker_w_dunder(self):
-        from zope.security._proxy import getChecker
-        from zope.security._proxy import getObject
+        from zope.security.proxy import getChecker, getObject
         _check = object() # don't use a func, due to bound method
         class _WithChecker(object):
             __Security_checker__ = _check
@@ -93,8 +90,7 @@ class Test_ProxyFactory(unittest.TestCase):
         from zope.security.checker import Checker
         from zope.security.checker import _checkers
         from zope.security.checker import _clear
-        from zope.security._proxy import getChecker
-        from zope.security._proxy import getObject
+        from zope.security.proxy import getChecker, getObject
         class _Obj(object):
             pass
         obj = _Obj()
@@ -128,21 +124,21 @@ class Test_canWrite(unittest.TestCase):
         return _Checker()
 
     def test_ok(self):
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker())
         self.assertTrue(self._callFUT(proxy, 'whatever'))
 
     def test_w_setattr_unauth(self):
         from zope.security.interfaces import Unauthorized
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker(ch_set=Unauthorized))
         self.assertFalse(self._callFUT(proxy, 'whatever'))
 
     def test_w_setattr_forbidden_getattr_allowed(self):
         from zope.security.interfaces import ForbiddenAttribute
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker(ch_set=ForbiddenAttribute))
         self.assertFalse(self._callFUT(proxy, 'whatever'))
@@ -150,7 +146,7 @@ class Test_canWrite(unittest.TestCase):
     def test_w_setattr_forbidden_getattr_unauth(self):
         from zope.security.interfaces import ForbiddenAttribute
         from zope.security.interfaces import Unauthorized
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker(ch_get=Unauthorized,
                                              ch_set=ForbiddenAttribute))
@@ -158,7 +154,7 @@ class Test_canWrite(unittest.TestCase):
 
     def test_w_setattr_forbidden_getattr_forbidden(self):
         from zope.security.interfaces import ForbiddenAttribute
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker(ch_get=ForbiddenAttribute,
                                              ch_set=ForbiddenAttribute))
@@ -179,21 +175,21 @@ class Test_canAccess(unittest.TestCase):
         return _Checker()
 
     def test_ok(self):
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker())
         self.assertTrue(self._callFUT(proxy, 'whatever'))
 
     def test_w_getattr_unauth(self):
         from zope.security.interfaces import Unauthorized
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker(ch_get=Unauthorized))
         self.assertFalse(self._callFUT(proxy, 'whatever'))
 
     def test_w_setattr_forbidden_getattr_allowed(self):
         from zope.security.interfaces import ForbiddenAttribute
-        from zope.security._proxy import _Proxy as Proxy
+        from zope.security.proxy import Proxy
         obj = object()
         proxy = Proxy(obj, self._makeChecker(ch_get=ForbiddenAttribute))
         self.assertRaises(ForbiddenAttribute, self._callFUT, proxy, 'whatever')
@@ -344,8 +340,7 @@ class CheckerTestsBase(object):
             del thread_local.interaction
 
     def test_proxy_already_proxied(self):
-        from zope.security._proxy import _Proxy as Proxy
-        from zope.security._proxy import getChecker
+        from zope.security.proxy import Proxy, getChecker
         obj = object()
         def _check(*x):
             pass
@@ -362,8 +357,7 @@ class CheckerTestsBase(object):
         self.assertTrue(returned is obj)
 
     def test_proxy_no_checker_w_dunder(self):
-        from zope.security._proxy import getChecker
-        from zope.security._proxy import getObject
+        from zope.security.proxy import getChecker, getObject
         _check = object() # don't use a func, due to bound method
         class _WithChecker(object):
             __Security_checker__ = _check
@@ -378,8 +372,7 @@ class CheckerTestsBase(object):
         from zope.security.checker import Checker
         from zope.security.checker import _checkers
         from zope.security.checker import _clear
-        from zope.security._proxy import getChecker
-        from zope.security._proxy import getObject
+        from zope.security.proxy import getChecker, getObject
         class _Obj(object):
             pass
         obj = _Obj()
@@ -696,7 +689,7 @@ class _SelectCheckerBase(object):
                     datetime.datetime.now(),
                     datetime.date.today(),
                     datetime.datetime.now().time(),
-                    datetime.tzinfo('UTC'),
+                    datetime.tzinfo(),
                    ]:
             self.assertTrue(self._callFUT(obj) is None)
 
@@ -1588,8 +1581,7 @@ class Test(unittest.TestCase):
 
     def testLayeredProxies(self):
         #Test that a Proxy will not be re-proxied.
-        from zope.proxy import getProxiedObject
-        from zope.security.proxy import Proxy
+        from zope.security.proxy import Proxy, getObject
         from zope.security.checker import Checker
         from zope.security.checker import NamesChecker
         class Base:
@@ -1600,12 +1592,12 @@ class Test(unittest.TestCase):
         # base is not proxied, so we expect a proxy
         proxy1 = checker.proxy(base)
         self.assertTrue(type(proxy1) is Proxy)
-        self.assertTrue(getProxiedObject(proxy1) is base)
+        self.assertTrue(getObject(proxy1) is base)
 
         # proxy is a proxy, so we don't expect to get another
         proxy2 = checker.proxy(proxy1)
         self.assertTrue(proxy2 is proxy1)
-        self.assertTrue(getProxiedObject(proxy2) is base)
+        self.assertTrue(getObject(proxy2) is base)
 
 
     def testMultiChecker(self):

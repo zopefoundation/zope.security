@@ -20,16 +20,16 @@ from zope.proxy import PyProxyBase
 from zope.security._compat import PYPY
 from zope.security.interfaces import ForbiddenAttribute
 
-# Never expose this attribute in an utrusted environment.
-_secret = str(hash(object()))
-
-def _check_name(meth):
+def _check_name(meth, wrap_result=True):
     name = meth.__name__
     def _wrapper(self, *args, **kw):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
-        checker.check_getattr(wrapped, name)
-        return checker.proxy(getattr(wrapped, name)(*args, **kw))
+        checker.check(wrapped, name)
+        res = meth(self, *args, **kw)
+        if not wrap_result:
+            return res
+        return checker.proxy(res)
     return functools.update_wrapper(_wrapper, meth)
 
 def _check_name_inplace(meth):
@@ -37,7 +37,7 @@ def _check_name_inplace(meth):
     def _wrapper(self, *args, **kw):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
-        checker.check_getattr(wrapped, name)
+        checker.check(wrapped, name)
         w_meth = getattr(wrapped, name, None)
         if w_meth is not None:
             # The proxy object cannot change; we are modifying in place.
@@ -74,14 +74,15 @@ class ProxyPy(PyProxyBase):
 
     # Attribute protocol
     def __getattribute__(self, name):
-        # Explicitely disallow _wrapped and _checker to be accessed.
         if name in ('_wrapped', '_checker'):
-            raise AttributeError(name)
+            # Only allow _wrapped and _checker to be accessed from inside.
+            if sys._getframe(1).f_locals.get('self') is not self:
+                raise AttributeError(name)
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        if name == '_wrapped'+_secret:
+        if name == '_wrapped':
             return wrapped
         checker = super(PyProxyBase, self).__getattribute__('_checker')
-        if name == '_checker'+_secret:
+        if name == '_checker':
             return checker
         if name not in ['__cmp__', '__hash__', '__bool__', '__nonzero__',
                         '__lt__', '__le__', '__eq__', '__ne__', '__ge__',
@@ -113,13 +114,13 @@ class ProxyPy(PyProxyBase):
 
     @_check_name
     def __getslice__(self, start, end):
-        getitem = super(PyProxyBase, self).__getattribute__('__getitem__')
-        return getitem(start, end)
+        getitem = PyProxyBase.__getattribute__(self, '__getitem__')
+        return getitem(slice(start, end))
 
     @_check_name
     def __setslice__(self, i, j, value):
-        setitem = super(PyProxyBase, self).__getattribute__('__setitem__')
-        return setitem(i, j, value)
+        setitem = PyProxyBase.__getattribute__(self, '__setitem__')
+        return setitem(slice(i, j), value)
 
     def __cmp__(self, other):
         # no check
@@ -212,7 +213,6 @@ for name in ['__call__',
              #'__bool__',    # Unchecked in C proxy (rich coparison)
              #'__hash__',    # Unchecked in C proxy (rich coparison)
              #'__cmp__',     # Unchecked in C proxy
-             '__len__',
              '__getitem__',
              '__setitem__',
              '__delitem__',
@@ -263,6 +263,11 @@ for name in ['__call__',
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name(meth))
 
+for name in ['__len__',
+             ]:
+    meth = getattr(PyProxyBase, name)
+    setattr(ProxyPy, name, _check_name(meth, False))
+
 for name in ['__iadd__',
              '__isub__',
              '__imul__',
@@ -281,10 +286,13 @@ for name in ['__iadd__',
     setattr(ProxyPy, name, _check_name_inplace(meth))
 
 def getCheckerPy(proxy):
-    return getattr(proxy, '_checker'+_secret)
+    return super(PyProxyBase, proxy).__getattribute__('_checker')
 
 def getObjectPy(proxy):
-    return getattr(proxy, '_wrapped'+_secret)
+    isinstance_func = builtin_isinstance or isinstance
+    if not isinstance_func(proxy, ProxyPy):
+        return proxy
+    return super(PyProxyBase, proxy).__getattribute__('_wrapped')
 
 try:
     from zope.security._proxy import _Proxy
