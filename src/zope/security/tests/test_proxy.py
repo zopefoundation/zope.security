@@ -1378,7 +1378,7 @@ class DummyChecker(object):
         self._checked = name
         if name not in self._allowed:
             if self._raising is not None:
-                raise self._raising()
+                raise self._raising(name)
     check_getattr = check_setattr = check
     def proxy(self, value):
         self._proxied = value

@@ -16,9 +16,10 @@
 __docformat__ = 'restructuredtext'
 
 import functools
-
+import sys
 
 from zope.proxy import PyProxyBase
+from zope.security.interfaces import ForbiddenAttribute
 
 
 def _check_name(meth):
@@ -44,6 +45,15 @@ def _check_name_inplace(meth):
         x_name = '__%s__' %  name[3:-2]
         return ProxyPy(getattr(wrapped, x_name)(*args, **kw), checker)
     return functools.update_wrapper(_wrapper, meth)
+
+def _fmt_address(obj):
+    # Try to replicate PyString_FromString("%p", obj), which actually uses
+    # the platform sprintf(buf, "%p", obj), which we cannot access from Python
+    # directly (and ctypes seems like overkill).
+    if sys.platform == 'win32':
+        return '0x%08x' % id(obj)
+    else:
+        return '0x%0x' % id(obj)
 
 
 class ProxyPy(PyProxyBase):
@@ -96,6 +106,24 @@ class ProxyPy(PyProxyBase):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         return hash(wrapped)
 
+    def __str__(self):
+        try:
+            return _check_name(PyProxyBase.__str__)(self)
+        except ForbiddenAttribute:
+            wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+            return '<security proxied %s.%s instance at %s>' %(
+                wrapped.__class__.__module__, wrapped.__class__.__name__,
+                _fmt_address(wrapped))
+
+    def __repr__(self):
+        try:
+            return _check_name(PyProxyBase.__repr__)(self)
+        except ForbiddenAttribute:
+            wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+            return '<security proxied %s.%s instance at %s>' %(
+                wrapped.__class__.__module__, wrapped.__class__.__name__,
+                _fmt_address(wrapped))
+
     def __nonzero__(self):
         # no check
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
@@ -103,8 +131,8 @@ class ProxyPy(PyProxyBase):
     __bool__ = __nonzero__
 
 for name in ['__call__',
-             '__repr__',
-             '__str__',
+             #'__repr__',
+             #'__str__',
              '__unicode__',
              '__reduce__',
              '__reduce_ex__',
