@@ -5,7 +5,9 @@ CHANGES
 4.0.0a6 (unreleased)
 --------------------
 
-- fixed extension compilation on windows python 3.x
+- Added support for PyPy.
+
+- Fixed extension compilation on windows python 3.x
 
 
 4.0.0a5 (2013-02-28)
