@@ -81,19 +81,28 @@ class ProxyPy(PyProxyBase):
             return checker
         if name not in ['__cmp__', '__hash__', '__bool__']:
             checker.check_getattr(wrapped, name)
-        return super(ProxyPy, self).__getattribute__(name)
+        return checker.proxy(super(ProxyPy, self).__getattribute__(name))
 
     def __getattr__(self, name):
-        return getattr(self._wrapped, name)
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        checker.check_getattr(wrapped, name)
+        return checker.proxy(getattr(self._wrapped, name))
 
     def __setattr__(self, name, value):
         if name in ('_wrapped', '_checker'):
             return super(PyProxyBase, self).__setattr__(name, value)
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        checker.check_setattr(wrapped, name)
         setattr(self._wrapped, name, value)
 
     def __delattr__(self, name):
         if name in ('_wrapped', '_checker'):
             raise AttributeError()
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        checker.check_setattr(wrapped, name)
         delattr(self._wrapped, name)
 
     def __cmp__(self, other):
