@@ -1536,7 +1536,11 @@ class ProxyTests(unittest.TestCase):
         self.c.ok = 1
 
     def testDerivation(self):
-        from zope.proxy import ProxyBase
+        from zope.security._compat import PURE_PYTHON
+        if PURE_PYTHON:
+            from zope.proxy import PyProxyBase as ProxyBase
+        else:
+            from zope.proxy import ProxyBase
         self.assertTrue(isinstance(self.p, ProxyBase))
 
     def testStr(self):
