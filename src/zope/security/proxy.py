@@ -79,7 +79,9 @@ class ProxyPy(PyProxyBase):
             return wrapped
         if name == '_checker':
             return checker
-        if name not in ['__cmp__', '__hash__', '__bool__']:
+        if name not in ['__cmp__', '__hash__', '__bool__', '__nonzero__',
+                        '__lt__', '__le__', '__eq__', '__ne__', '__ge__',
+                        '__gt__']:
             checker.check_getattr(wrapped, name)
         return checker.proxy(super(ProxyPy, self).__getattribute__(name))
 
@@ -105,15 +107,68 @@ class ProxyPy(PyProxyBase):
         checker.check_setattr(wrapped, name)
         delattr(self._wrapped, name)
 
+    @_check_name
+    def __getslice__(self, start, end):
+        getitem = super(PyProxyBase, self).__getattribute__('__getitem__')
+        return getitem(start, end)
+
+    @_check_name
+    def __setslice__(self, i, j, value):
+        setitem = super(PyProxyBase, self).__getattribute__('__setitem__')
+        return setitem(i, j, value)
+
     def __cmp__(self, other):
         # no check
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         return cmp(wrapped, other)
 
+    def __lt__(self, other):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return wrapped < other
+
+    def __le__(self, other):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return wrapped <= other
+
+    def __eq__(self, other):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return wrapped == other
+
+    def __ne__(self, other):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return wrapped != other
+
+    def __ge__(self, other):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return wrapped >= other
+
+    def __gt__(self, other):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return wrapped > other
+
     def __hash__(self):
         # no check
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         return hash(wrapped)
+
+    def __nonzero__(self):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return bool(wrapped)
+    __bool__ = __nonzero__
+
+    def __coerce__(self, other):
+        # For some reason _check_name does not work for coerce()
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        checker.check_getattr(wrapped, '__coerce__')
+        return PyProxyBase.__coerce__(self, other)
 
     def __str__(self):
         try:
@@ -133,27 +188,22 @@ class ProxyPy(PyProxyBase):
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
                 _fmt_address(wrapped))
 
-    def __nonzero__(self):
-        # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        return bool(wrapped)
-    __bool__ = __nonzero__
-
 for name in ['__call__',
              #'__repr__',
              #'__str__',
              '__unicode__',
              '__reduce__',
              '__reduce_ex__',
-             '__lt__',
-             '__le__',
-             '__eq__',
-             '__ge__',
-             '__gt__',
+             #'__lt__',      # Unchecked in C proxy (rich coparison)
+             #'__le__',      # Unchecked in C proxy (rich coparison)
+             #'__eq__',      # Unchecked in C proxy (rich coparison)
+             #'__ne__',      # Unchecked in C proxy (rich coparison)
+             #'__ge__',      # Unchecked in C proxy (rich coparison)
+             #'__gt__',      # Unchecked in C proxy (rich coparison)
+             #'__nonzero__', # Unchecked in C proxy (rich coparison)
+             #'__bool__',    # Unchecked in C proxy (rich coparison)
+             #'__hash__',    # Unchecked in C proxy (rich coparison)
              #'__cmp__',     # Unchecked in C proxy
-             #'__nonzero__', # Unchecked in C proxy
-             #'__bool__',    # Unchecked in C proxy
-             #'__hash__',    # Unchecked in C proxy
              '__len__',
              '__getitem__',
              '__setitem__',
@@ -173,7 +223,6 @@ for name in ['__call__',
              '__oct__',
              '__hex__',
              '__index__',
-             '__coerce__',
              '__add__',
              '__sub__',
              '__mul__',
