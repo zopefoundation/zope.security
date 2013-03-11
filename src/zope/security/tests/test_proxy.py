@@ -239,7 +239,7 @@ class ProxyTestBase(object):
             def __call__(self):
                 return 'Bar'
         target = Foo()
-        checker = DummyChecker(Unauthorized, ['__name__'])
+        checker = DummyChecker(Unauthorized, ['__name__', '__str__'])
         proxy = self._makeOne(target, checker)
         self.assertRaises(Unauthorized, proxy)
         self.assertEqual(checker._checked, '__call__')
@@ -250,7 +250,7 @@ class ProxyTestBase(object):
             def __call__(self):
                 return 'Bar'
         target = Foo()
-        checker = DummyChecker(ForbiddenAttribute, ['__name__'])
+        checker = DummyChecker(ForbiddenAttribute, ['__str__'])
         proxy = self._makeOne(target, checker)
         self.assertRaises(ForbiddenAttribute, proxy)
         self.assertEqual(checker._checked, '__call__')
@@ -476,18 +476,18 @@ class ProxyTestBase(object):
         self.assertEqual(checker._checked, '__pow__')
 
     def test___pow___w_y_proxied_allowed(self):
-        x, y, z = 3, 4, 7
+        x, y = 3, 4
         checker = DummyChecker()
         proxy = self._makeOne(y, checker)
-        self.assertEqual(pow(x, proxy, z), pow(x, y, z))
+        self.assertEqual(pow(x, proxy), pow(x, y))
         self.assertEqual(checker._checked, '__rpow__')
 
     def test___pow___w_y_proxied_forbidden(self):
         from zope.security.interfaces import ForbiddenAttribute
-        x, y, z = 3, 4, 7
+        x, y = 3, 4
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(y, checker)
-        self.assertRaises(ForbiddenAttribute, lambda: pow(x, proxy, z))
+        self.assertRaises(ForbiddenAttribute, lambda: pow(x, proxy))
         self.assertEqual(checker._checked, '__rpow__')
 
     def test___pow___w_z_proxied_allowed(self):
@@ -1351,6 +1351,23 @@ class ProxyPyTests(unittest.TestCase, ProxyTestBase):
             del proxy._checker
         self.assertRaises(AttributeError, test)
 
+    def test___pow___w_z_proxied_allowed(self):
+        x, y, z = 3, 4, 7
+        checker = DummyChecker()
+        proxy = self._makeOne(z, checker)
+        # Disabled, because a PyProxy cannot lie about its type, so
+        # pow(i, j, proxy(k)) will fail with a TypeError
+        self.assertRaises(TypeError, pow, (x, y, proxy))
+
+    def test___pow___w_z_proxied_forbidden(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        x, y, z = 3, 4, 7
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(z, checker)
+        # Disabled, because a PyProxy cannot lie about its type, so
+        # pow(i, j, proxy(k)) will fail with a TypeError
+        self.assertRaises(TypeError, pow, (x, y, proxy))
+
 
 class DummyChecker(object):
     _proxied = _checked = None
@@ -1358,14 +1375,10 @@ class DummyChecker(object):
         self._raising = raising
         self._allowed = allowed
     def check(self, target, name):
-        # We only want to assign on the first call, since further checks might
-        # be needed for the tests, like__eq__. For some reason the C version
-        # of the proxy does not do that but the Python version does.
-        if self._checked is None:
-            self._checked = name
+        self._checked = name
         if name not in self._allowed:
             if self._raising is not None:
-                raise self._raising
+                raise self._raising()
     check_getattr = check_setattr = check
     def proxy(self, value):
         self._proxied = value
