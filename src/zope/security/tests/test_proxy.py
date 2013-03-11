@@ -214,7 +214,7 @@ class ProxyTestBase(object):
         checker = object() # checker not consulted
         proxy = self._makeOne(target, checker)
         o_proxy = self._makeOne(target, checker)
-        self.assertNotEqual(cmp(proxy, o_proxy), 0)
+        self.assertEqual(cmp(proxy, o_proxy), 0)
 
     def test___hash___w_self(self):
         target = object()
