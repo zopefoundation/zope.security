@@ -27,7 +27,7 @@ def _check_name(meth):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
         checker.check_getattr(wrapped, name)
-        return getattr(wrapped, name)(*args, **kw)
+        return checker.proxy(getattr(wrapped, name)(*args, **kw))
     return functools.update_wrapper(_wrapper, meth)
 
 def _check_name_inplace(meth):
