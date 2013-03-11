@@ -13,8 +13,6 @@
 ##############################################################################
 """Helper functions for Proxies.
 """
-__docformat__ = 'restructuredtext'
-
 import functools
 import sys
 
@@ -22,6 +20,8 @@ from zope.proxy import PyProxyBase
 from zope.security._compat import PYPY
 from zope.security.interfaces import ForbiddenAttribute
 
+# Never expose this attribute in an utrusted environment.
+_secret = str(hash(object()))
 
 def _check_name(meth):
     name = meth.__name__
@@ -74,11 +74,14 @@ class ProxyPy(PyProxyBase):
 
     # Attribute protocol
     def __getattribute__(self, name):
+        # Explicitely disallow _wrapped and _checker to be accessed.
+        if name in ('_wrapped', '_checker'):
+            raise AttributeError(name)
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        checker = super(PyProxyBase, self).__getattribute__('_checker')
-        if name == '_wrapped':
+        if name == '_wrapped'+_secret:
             return wrapped
-        if name == '_checker':
+        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        if name == '_checker'+_secret:
             return checker
         if name not in ['__cmp__', '__hash__', '__bool__', '__nonzero__',
                         '__lt__', '__le__', '__eq__', '__ne__', '__ge__',
@@ -90,7 +93,7 @@ class ProxyPy(PyProxyBase):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
         checker.check_getattr(wrapped, name)
-        return checker.proxy(getattr(self._wrapped, name))
+        return checker.proxy(getattr(wrapped, name))
 
     def __setattr__(self, name, value):
         if name in ('_wrapped', '_checker'):
@@ -98,7 +101,7 @@ class ProxyPy(PyProxyBase):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
         checker.check_setattr(wrapped, name)
-        setattr(self._wrapped, name, value)
+        setattr(wrapped, name, value)
 
     def __delattr__(self, name):
         if name in ('_wrapped', '_checker'):
@@ -106,7 +109,7 @@ class ProxyPy(PyProxyBase):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
         checker.check_setattr(wrapped, name)
-        delattr(self._wrapped, name)
+        delattr(wrapped, name)
 
     @_check_name
     def __getslice__(self, start, end):
@@ -169,7 +172,11 @@ class ProxyPy(PyProxyBase):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
         checker.check_getattr(wrapped, '__coerce__')
-        return PyProxyBase.__coerce__(self, other)
+        # Re-implement __coerce__(), so we do not depend on self._wrapped
+        left, right = coerce(wrapped, other)
+        if left == wrapped and type(left) is type(wrapped):
+            left = self
+        return left, right
 
     def __str__(self):
         try:
@@ -274,12 +281,10 @@ for name in ['__iadd__',
     setattr(ProxyPy, name, _check_name_inplace(meth))
 
 def getCheckerPy(proxy):
-    return proxy._checker
+    return getattr(proxy, '_checker'+_secret)
 
 def getObjectPy(proxy):
-    # Aem, if this works, how is the Python implementation providing any
-    # security?
-    return proxy._wrapped
+    return getattr(proxy, '_wrapped'+_secret)
 
 try:
     from zope.security._proxy import _Proxy

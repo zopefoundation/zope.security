@@ -1327,13 +1327,23 @@ class ProxyPyTests(unittest.TestCase, ProxyTestBase):
         from zope.security.proxy import ProxyPy
         return ProxyPy
 
-    def test_ctor_w_checker(self):
+    def test_wrapper_checker_unaccessible(self):
+        from zope.security.proxy import _secret
         # Can't access '_wrapped' / '_checker' in C version
         target = object()
         checker = object()
         proxy = self._makeOne(target, checker)
-        self.assertTrue(proxy._wrapped is target)
-        self.assertTrue(proxy._checker is checker)
+        self.assertRaises(AttributeError, getattr, proxy, '_wrapped')
+        self.assertRaises(AttributeError, getattr, proxy, '_checker')
+
+    def test_ctor_w_checker(self):
+        from zope.security.proxy import _secret
+        # Can't access '_wrapped' / '_checker' in C version
+        target = object()
+        checker = object()
+        proxy = self._makeOne(target, checker)
+        self.assertTrue(getattr(proxy, '_wrapped'+_secret) is target)
+        self.assertTrue(getattr(proxy, '_checker'+_secret) is checker)
 
     def test___delattr___w__wrapped(self):
         target = object()
