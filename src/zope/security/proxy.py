@@ -19,6 +19,7 @@ import functools
 import sys
 
 from zope.proxy import PyProxyBase
+from zope.security._compat import PYPY
 from zope.security.interfaces import ForbiddenAttribute
 
 
@@ -272,27 +273,26 @@ for name in ['__iadd__',
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name_inplace(meth))
 
+def getCheckerPy(proxy):
+    return proxy._checker
+
+def getObjectPy(proxy):
+    # Aem, if this works, how is the Python implementation providing any
+    # security?
+    return proxy._wrapped
+
 try:
     from zope.security._proxy import _Proxy
 except ImportError: #pragma NO COVER PyPy
-    #getChecker = getCheckerPy
-    #getObject = getObjectPy
+    getChecker = getCheckerPy
+    getObject = getObjectPy
     Proxy = ProxyPy
 else: #pragma NO COVER CPython
     from zope.security._proxy import getChecker
     from zope.security._proxy import getObject
     Proxy = _Proxy
 
-# We need the injection of DecoratedSecurityCheckerDescriptor into
-# zope.location's LocationProxy as soon someone uses security proxies by
-# importing zope.security.proxy:
-import zope.security.decorator
-
-
 removeSecurityProxy = getObject
-
-# This import represents part of the API for this module
-from zope.security.checker import ProxyFactory
 
 def getTestProxyItems(proxy):
     """Return a sorted sequence of checker names and permissions for testing
@@ -309,7 +309,10 @@ def isinstance(object, cls):
     """
     global builtin_isinstance
     if builtin_isinstance is None:
-        builtin_isinstance = __builtins__['isinstance']
+        if PYPY:
+            builtin_isinstance = getattr(__builtins__, 'isinstance')
+        else:
+            builtin_isinstance = __builtins__['isinstance']
     # The removeSecurityProxy call is OK here because it is *only*
     # being used for isinstance
     return builtin_isinstance(removeSecurityProxy(object), cls)

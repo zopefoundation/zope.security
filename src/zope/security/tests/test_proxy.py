@@ -1887,13 +1887,13 @@ def test_using_mapping_slots_hack():
 
 class LocationProxySecurityCheckerTests(unittest.TestCase):
 
-    def test_LocationProxy_gets_a_security_checker_when_importing_z_s_proxy(
+    def test_LocationProxy_gets_a_security_checker_when_importing_z_security(
             self):
         # Regression test for a problem introduced in 3.8.1 and fixed in
         # 3.8.3. For details see change log.
         import sys
         from zope.location.location import LocationProxy
-        import zope.security.proxy
+        import zope.security
         from zope.security._compat import reload
         # This attribute is set when zope.security.decorator is imported, to
         # show that it will be set too, if zope.security.proxy is imported
@@ -1904,7 +1904,7 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
         # After deleting zope.security.decorator and reloading
         # zope.security.proxy the attribute is set again:
         del sys.modules["zope.security.decorator"]
-        reload(zope.security.proxy)
+        reload(zope.security)
         self.assertTrue(
             hasattr(LocationProxy, '__Security_checker__'))
 

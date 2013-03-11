@@ -50,8 +50,8 @@ from zope.security._definitions import thread_local
 from zope.security._compat import CLASS_TYPES
 from zope.security._compat import PYTHON2
 from zope.security._compat import _u
-from zope.security._proxy import _Proxy as Proxy
-from zope.security._proxy import getChecker
+from zope.security.proxy import Proxy
+from zope.security.proxy import getChecker
 
 try:
     from zope.exceptions import DuplicationError
@@ -97,6 +97,10 @@ def ProxyFactory(object, checker=None):
     return Proxy(object, checker)
 
 directlyProvides(ProxyFactory, ISecurityProxyFactory)
+
+# This import represents part of the API for the proxy module
+from . import proxy
+proxy.ProxyFactory = ProxyFactory
 
 def canWrite(obj, name):
     """Check whether the interaction may write an attribute named name on obj.
