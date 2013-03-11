@@ -38,7 +38,6 @@ def protectName(class_, name, permission):
 
 def protectSetAttribute(class_, name, permission):
     """Set a permission on a particular name."""
-
     checker = getCheckerForInstancesOf(class_)
     if checker is None:
         checker = Checker({}, {})

@@ -114,13 +114,19 @@ class ProxyPy(PyProxyBase):
 
     @_check_name
     def __getslice__(self, start, end):
-        getitem = PyProxyBase.__getattribute__(self, '__getitem__')
-        return getitem(slice(start, end))
+        try:
+            return self._wrapped.__getslice__(start, end)
+        except:
+            getitem = PyProxyBase.__getattribute__(self, '__getitem__')
+            return getitem(slice(start, end))
 
     @_check_name
     def __setslice__(self, i, j, value):
-        setitem = PyProxyBase.__getattribute__(self, '__setitem__')
-        return setitem(slice(i, j), value)
+        try:
+            return self._wrapped.__setslice__(i, j, value)
+        except:
+            setitem = PyProxyBase.__getattribute__(self, '__setitem__')
+            return setitem(slice(i, j), value)
 
     def __cmp__(self, other):
         # no check
@@ -172,17 +178,14 @@ class ProxyPy(PyProxyBase):
         # For some reason _check_name does not work for coerce()
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
-        checker.check_getattr(wrapped, '__coerce__')
-        # Re-implement __coerce__(), so we do not depend on self._wrapped
-        left, right = coerce(wrapped, other)
-        if left == wrapped and type(left) is type(wrapped):
-            left = self
-        return left, right
+        checker.check(wrapped, '__coerce__')
+        return super(ProxyPy, self).__coerce__(other)
 
     def __str__(self):
         try:
             return _check_name(PyProxyBase.__str__)(self)
-        except ForbiddenAttribute:
+        except:
+            # The C implementation catches all exceptions.
             wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
             return '<security proxied %s.%s instance at %s>' %(
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
@@ -191,7 +194,8 @@ class ProxyPy(PyProxyBase):
     def __repr__(self):
         try:
             return _check_name(PyProxyBase.__repr__)(self)
-        except ForbiddenAttribute:
+        except:
+            # The C implementation catches all exceptions.
             wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
             return '<security proxied %s.%s instance at %s>' %(
                 wrapped.__class__.__module__, wrapped.__class__.__name__,

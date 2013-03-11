@@ -177,6 +177,8 @@ class CheckerPy(object):
         if set_permissions is not None:
             if not isinstance(set_permissions, dict):
                 raise TypeError('set_permissions must be a dict')
+        else:
+            set_permissions = {}
         self.set_permissions = set_permissions
 
     def permission_id(self, name):

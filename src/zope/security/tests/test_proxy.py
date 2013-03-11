@@ -16,7 +16,7 @@
 import unittest
 import sys
 
-from zope.security._compat import PYTHON2, PYPY
+from zope.security._compat import PYTHON2, PYPY, PURE_PYTHON
 
 def _skip_if_not_Py2(testfunc):
     from functools import update_wrapper
@@ -1946,6 +1946,6 @@ def test_suite():
         unittest.makeSuite(ProxyTests),
         unittest.makeSuite(LocationProxySecurityCheckerTests),
     ))
-    if not PYPY:
+    if not (PYPY or PURE_PYTHON):
         suite.addTest(unittest.makeSuite(ProxyCTests))
     return suite
