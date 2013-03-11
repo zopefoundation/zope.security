@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.0a6 (unreleased)
+4.0.0b1 (2013-03-11)
 --------------------
 
 - Added support for PyPy.
