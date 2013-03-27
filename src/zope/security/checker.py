@@ -515,7 +515,7 @@ class CheckerLoggingMixin(object):
     _file = sys.stderr
 
     def _log(self, msg, verbosity=1):
-        if verbosity >= self.verbosity:
+        if self.verbosity >= verbosity:
             self._file.write('%s\n' % msg)
 
     def check(self, object, name):

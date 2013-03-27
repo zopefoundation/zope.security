@@ -5,7 +5,9 @@ CHANGES
 4.0.0b2 (unreleased)
 --------------------
 
-- TBD
+- Bugfix: ZOPE_WATCH_CHECKERS=2 used to incorrectly suppress
+  unauthorized/forbidden warnings.
+
 
 4.0.0b1 (2013-03-11)
 --------------------

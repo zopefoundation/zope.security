@@ -1162,6 +1162,16 @@ class CheckerLoggingMixinTests(unittest.TestCase):
         self.assertEqual(checker._file[0],
                          '[CHK] - Unauthorized: name on TESTING\n')
 
+    def test_check_unauthorized_raised_verbosity(self):
+        from zope.security.interfaces import Unauthorized
+        checker = self._makeOne(Unauthorized)
+        checker.verbosity = 2
+        self.assertRaises(Unauthorized,
+                          checker.check, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Unauthorized: name on TESTING\n')
+
     def test_check_forbidden_attribute(self):
         from zope.security.interfaces import ForbiddenAttribute
         checker = self._makeOne(ForbiddenAttribute)
