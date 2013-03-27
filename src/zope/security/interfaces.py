@@ -132,7 +132,7 @@ class IChecker(Interface):
         May raise Unauthorized or Forbidden.  Returns no value.
 
         If a checker implements __setitem__, then __setitem__ will be
-        called rather than check to chack whether an operation is
+        called rather than check to check whether an operation is
         allowed.  This is a hack that allows significantly greater
         performance due to the fact that low-level operator access is
         much faster than method access.
