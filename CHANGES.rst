@@ -8,6 +8,8 @@ CHANGES
 - Bugfix: ZOPE_WATCH_CHECKERS=2 used to incorrectly suppress
   unauthorized/forbidden warnings.
 
+- Bugfix: ZOPE_WATCH_CHECKERS=1 used to miss most of the checks.
+
 
 4.0.0b1 (2013-03-11)
 --------------------

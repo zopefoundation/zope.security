@@ -1252,6 +1252,18 @@ class CheckerLoggingMixinTests(unittest.TestCase):
         self.assertEqual(checker._file[0],
                          '[CHK] - Forbidden setattr: name on TESTING\n')
 
+    def test_check_setitem_unauthorized(self):
+        # __setitem__ is an alias for check_getattr, used for speed reasons
+        # (AFAIU calling tp_setitem from C is much faster than calling a
+        # method by name).
+        from zope.security.interfaces import Unauthorized
+        checker = self._makeOne(Unauthorized)
+        self.assertRaises(Unauthorized,
+                          checker.__setitem__, self._makeObject(), 'name')
+        self.assertEqual(len(checker._file), 1)
+        self.assertEqual(checker._file[0],
+                         '[CHK] - Unauthorized getattr: name on TESTING\n')
+
 
 class Test__instanceChecker(unittest.TestCase):
 

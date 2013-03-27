@@ -558,6 +558,8 @@ class CheckerLoggingMixin(object):
                 '[CHK] - Forbidden getattr: %s on %r' % (name, object))
             raise
 
+    __setitem__ = check_getattr
+
     def check_setattr(self, object, name):
         try:
             super(CheckerLoggingMixin, self).check_setattr(object, name)
