@@ -5,6 +5,8 @@ CHANGES
 4.0.0b2 (unreleased)
 --------------------
 
+- Updated ``boostrap.py`` to version 2.2.
+
 - Bugfix: ZOPE_WATCH_CHECKERS=2 used to incorrectly suppress
   unauthorized/forbidden warnings.
 
