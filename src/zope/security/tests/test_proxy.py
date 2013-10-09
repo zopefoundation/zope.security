@@ -1848,6 +1848,148 @@ class ProxyTests(unittest.TestCase):
         self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
 
 
+class Test_ValuesChecker(unittest.TestCase):
+
+    def _callFUT(self, object, *args, **kw):
+        from zope.interface import implementer
+        from zope.security.checker import ProxyFactory
+        from zope.security.interfaces import IValueBasedChecker
+        from zope.security.interfaces import Unauthorized
+
+        @implementer(IValueBasedChecker)
+        class ValuesChecker(object):
+            def __init__(self, forbidden_values=None,
+                         forbidden_operands=None, forbidden_del=None):
+                self.forbidden_values = forbidden_values \
+                                        if forbidden_values is not None \
+                                        else set()
+                self.forbidden_operands = forbidden_operands \
+                                          if forbidden_operands is not None \
+                                          else set()
+                self.forbidden_del = forbidden_del \
+                                     if forbidden_del is not None \
+                                     else set()
+
+            def check(self, ob, name):
+                return True
+
+            def check_getattr(self, ob, name):
+                return True
+
+            def check_setattr(self, ob, name):
+                return True
+
+            def check_delattr(self, ob, name):
+                if name in self.forbidden_del:
+                    raise Unauthorized(ob, name)
+                return True
+
+            def check_setattr_with_value(self, ob, name, value):
+                if value in self.forbidden_values:
+                    raise Unauthorized(ob, name)
+                return self.check_setattr(ob, name)
+
+            def check_with_value(self, ob, name, value):
+                if value in self.forbidden_operands:
+                    raise Unauthorized(ob, name)
+                return self.check(ob, name)
+
+        checker = ValuesChecker(*args, **kw)
+        return ProxyFactory(object, checker)
+
+    def test_in_place_mutation(self):
+        from zope.security.interfaces import Unauthorized
+
+        class AddableObject:
+            def __init__(self, value):
+                self.value = value
+
+            def __add__(self, other):
+                return AddableObject(self.value + other.value)
+
+            def __iadd__(self, other):
+                self.value += other.value
+
+        foo = AddableObject(1)
+        bar = AddableObject(2)
+        proxied_bar = self._callFUT(bar)
+        proxied_foo = self._callFUT(foo, forbidden_operands=(proxied_bar,))
+
+        def add():
+            return proxied_foo + proxied_bar
+
+        def iadd():
+            proxied_foo += proxied_bar
+            return proxied_foo
+
+        def riadd():
+            proxied_bar += proxied_foo
+            return proxied_bar
+
+        try:
+            add()
+        except Unauthorized:
+            self.assertTrue(False,
+                            "Addition unexpectedly raised 'Unauthorized'.")
+        self.assertRaises(Unauthorized, iadd)
+        try:
+            riadd()
+        except Unauthorized:
+            self.assertTrue(False,
+                            "Addition unexpectedly raised 'Unauthorized'.")
+
+    def test_setattr(self):
+        from zope.security.interfaces import Unauthorized
+
+        class AssignableObject:
+            def __init__(self, value):
+                self.value = None
+                self.optional_attribute = None
+
+        foo = AssignableObject()
+        bar = AssignableObject()
+        baz = AssignableObject()
+        proxied_bar = self._callFUT(bar)
+        proxied_baz = self._callFUT(baz)
+        proxied_foo = self._callFUT(foo,
+                                    forbidden_values=(proxied_bar,),
+                                    forbidden_del=('value',))
+
+        def assign():
+            proxied_foo.value = proxied_baz
+
+        def bad_assign():
+            proxied_foo.value = proxied_bar
+
+        def get():
+            proxied_foo.value = proxied_baz
+            return proxied_foo.value
+
+        def delete():
+            del proxied_foo.optional_attribute
+
+        def bad_delete():
+            del proxied_foo.value
+
+        try:
+            assign()
+        except Unauthorized:
+            self.assertTrue(False,
+                            "Assignment unexpectedly raised 'Unauthorized'.")
+        self.assertRaises(Unauthorized, bad_assign)
+        try:
+            get()
+        except Unauthorized:
+            self.assertTrue(False,
+                            "Retrieval unexpectedly raised 'Unauthorized'.")
+        try:
+            delete()
+        except Unauthorized:
+            self.assertTrue(False,
+                            "Deletion unexpectedly raised 'Unauthorized'.")
+        self.assertRaises(Unauthorized, bad_delete)
+
+
 def test_using_mapping_slots_hack():
     """The security proxy will use mapping slots, on the checker to go faster
 
