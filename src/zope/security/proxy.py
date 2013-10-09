@@ -126,7 +126,10 @@ class ProxyPy(PyProxyBase):
             return super(PyProxyBase, self).__setattr__(name, value)
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
-        checker.check_setattr(wrapped, name)
+        if getattr(checker, 'check_setattr_with_value', None) is not None:
+            checker.check_setattr_with_value(wrapped, name, value)
+        else:
+            checker.check_setattr(wrapped, name)
         setattr(wrapped, name, value)
 
     def __delattr__(self, name):
@@ -134,7 +137,10 @@ class ProxyPy(PyProxyBase):
             raise AttributeError()
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
-        checker.check_setattr(wrapped, name)
+        if getattr(checker, 'check_delattr', None) is not None:
+            checker.check_delattr(wrapped, name)
+        else:
+            checker.check_setattr(wrapped, name)
         delattr(wrapped, name)
 
     @_check_name
