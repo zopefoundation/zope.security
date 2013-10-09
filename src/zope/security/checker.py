@@ -43,6 +43,7 @@ from zope.interface.interfaces import IInterface
 
 from zope.security.interfaces import IChecker
 from zope.security.interfaces import INameBasedChecker
+from zope.security.interfaces import IValueBasedChecker
 from zope.security.interfaces import ISecurityProxyFactory
 from zope.security.interfaces import ForbiddenAttribute
 from zope.security.interfaces import Unauthorized
@@ -101,8 +102,9 @@ directlyProvides(ProxyFactory, ISecurityProxyFactory)
 # This import represents part of the API for the proxy module
 from . import proxy
 proxy.ProxyFactory = ProxyFactory
+_marker = object()
 
-def canWrite(obj, name):
+def canWrite(obj, name, value=_marker):
     """Check whether the interaction may write an attribute named name on obj.
 
     Convenience method.  Rather than using checkPermission in high level code,
@@ -111,7 +113,10 @@ def canWrite(obj, name):
     obj = ProxyFactory(obj)
     checker = getChecker(obj)
     try:
-        checker.check_setattr(obj, name)
+        if value is not _marker and IValueBasedChecker.providedBy(checker):
+            checker.check_setattr_with_value(obj, name, value)
+        else:
+            checker.check_setattr(obj, name)
     except Unauthorized:
         return False
     except ForbiddenAttribute:
