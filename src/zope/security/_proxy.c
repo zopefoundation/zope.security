@@ -182,7 +182,8 @@ check(SecurityProxy *self, PyObject *meth, PyObject *name, PyObject *value)
 
   if (value != NULL
 	  && meth == str_check_setattr
-      && PyObject_HasAttr(self->proxy_checker, str_check_setattr_with_value) == 1)
+      && (PyObject_HasAttr(self->proxy_checker, str_check_setattr_with_value)
+    	  == 1))
 	  // value is NULL if this is really a delattr call
 	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
 									 str_check_setattr_with_value,
@@ -256,7 +257,8 @@ check2(PyObject *self, PyObject *other,
 
   if (Proxy_Check(self)) 
     {
-      if (check((SecurityProxy*)self, str_check, opname, (PyObject *)NULL) >= 0)
+      if (check((SecurityProxy*)self, str_check, opname, (PyObject *)NULL)
+    	  >= 0)
         {
           result = operation(((SecurityProxy*)self)->proxy.proxy_object, 
                              other);
@@ -265,7 +267,8 @@ check2(PyObject *self, PyObject *other,
     }
   else if (Proxy_Check(other)) 
     {
-      if (check((SecurityProxy*)other, str_check, ropname, (PyObject *)NULL) >= 0)
+      if (check((SecurityProxy*)other, str_check, ropname,
+    			(PyObject *)NULL) >= 0)
         {
           result = operation(self, 
                              ((SecurityProxy*)other)->proxy.proxy_object);
@@ -587,7 +590,8 @@ proxy_pow(PyObject *self, PyObject *other, PyObject *modulus)
 
   if (Proxy_Check(self)) 
     {
-      if (check((SecurityProxy*)self, str_check, str___pow__, (PyObject *)NULL) >= 0)
+      if (check((SecurityProxy*)self, str_check, str___pow__,
+    		    (PyObject *)NULL) >= 0)
         {
           result = PyNumber_Power(((SecurityProxy*)self)->proxy.proxy_object,
                                   other, modulus);
@@ -596,17 +600,19 @@ proxy_pow(PyObject *self, PyObject *other, PyObject *modulus)
     }
   else if (Proxy_Check(other)) 
     {
-      if (check((SecurityProxy*)other, str_check, str___rpow__, (PyObject *)NULL) >= 0)
+      if (check((SecurityProxy*)other, str_check, str___rpow__,
+    		    (PyObject *)NULL) >= 0)
         {      
           result = PyNumber_Power(self, 
-                                  ((SecurityProxy*)other)->proxy.proxy_object, 
+                                  ((SecurityProxy*)other)->proxy.proxy_object,
                                   modulus);
           PROXY_RESULT(((SecurityProxy*)other), result);
         }
     }
   else if (modulus != NULL && Proxy_Check(modulus)) 
     {
-      if (check((SecurityProxy*)modulus, str_check, str___3pow__, (PyObject *)NULL) >= 0)
+      if (check((SecurityProxy*)modulus, str_check, str___3pow__,
+    		    (PyObject *)NULL) >= 0)
         {      
           result = PyNumber_Power(self, other, 
                                ((SecurityProxy*)modulus)->proxy.proxy_object);
@@ -635,7 +641,8 @@ proxy_coerce(PyObject **p_self, PyObject **p_other)
 
   assert(Proxy_Check(self));
 
-  if (check((SecurityProxy*)self, str_check, str___coerce__, (PyObject *)NULL) >= 0)
+  if (check((SecurityProxy*)self, str_check, str___coerce__,
+		    (PyObject *)NULL) >= 0)
     {
       PyObject *left = ((SecurityProxy*)self)->proxy.proxy_object;
       PyObject *right = other;
@@ -768,7 +775,8 @@ proxy_slice(SecurityProxy *self, Py_ssize_t start, Py_ssize_t end)
 }
 
 static int
-proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j, PyObject *value)
+proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j,
+				PyObject *value)
 {
   if (check(self, str_check, str___setslice__, value) >= 0)
     return PySequence_SetSlice(self->proxy.proxy_object, i, j, value);
