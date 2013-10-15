@@ -194,7 +194,6 @@ check(SecurityProxy *self, PyObject *meth, PyObject *name, PyObject *value)
 		     && meth == str_check
 		     && (PyObject_HasAttr(self->proxy_checker, str_check_with_value)
                  == 1)) {
-	  // value is NULL if this is really a delattr call
 	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
 									 str_check_with_value,
 									 self->proxy.proxy_object, name,
@@ -203,6 +202,7 @@ check(SecurityProxy *self, PyObject *meth, PyObject *name, PyObject *value)
 		     && meth == str_check_setattr
 		     && PyObject_HasAttr(self->proxy_checker, str_check_delattr) == 1
 		     ) {
+	  // value is NULL if this is really a delattr call
 	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
 			  	  	  	  	  	  	 str_check_delattr,
 									 self->proxy.proxy_object, name,
