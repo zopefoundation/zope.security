@@ -176,38 +176,42 @@ check(SecurityProxy *self, PyObject *meth, PyObject *name, PyObject *value)
      a lot.  */
   if (self->proxy_checker->ob_type->tp_as_mapping != NULL
       && self->proxy_checker->ob_type->tp_as_mapping->mp_ass_subscript != NULL
-      && meth != str_check_setattr)
+      && meth != str_check_setattr) {
     return self->proxy_checker->ob_type->tp_as_mapping->
       mp_ass_subscript(self->proxy_checker, self->proxy.proxy_object, name);
+  }
 
   if (value != NULL
 	  && meth == str_check_setattr
       && (PyObject_HasAttr(self->proxy_checker, str_check_setattr_with_value)
-    	  == 1))
+    	  == 1)) {
 	  // value is NULL if this is really a delattr call
 	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
 									 str_check_setattr_with_value,
 									 self->proxy.proxy_object, name,
 									 value, NULL);
-  else if (value != NULL
-		   && meth == str_check
-		   && PyObject_HasAttr(self->proxy_checker, str_check_with_value) == 1)
+  } else if (value != NULL
+		     && meth == str_check
+		     && (PyObject_HasAttr(self->proxy_checker, str_check_with_value)
+                 == 1)) {
 	  // value is NULL if this is really a delattr call
 	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
 									 str_check_with_value,
 									 self->proxy.proxy_object, name,
 									 value, NULL);
-  else if (value == NULL
-		  && meth == str_check_setattr
-		  && PyObject_HasAttr(self->proxy_checker, str_check_delattr) == 1)
+  } else if (value == NULL
+		     && meth == str_check_setattr
+		     && PyObject_HasAttr(self->proxy_checker, str_check_delattr) == 1
+		     ) {
 	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
 			  	  	  	  	  	  	 str_check_delattr,
 									 self->proxy.proxy_object, name,
 									 value, NULL);
-  else
+  } else {
 	  r = PyObject_CallMethodObjArgs(self->proxy_checker, meth,
 									 self->proxy.proxy_object, name,
 									 NULL);
+  }
   if (r == NULL)
     return -1;
 
