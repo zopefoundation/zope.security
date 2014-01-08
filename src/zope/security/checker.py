@@ -304,6 +304,7 @@ CP_HACK_XXX = CheckerPublic
 d={}
 CheckerPublic = Proxy(CheckerPublic, Checker(d)) # XXX uses CheckerPy
 d['__reduce__'] = CheckerPublic
+d['__module__'] = CheckerPublic
 del d
 
 # TODO: It's a bit scary above that we can pickle a proxy if access is
