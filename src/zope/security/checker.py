@@ -299,9 +299,9 @@ class Global(object):
 CheckerPublic = Global('CheckerPublic')
 CP_HACK_XXX = CheckerPublic
 
-# Now we wrap it in a security proxy so that it retains it's
+# Now we wrap it in a security proxy so that it retains its
 # identity when it needs to be security proxied.
-d={}
+d = {}
 CheckerPublic = Proxy(CheckerPublic, Checker(d)) # XXX uses CheckerPy
 d['__reduce__'] = CheckerPublic
 d['__module__'] = CheckerPublic
