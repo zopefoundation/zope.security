@@ -52,7 +52,7 @@ def _fmt_address(obj):
     # the platform sprintf(buf, "%p", obj), which we cannot access from Python
     # directly (and ctypes seems like overkill).
     if sys.platform == 'win32':
-        return '0x%08x' % id(obj)
+        return '0x%08X' % id(obj)
     else:
         return '0x%0x' % id(obj)
 

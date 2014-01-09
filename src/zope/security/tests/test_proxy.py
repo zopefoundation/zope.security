@@ -36,15 +36,6 @@ def _skip_if_Py2(testfunc):
         return dummy
     return testfunc
 
-def _fmt_address(obj):
-    # Try to replicate PyString_FromString("%p", obj), which actually uses
-    # the platform sprintf(buf, "%p", obj), which we cannot access from Python
-    # directly (and ctypes seems like overkill).
-    if sys.platform == 'win32':
-        return '0x%08X' % id(obj)
-    else:
-        return '0x%0x' % id(obj)
-
 
 class ProxyTestBase(object):
 
@@ -160,6 +151,7 @@ class ProxyTestBase(object):
     def test___str___checker_forbids_str(self):
         from zope.security.interfaces import ForbiddenAttribute
         from zope.security._compat import _BUILTINS
+        from zope.security.proxy import _fmt_address
         target = object()
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(target, checker)
@@ -177,6 +169,7 @@ class ProxyTestBase(object):
     def test___repr___checker_forbids_str(self):
         from zope.security.interfaces import ForbiddenAttribute
         from zope.security._compat import _BUILTINS
+        from zope.security.proxy import _fmt_address
         target = object()
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(target, checker)
