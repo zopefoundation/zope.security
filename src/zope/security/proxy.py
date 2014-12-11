@@ -14,7 +14,9 @@
 """Helper functions for Proxies.
 """
 import functools
+from six import get_unbound_function, create_bound_method
 import sys
+import types
 
 from zope.proxy import PyProxyBase
 from zope.security._compat import PYPY
@@ -88,7 +90,10 @@ class ProxyPy(PyProxyBase):
                         '__lt__', '__le__', '__eq__', '__ne__', '__ge__',
                         '__gt__']:
             checker.check_getattr(wrapped, name)
-        return checker.proxy(super(ProxyPy, self).__getattribute__(name))
+        attr = super(ProxyPy, self).__getattribute__(name)
+        if isinstance(attr, types.MethodType):
+            attr = create_bound_method(get_unbound_function(attr), self)
+        return checker.proxy(attr)
 
     def __getattr__(self, name):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
