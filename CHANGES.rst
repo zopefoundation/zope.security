@@ -1,5 +1,4 @@
-=======
-CHANGES
+Changes
 =======
 
 4.0.2 (unreleased)
