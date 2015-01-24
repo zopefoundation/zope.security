@@ -8,6 +8,7 @@ Narrative Documentation
    :maxdepth: 2
 
    narr
+   hacking
 
 API Reference
 -------------
