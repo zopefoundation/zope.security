@@ -315,7 +315,10 @@ for name in ['__iadd__',
 def getCheckerPy(proxy):
     return super(PyProxyBase, proxy).__getattribute__('_checker')
 
-_builtin_isinstance = __builtins__.isinstance
+if PYPY:
+    _builtin_isinstance = __builtins__.isinstance
+else:
+    _builtin_isinstance = __builtins__['isinstance']
 
 def getObjectPy(proxy):
     if not _builtin_isinstance(proxy, ProxyPy):
