@@ -315,9 +315,10 @@ for name in ['__iadd__',
 def getCheckerPy(proxy):
     return super(PyProxyBase, proxy).__getattribute__('_checker')
 
+_builtin_isinstance = __builtins__.isinstance
+
 def getObjectPy(proxy):
-    isinstance_func = builtin_isinstance or isinstance
-    if not isinstance_func(proxy, ProxyPy):
+    if not _builtin_isinstance(proxy, ProxyPy):
         return proxy
     return super(PyProxyBase, proxy).__getattribute__('_wrapped')
 
@@ -341,18 +342,11 @@ def getTestProxyItems(proxy):
     return sorted(checker.get_permissions.items())
 
 
-builtin_isinstance = None
 def isinstance(object, cls):
     """Test whether an object is an instance of a type.
 
-    This works even if the object is security proxied:
+    This works even if the object is security proxied.
     """
-    global builtin_isinstance
-    if builtin_isinstance is None:
-        if PYPY:
-            builtin_isinstance = getattr(__builtins__, 'isinstance')
-        else:
-            builtin_isinstance = __builtins__['isinstance']
     # The removeSecurityProxy call is OK here because it is *only*
     # being used for isinstance
-    return builtin_isinstance(removeSecurityProxy(object), cls)
+    return _builtin_isinstance(removeSecurityProxy(object), cls)

@@ -1389,6 +1389,28 @@ class ProxyPyTests(unittest.TestCase, ProxyTestBase):
         # pow(i, j, proxy(k)) will fail with a TypeError
         self.assertRaises(TypeError, pow, (x, y, proxy))
 
+    def test_getObjectPy_initial_conditions(self):
+        # Once upon a time, we dynamically set _builtin_isinstance
+        # in z.s.proxy.isinstance itself. And at that time getObjectPy
+        # (aka removeSecurityProxy) called z.s.proxy.isinstance if
+        # _builtin_isinstance was not set...which recursively calls
+        # getObjectPy. The net result was that the very first call
+        # to getObjectPy would falsely return the proxy object if passed
+        # a proxy, not the wrapped object!
+        # This test makes sure we're not dynamically setting that attribute
+        # any more.
+        import zope.security.proxy
+
+        target = object()
+        checker = object()
+        proxy = self._makeOne(target, checker)
+
+        orig_builtin_isinstance = zope.security.proxy._builtin_isinstance
+        zope.security.proxy._builtin_isinstance = None
+        try:
+            self.assertRaises(TypeError, zope.security.proxy.getObjectPy, proxy)
+        finally:
+            zope.security.proxy._builtin_isinstance = orig_builtin_isinstance
 
 class DummyChecker(object):
     _proxied = _checked = None

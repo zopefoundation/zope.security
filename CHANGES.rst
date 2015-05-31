@@ -4,7 +4,10 @@ Changes
 4.0.2 (unreleased)
 ------------------
 
-- Compatibility with ``zope.proxy`` 4.1.5 under PyPy.
+- Fixed compatibility with ``zope.proxy`` 4.1.5 under PyPy.
+
+- Fixed the very first call to ``removeSecurityProxy`` returning
+  incorrect results if given a proxy under PyPy.
 
 4.0.1 (2014-03-19)
 ------------------
