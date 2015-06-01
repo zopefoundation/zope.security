@@ -84,11 +84,34 @@ class ProxyPy(PyProxyBase):
         checker = super(PyProxyBase, self).__getattribute__('_checker')
         if name == '_checker':
             return checker
-        if name not in ['__cmp__', '__hash__', '__bool__', '__nonzero__',
+        if name not in ('__cmp__', '__hash__', '__bool__', '__nonzero__',
                         '__lt__', '__le__', '__eq__', '__ne__', '__ge__',
-                        '__gt__']:
+                        '__gt__'):
             checker.check_getattr(wrapped, name)
-        return checker.proxy(super(ProxyPy, self).__getattribute__(name))
+        if name in ('__reduce__', '__reduce_ex__'):
+            # The superclass specifically denies access to __reduce__
+            # and __reduce__ex__, not letting proxies be pickled. But
+            # for backwards compatibility, we need to be able to
+            # pickle proxies. See checker:Global for an example.
+            val = getattr(wrapped, name)
+        elif name == '__module__':
+            # The superclass deals with descriptors found in the type
+            # of this object just like the Python language spec states, letting
+            # them have precedence over things found in the instance. This
+            # normally makes us a better proxy implementation. However, the
+            # C version of this code in _proxy doesn't take that same care and instead
+            # uses the generic object attribute access methods directly on
+            # the wrapped object. This is a behaviour difference; so far, it's
+            # only been noticed for the __module__ attribute, which checker:Global
+            # wants to override but couldn't because this object's type's __module__ would
+            # get in the way. That broke pickling, and checker:Global can't return
+            # anything more sophisticated than a str (a tuple) because it gets proxied
+            # and breaks pickling again. Our solution is to match the C version for this
+            # one attribute.
+            val = getattr(wrapped, name)
+        else:
+            val = super(ProxyPy, self).__getattribute__(name)
+        return checker.proxy(val)
 
     def __getattr__(self, name):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
@@ -292,9 +315,13 @@ for name in ['__iadd__',
 def getCheckerPy(proxy):
     return super(PyProxyBase, proxy).__getattribute__('_checker')
 
+if PYPY:
+    _builtin_isinstance = __builtins__.isinstance
+else:
+    _builtin_isinstance = __builtins__['isinstance']
+
 def getObjectPy(proxy):
-    isinstance_func = builtin_isinstance or isinstance
-    if not isinstance_func(proxy, ProxyPy):
+    if not _builtin_isinstance(proxy, ProxyPy):
         return proxy
     return super(PyProxyBase, proxy).__getattribute__('_wrapped')
 
@@ -318,18 +345,11 @@ def getTestProxyItems(proxy):
     return sorted(checker.get_permissions.items())
 
 
-builtin_isinstance = None
 def isinstance(object, cls):
     """Test whether an object is an instance of a type.
 
-    This works even if the object is security proxied:
+    This works even if the object is security proxied.
     """
-    global builtin_isinstance
-    if builtin_isinstance is None:
-        if PYPY:
-            builtin_isinstance = getattr(__builtins__, 'isinstance')
-        else:
-            builtin_isinstance = __builtins__['isinstance']
     # The removeSecurityProxy call is OK here because it is *only*
     # being used for isinstance
-    return builtin_isinstance(removeSecurityProxy(object), cls)
+    return _builtin_isinstance(removeSecurityProxy(object), cls)
