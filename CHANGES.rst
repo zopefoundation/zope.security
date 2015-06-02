@@ -1,7 +1,7 @@
 Changes
 =======
 
-4.0.2 (unreleased)
+4.0.2 (2015-06-02)
 ------------------
 
 - Fixed compatibility with ``zope.proxy`` 4.1.5 under PyPy.
