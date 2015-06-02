@@ -327,7 +327,7 @@ def getObjectPy(proxy):
 
 try:
     from zope.security._proxy import _Proxy
-except ImportError: #pragma NO COVER PyPy
+except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
     getChecker = getCheckerPy
     getObject = getObjectPy
     Proxy = ProxyPy
