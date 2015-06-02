@@ -36,6 +36,14 @@ def _skip_if_Py2(testfunc):
         return dummy
     return testfunc
 
+def _skip_if_pypy250(testfunc):
+    from functools import update_wrapper
+    if PYPY and sys.pypy_version_info[:3] == (2,5,0):
+        def dummy(self):
+            pass
+        update_wrapper(dummy, testfunc)
+        return dummy
+    return testfunc
 
 class ProxyTestBase(object):
 
@@ -1704,6 +1712,13 @@ class ProxyTests(unittest.TestCase):
         from zope.security.proxy import getChecker
         self.assertEqual(self.c, getChecker(self.p))
 
+
+    # XXX: PyPy 2.5.0 has a bug where proxys around types
+    # aren't correctly hashable, which breaks this part of the
+    # test. This is fixed in 2.5.1+, but as of 2015-05-28,
+    # TravisCI still uses 2.5.0.
+
+    @_skip_if_pypy250
     def testProxiedClassicClassAsDictKey(self):
         from zope.security.proxy import ProxyFactory
         class C(object):
@@ -1712,6 +1727,7 @@ class ProxyTests(unittest.TestCase):
         pC = ProxyFactory(C, self.c)
         self.assertEqual(d[pC], d[C])
 
+    @_skip_if_pypy250
     def testProxiedNewClassAsDictKey(self):
         from zope.security.proxy import ProxyFactory
         class C(object):
