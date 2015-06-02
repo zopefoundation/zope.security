@@ -4,7 +4,8 @@ Changes
 4.0.3 (unreleased)
 ------------------
 
-- TBD
+- Fixed iteration over security proxies in Python 3 using the
+  pure-Python implementation.
 
 4.0.2 (2015-06-02)
 ------------------
