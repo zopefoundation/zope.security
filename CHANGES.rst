@@ -1,7 +1,7 @@
 Changes
 =======
 
-4.0.3 (unreleased)
+4.0.3 (2015-06-02)
 ------------------
 
 - Fix iteration over security proxies in Python 3 using the pure-Python
