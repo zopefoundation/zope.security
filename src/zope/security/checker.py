@@ -604,7 +604,7 @@ _typeChecker = NamesChecker(
      '__implemented__'])
 _namedChecker = NamesChecker(['__name__'])
 
-_iteratorChecker = NamesChecker(['next', '__iter__', '__len__'])
+_iteratorChecker = NamesChecker(['next', '__next__', '__iter__', '__len__'])
 
 _setChecker = NamesChecker(['__iter__', '__len__', '__str__', '__contains__',
                             'copy', 'difference', 'intersection', 'issubset',
@@ -651,7 +651,7 @@ _basic_types = {
     datetime.time: NoProxy,
     datetime.tzinfo: NoProxy,
 }
-if PYTHON2: 
+if PYTHON2:
     _basic_types[long] = NoProxy
     _basic_types[unicode] = NoProxy
 else: #pragma NO COVER
@@ -783,4 +783,3 @@ except ImportError: #pragma NO COVER
     pass
 else:
     addCleanUp(_clear)
-
