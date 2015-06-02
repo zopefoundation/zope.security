@@ -620,7 +620,7 @@ class Test_MultiChecker(unittest.TestCase):
         class IFoo(Interface):
             bar = Attribute('Bar')
         other_perm = object()
-        checker = self._callFUT([(IFoo, other_perm), 
+        checker = self._callFUT([(IFoo, other_perm),
                                  (('foo', 'baz'), CheckerPublic)])
         self.assertTrue(checker.permission_id('foo') is CheckerPublic)
         self.assertTrue(checker.permission_id('bar') is other_perm)
@@ -636,7 +636,7 @@ class Test_MultiChecker(unittest.TestCase):
             bar = Attribute('Bar')
         other_perm = object()
         self.assertRaises(DuplicationError,
-                          self._callFUT, [(IFoo, other_perm), 
+                          self._callFUT, [(IFoo, other_perm),
                                           (('foo', 'bar'), CheckerPublic)])
 
     def test_w_spec_as_mapping(self):
@@ -784,7 +784,7 @@ class Test_getCheckerForInstancesOf(unittest.TestCase):
         from zope.security.checker import _checkers
         class Foo(object):
             pass
-        checker = _checkers[Foo] = object() 
+        checker = _checkers[Foo] = object()
         self.assertTrue(self._callFUT(Foo) is checker)
 
 
@@ -1362,7 +1362,7 @@ class BasicTypesTests(unittest.TestCase):
         BasicTypes.update({Foo:  checker})
         self.assertTrue(BasicTypes[Foo] is checker)
         self.assertTrue(_checkers[Foo] is checker)
- 
+
 
 # Pre-geddon tests start here
 
@@ -1600,6 +1600,15 @@ class Test(unittest.TestCase):
             #
             #    proxy2 = checker.proxy(proxy)
             #    self.assertTrue(proxy2 is proxy, [proxy, proxy2])
+
+    def test_iteration(self):
+        from zope.security.checker import ProxyFactory
+        from zope.security.checker import selectChecker
+
+        for i in ((1,), [1]):
+            _iter = iter(i)
+            proxy = ProxyFactory(_iter, selectChecker(_iter))
+            self.assertEqual(next(proxy), 1)
 
     def testLayeredProxies(self):
         #Test that a Proxy will not be re-proxied.
