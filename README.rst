@@ -1,7 +1,7 @@
 ``zope.security``
 =================
 
-.. image:: https://pypip.in/version/zope.security/badge.svg?style=flat
+.. image:: https://img.shields.io/pypi/v/zope.security.svg
     :target: https://pypi.python.org/pypi/zope.security/
     :alt: Latest Version
 
