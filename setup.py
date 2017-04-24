@@ -26,6 +26,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 TESTS_REQUIRE = [
+    'BTrees',
     'zope.component',
     'zope.configuration',
     'zope.location',
@@ -50,7 +51,8 @@ def alltests():
 
 here = os.path.abspath(os.path.dirname(__file__))
 def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
+        return f.read()
 
 # Include directories for C extensions
 # Sniff the location of the headers in 'persistent' or fall back
@@ -114,8 +116,8 @@ setup(name='zope.security',
           + '\n\n' +
           read('CHANGES.rst')
           ),
-      keywords = "zope security policy principal permission",
-      classifiers = [
+      keywords="zope security policy principal permission",
+      classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
@@ -127,12 +129,14 @@ setup(name='zope.security',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
           'Operating System :: OS Independent',
           'Topic :: Internet :: WWW/HTTP',
-          'Framework :: Zope3'],
+          'Framework :: Zope3',
+      ],
       url='http://pypi.python.org/pypi/zope.security',
       license='ZPL 2.1',
       packages=find_packages('src'),
@@ -140,14 +144,15 @@ setup(name='zope.security',
       namespace_packages=['zope'],
       setup_requires=setup_requires,
       ext_modules=ext_modules,
-      install_requires=['setuptools',
-                        'zope.component',
-                        'zope.i18nmessageid',
-                        'zope.interface',
-                        'zope.location',
-                        'zope.proxy >= 4.1.0',
-                        'zope.schema',
-                        ],
+      install_requires=[
+          'setuptools',
+          'zope.component',
+          'zope.i18nmessageid',
+          'zope.interface',
+          'zope.location',
+          'zope.proxy >= 4.1.0',
+          'zope.schema',
+      ],
       test_suite = '__main__.alltests',
       tests_require=TESTS_REQUIRE,
       extras_require = dict(
@@ -157,7 +162,7 @@ setup(name='zope.security',
           test=TESTS_REQUIRE,
           testing=TESTS_REQUIRE + ['nose', 'coverage'],
           docs=['Sphinx', 'repoze.sphinx.autointerface'],
-          ),
+      ),
       include_package_data = True,
       zip_safe = False,
       )

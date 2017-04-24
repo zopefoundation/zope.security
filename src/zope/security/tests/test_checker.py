@@ -17,13 +17,15 @@ import unittest
 
 def _skip_if_not_Py2(testfunc):
     import sys
-    from functools import update_wrapper
-    if sys.version_info[0] >= 3:
-        def dummy(self):
-            pass
-        update_wrapper(dummy, testfunc)
-        return dummy
-    return testfunc
+    return unittest.skipIf(sys.version_info[0] >= 3, "Needs Python 2")(testfunc)
+
+def _skip_if_no_btrees(testfunc):
+    try:
+        import BTrees
+    except ImportError:
+        return unittest.skip("BTrees is not installed")(testfunc)
+    else:
+        return testfunc
 
 class Test_ProxyFactory(unittest.TestCase):
 
@@ -388,6 +390,28 @@ class CheckerTestsBase(object):
             self.assertTrue(getChecker(returned) is _checker)
         finally:
             _clear()
+
+    @_skip_if_no_btrees
+    def test_iteration_of_btree_items(self):
+        # iteration of BTree.items() is allowed by default.
+        from zope.security.proxy import Proxy
+        from zope.security.checker import Checker
+        from zope.security.checker import CheckerPublic
+        import BTrees
+
+        checker = Checker({'items': CheckerPublic})
+
+        for name in ('IF', 'II', 'IO', 'OI', 'OO'):
+            for family_name in ('family32', 'family64'):
+                family = getattr(BTrees, family_name)
+                btree = getattr(family, name).BTree()
+                proxy = Proxy(btree, checker)
+                # empty
+                self.assertEqual([], list(proxy.items()))
+
+                # With an object
+                btree[1] = 2
+                self.assertEqual([(1, 2)], list(proxy.items()))
 
 
 class CheckerPyTests(unittest.TestCase, CheckerTestsBase):

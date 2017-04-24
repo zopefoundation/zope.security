@@ -4,6 +4,8 @@ matrix:
   include:
     - python: 3.5
       env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
 env:
     - TOXENV=py27
     - TOXENV=py27-pure
@@ -11,12 +13,13 @@ env:
     - TOXENV=py33-pure
     - TOXENV=py34
     - TOXENV=pypy
-    - TOXENV=pypy3
     - TOXENV=coverage
     - TOXENV=docs
 install:
-    - pip install tox
+    - pip install -U pip
+    - pip install -U setuptools tox
 script:
     - tox
 notifications:
     email: false
+cache: pip

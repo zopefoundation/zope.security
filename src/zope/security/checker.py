@@ -770,6 +770,43 @@ if PYTHON2:
     _default_checkers[type({}.iterkeys())] = _iteratorChecker
     _default_checkers[type({}.itervalues())] = _iteratorChecker
 
+try:
+    import BTrees
+except ImportError: # pragma: no cover
+    pass
+else:
+    # The C implementation of BTree.items() is its own iterator
+    # and doesn't need any special entries to enable iteration.
+    # But the Python implementation has to call __iter__ to be able
+    # to do iteration. Whitelist it so that they behave the same.
+    # In addition, Python 3 will attempt to call __len__ on iterators
+    # for a length hint, so the C implementations also need to be
+    # added to the _iteratorChecker.
+    # We do this here so that all users of zope.security can benefit
+    # without knowing implementation details.
+    # See https://github.com/zopefoundation/zope.security/issues/20
+
+    def _fixup_btrees():
+        import BTrees._base
+        _default_checkers[BTrees._base._TreeItems] = _iteratorChecker
+
+        for name in ('IF', 'II', 'IO', 'OI', 'OO'):
+            for family_name in ('family32', 'family64'):
+                family = getattr(BTrees, family_name)
+                btree = getattr(family, name).BTree()
+
+                empty_type = type(btree.items())
+                if empty_type not in _default_checkers:
+                    _default_checkers[empty_type] = _iteratorChecker
+
+                btree[1] = 1
+                populated_type = type(btree.items())
+                if populated_type not in _default_checkers:
+                    _default_checkers[populated_type] = _iteratorChecker
+
+    _fixup_btrees()
+    del _fixup_btrees
+
 def _clear():
     _checkers.clear()
     _checkers.update(_default_checkers)

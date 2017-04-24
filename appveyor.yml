@@ -9,18 +9,26 @@ environment:
     - python : 34-x64
     - python : 35
     - python : 35-x64
+    - python : 36
+    - python : 36-x64
     - { python: 27, PURE_PYTHON: 1 }
     - { python: 35, PURE_PYTHON: 1 }
 
 install:
   - "SET PATH=C:\\Python%PYTHON%;c:\\Python%PYTHON%\\scripts;%PATH%"
   - echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\vcvars64.bat"
-  - pip install -e .
+# We need to install the C extensions that BTrees setup-requires
+# separately because we've seen problems with the BTrees build cleanup step trying
+# to delete a .pyd that was still open.
+  - pip install persistent
+  - pip install BTrees
+  - pip install zope.testrunner
+  - pip install .[test]
 
 build: false
 
 test_script:
-  - python setup.py -q test -q
+  - python -m zope.testrunner --test-path=src
 
 on_success:
   - echo Build succesful!
