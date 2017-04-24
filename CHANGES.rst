@@ -9,7 +9,14 @@ Changes
 
 - Drop support for Python 2.6 and 3.2.
 
-- Add support for Python 3.5.
+- Add support for Python 3.5 and 3.6.
+
+- Fix iteration of pure-Python BTrees.items(). See `issue 20
+  <https://github.com/zopefoundation/zope.security/issues/20>`_.
+
+- Fix creating a list from a BTrees.items() on Python 3.  See `issue 20
+  <https://github.com/zopefoundation/zope.security/issues/20>`_.
+
 
 4.0.3 (2015-06-02)
 ------------------
