@@ -22,7 +22,8 @@ install:
 # to delete a .pyd that was still open.
   - pip install persistent
   - pip install BTrees
-  - pip install -e .[test]
+  - pip install zope.testrunner
+  - pip install .[test]
 
 build: false
 
