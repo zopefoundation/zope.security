@@ -1,7 +1,7 @@
 Changes
 =======
 
-4.1.0 (unreleased)
+4.1.0 (2017-04-24)
 ------------------
 
 - When testing ``PURE_PYTHON`` environments under ``tox``, avoid poisoning
@@ -11,12 +11,9 @@ Changes
 
 - Add support for Python 3.5 and 3.6.
 
-- Fix iteration of pure-Python BTrees.items(). See `issue 20
-  <https://github.com/zopefoundation/zope.security/issues/20>`_.
-
-- Fix creating a list from a BTrees.items() on Python 3.  See `issue 20
-  <https://github.com/zopefoundation/zope.security/issues/20>`_.
-
+- Fix `issue 20 <https://github.com/zopefoundation/zope.security/issues/20>`_:
+  iteration of pure-Python ``BTrees.items()``, and also creating a list from
+  ``BTrees.items()`` on Python 3.
 
 4.0.3 (2015-06-02)
 ------------------
