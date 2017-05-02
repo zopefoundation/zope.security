@@ -781,7 +781,8 @@ else:
     # to do iteration. Whitelist it so that they behave the same.
     # In addition, Python 3 will attempt to call __len__ on iterators
     # for a length hint, so the C implementations also need to be
-    # added to the _iteratorChecker.
+    # added to the _iteratorChecker. The same thing automatically
+    # applies for .keys() and .values() since they return the same type.
     # We do this here so that all users of zope.security can benefit
     # without knowing implementation details.
     # See https://github.com/zopefoundation/zope.security/issues/20

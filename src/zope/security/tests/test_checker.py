@@ -399,7 +399,9 @@ class CheckerTestsBase(object):
         from zope.security.checker import CheckerPublic
         import BTrees
 
-        checker = Checker({'items': CheckerPublic})
+        checker = Checker({'items': CheckerPublic,
+                           'keys': CheckerPublic,
+                           'values': CheckerPublic})
 
         for name in ('IF', 'II', 'IO', 'OI', 'OO'):
             for family_name in ('family32', 'family64'):
@@ -408,10 +410,14 @@ class CheckerTestsBase(object):
                 proxy = Proxy(btree, checker)
                 # empty
                 self.assertEqual([], list(proxy.items()))
+                self.assertEqual([], list(proxy.keys()))
+                self.assertEqual([], list(proxy.values()))
 
                 # With an object
                 btree[1] = 2
                 self.assertEqual([(1, 2)], list(proxy.items()))
+                self.assertEqual([1], list(proxy.keys()))
+                self.assertEqual([2], list(proxy.values()))
 
 
 class CheckerPyTests(unittest.TestCase, CheckerTestsBase):

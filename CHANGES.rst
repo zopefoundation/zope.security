@@ -18,7 +18,7 @@ Changes
 
 - Fix `issue 20 <https://github.com/zopefoundation/zope.security/issues/20>`_:
   iteration of pure-Python ``BTrees.items()``, and also creating a list from
-  ``BTrees.items()`` on Python 3.
+  ``BTrees.items()`` on Python 3. The same applies for ``keys()`` and ``values()``.
 
 4.0.3 (2015-06-02)
 ------------------
