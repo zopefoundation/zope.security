@@ -1,14 +1,14 @@
 Changes
 =======
 
-4.1.1 (unreleased)
+4.1.1 (2017-05-17)
 ------------------
 
 - Fix `issue 23 <https://github.com/zopefoundation/zope.security/issues/23>`_:
   iteration of ``collections.OrderedDict`` and its various views is
   now allowed by default on all versions of Python.
 
-- As a further fix for issue 20, iteration of BTree itself is now
+- As a further fix for issue 20, iteration of ``BTree`` itself is now
   allowed by default.
 
 4.1.0 (2017-04-24)
