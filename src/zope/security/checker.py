@@ -770,6 +770,27 @@ if PYTHON2:
     _default_checkers[type({}.iterkeys())] = _iteratorChecker
     _default_checkers[type({}.itervalues())] = _iteratorChecker
 
+def _fixup_dictlike(dict_type):
+    empty_dict = dict_type()
+    populated_dict = dict_type({1: 2})
+    for dictlike in (empty_dict, populated_dict):
+        for attr in ('__iter__', 'keys', 'items', 'values'):
+            obj = getattr(dictlike, attr)()
+            o_type = type(obj)
+            if o_type not in _default_checkers:
+                _default_checkers[o_type] = _iteratorChecker
+
+def _fixup_odict():
+    # OrderedDicts have three different implementations: Python 2 (pure
+    # python, returns generators and lists), Python <=3.4 (pure Python,
+    # uses view classes) and CPython 3.5+ (implemented in C). These should
+    # all be iterable.
+    from collections import OrderedDict
+    _fixup_dictlike(OrderedDict)
+
+_fixup_odict()
+del _fixup_odict
+
 try:
     import BTrees
 except ImportError: # pragma: no cover
@@ -794,19 +815,13 @@ else:
         for name in ('IF', 'II', 'IO', 'OI', 'OO'):
             for family_name in ('family32', 'family64'):
                 family = getattr(BTrees, family_name)
-                btree = getattr(family, name).BTree()
-
-                empty_type = type(btree.items())
-                if empty_type not in _default_checkers:
-                    _default_checkers[empty_type] = _iteratorChecker
-
-                btree[1] = 1
-                populated_type = type(btree.items())
-                if populated_type not in _default_checkers:
-                    _default_checkers[populated_type] = _iteratorChecker
+                btree = getattr(family, name).BTree
+                _fixup_dictlike(btree)
 
     _fixup_btrees()
     del _fixup_btrees
+
+del _fixup_dictlike
 
 def _clear():
     _checkers.clear()
