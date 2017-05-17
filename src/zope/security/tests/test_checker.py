@@ -391,34 +391,48 @@ class CheckerTestsBase(object):
         finally:
             _clear()
 
-    @_skip_if_no_btrees
-    def test_iteration_of_btree_items(self):
-        # iteration of BTree.items() is allowed by default.
+    def _check_iteration_of_dict_like(self, dict_like):
         from zope.security.proxy import Proxy
         from zope.security.checker import Checker
-        from zope.security.checker import CheckerPublic
+        from zope.security.checker import _default_checkers
+
+        checker = _default_checkers[dict]
+
+        proxy = Proxy(dict_like, checker)
+        # empty
+        self.assertEqual([], list(proxy.items()))
+        self.assertEqual([], list(proxy.keys()))
+        self.assertEqual([], list(proxy.values()))
+        self.assertEqual([], list(proxy))
+
+        # With an object
+        dict_like[1] = 2
+        self.assertEqual([(1, 2)], list(proxy.items()))
+        self.assertEqual([1], list(proxy.keys()))
+        self.assertEqual([1], list(proxy))
+        self.assertEqual([2], list(proxy.values()))
+
+
+    @_skip_if_no_btrees
+    def test_iteration_of_btree_items_keys_values(self):
+        # iteration of BTree.items() is allowed by default.
         import BTrees
-
-        checker = Checker({'items': CheckerPublic,
-                           'keys': CheckerPublic,
-                           'values': CheckerPublic})
-
         for name in ('IF', 'II', 'IO', 'OI', 'OO'):
             for family_name in ('family32', 'family64'):
                 family = getattr(BTrees, family_name)
                 btree = getattr(family, name).BTree()
-                proxy = Proxy(btree, checker)
-                # empty
-                self.assertEqual([], list(proxy.items()))
-                self.assertEqual([], list(proxy.keys()))
-                self.assertEqual([], list(proxy.values()))
+                self._check_iteration_of_dict_like(btree)
 
-                # With an object
-                btree[1] = 2
-                self.assertEqual([(1, 2)], list(proxy.items()))
-                self.assertEqual([1], list(proxy.keys()))
-                self.assertEqual([2], list(proxy.values()))
+    def test_iteration_of_odict_items_keys_values(self):
+        # iteration of OrderedDict.items() is allowed by default.
+        from collections import OrderedDict
 
+        odict = OrderedDict()
+        self._check_iteration_of_dict_like(odict)
+
+    def test_iteration_of_dict_items_keys_values(self):
+        # iteration of regular dict is allowed by default
+        self._check_iteration_of_dict_like(dict())
 
 class CheckerPyTests(unittest.TestCase, CheckerTestsBase):
 
