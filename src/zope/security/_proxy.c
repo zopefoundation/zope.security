@@ -72,8 +72,11 @@ static PyObject *__class__str = 0, *__name__str = 0, *__module__str = 0;
 DECLARE_STRING(__3pow__);
 DECLARE_STRING(__call__);
 DECLARE_STRING(check);
+DECLARE_STRING(check_with_value);
 DECLARE_STRING(check_getattr);
 DECLARE_STRING(check_setattr);
+DECLARE_STRING(check_setattr_with_value);
+DECLARE_STRING(check_delattr);
 DECLARE_STRING(__cmp__);
 DECLARE_STRING(__coerce__);
 DECLARE_STRING(__contains__);
@@ -161,25 +164,54 @@ static PyTypeObject SecurityProxyType;
  */
 
 static int
-check(SecurityProxy *self, PyObject *meth, PyObject *name)
+check(SecurityProxy *self, PyObject *meth, PyObject *name, PyObject *value)
 {
   PyObject *r;
 
-  /* If the checker has __setitem__, we call it's slot rather than
+  /* If the checker has __setitem__, we call its slot rather than
      calling check or check_getattr. Why? Because calling operator slots
      is much faster than calling methods and security checks are done so
      often that speed matters.  So we have this hack of using
      almost-arbitrary operations to represent methods that we call
-     alot.  */
+     a lot.  */
   if (self->proxy_checker->ob_type->tp_as_mapping != NULL
       && self->proxy_checker->ob_type->tp_as_mapping->mp_ass_subscript != NULL
-      && meth != str_check_setattr)
+      && meth != str_check_setattr) {
     return self->proxy_checker->ob_type->tp_as_mapping->
       mp_ass_subscript(self->proxy_checker, self->proxy.proxy_object, name);
+  }
 
-  r = PyObject_CallMethodObjArgs(self->proxy_checker, meth, 
-                                 self->proxy.proxy_object, name, 
-                                 NULL);
+  if (value != NULL
+	  && meth == str_check_setattr
+      && (PyObject_HasAttr(self->proxy_checker, str_check_setattr_with_value)
+    	  == 1)) {
+	  // value is NULL if this is really a delattr call
+	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
+									 str_check_setattr_with_value,
+									 self->proxy.proxy_object, name,
+									 value, NULL);
+  } else if (value != NULL
+		     && meth == str_check
+		     && (PyObject_HasAttr(self->proxy_checker, str_check_with_value)
+                 == 1)) {
+	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
+									 str_check_with_value,
+									 self->proxy.proxy_object, name,
+									 value, NULL);
+  } else if (value == NULL
+		     && meth == str_check_setattr
+		     && PyObject_HasAttr(self->proxy_checker, str_check_delattr) == 1
+		     ) {
+	  // value is NULL if this is really a delattr call
+	  r = PyObject_CallMethodObjArgs(self->proxy_checker,
+			  	  	  	  	  	  	 str_check_delattr,
+									 self->proxy.proxy_object, name,
+									 value, NULL);
+  } else {
+	  r = PyObject_CallMethodObjArgs(self->proxy_checker, meth,
+									 self->proxy.proxy_object, name,
+									 NULL);
+  }
   if (r == NULL)
     return -1;
 
@@ -214,7 +246,7 @@ check1(SecurityProxy *self, PyObject *opname, function1 operation)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, opname) >= 0) {
+  if (check(self, str_check, opname, (PyObject *)NULL) >= 0) {
     result = operation(self->proxy.proxy_object);
     PROXY_RESULT(self, result);
   }
@@ -229,7 +261,8 @@ check2(PyObject *self, PyObject *other,
 
   if (Proxy_Check(self)) 
     {
-      if (check((SecurityProxy*)self, str_check, opname) >= 0)
+      if (check((SecurityProxy*)self, str_check, opname, (PyObject *)NULL)
+    	  >= 0)
         {
           result = operation(((SecurityProxy*)self)->proxy.proxy_object, 
                              other);
@@ -238,7 +271,8 @@ check2(PyObject *self, PyObject *other,
     }
   else if (Proxy_Check(other)) 
     {
-      if (check((SecurityProxy*)other, str_check, ropname) >= 0)
+      if (check((SecurityProxy*)other, str_check, ropname,
+    			(PyObject *)NULL) >= 0)
         {
           result = operation(self, 
                              ((SecurityProxy*)other)->proxy.proxy_object);
@@ -261,7 +295,7 @@ check2i(SecurityProxy *self, PyObject *other,
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, opname) >= 0) 
+  if (check(self, str_check, opname, other) >= 0)
     {
       result = operation(self->proxy.proxy_object, other);
       if (result == self->proxy.proxy_object) 
@@ -372,7 +406,7 @@ proxy_iter(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___iter__) >= 0) 
+  if (check(self, str_check, str___iter__, (PyObject *)NULL) >= 0)
     {
       result = PyObject_GetIter(self->proxy.proxy_object);
       PROXY_RESULT(self, result);
@@ -385,7 +419,7 @@ proxy_iternext(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check_getattr, str_next) >= 0) 
+  if (check(self, str_check_getattr, str_next, (PyObject *)NULL) >= 0)
     {
       result = PyIter_Next(self->proxy.proxy_object);
       PROXY_RESULT(self, result);
@@ -398,7 +432,7 @@ proxy_getattro(SecurityProxy *self, PyObject *name)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check_getattr, name) >= 0) 
+  if (check(self, str_check_getattr, name, (PyObject *)NULL) >= 0)
     {
       result = PyObject_GetAttr(self->proxy.proxy_object, name);
       PROXY_RESULT(self, result);
@@ -409,7 +443,7 @@ proxy_getattro(SecurityProxy *self, PyObject *name)
 static int
 proxy_setattro(SecurityProxy *self, PyObject *name, PyObject *value)
 {
-  if (check(self, str_check_setattr, name) >= 0)
+  if (check(self, str_check_setattr, name, value) >= 0)
     return PyObject_SetAttr(self->proxy.proxy_object, name, value);
   return -1;
 }
@@ -458,7 +492,7 @@ proxy_str(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___str__) >= 0) 
+  if (check(self, str_check, str___str__, (PyObject *)NULL) >= 0)
     {
       result = PyObject_Str(self->proxy.proxy_object);
     }
@@ -475,7 +509,7 @@ proxy_repr(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___repr__) >= 0) {
+  if (check(self, str_check, str___repr__, (PyObject *)NULL) >= 0) {
     result = PyObject_Repr(self->proxy.proxy_object);
   }
   else {
@@ -504,7 +538,7 @@ proxy_call(SecurityProxy *self, PyObject *args, PyObject *kwds)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___call__) >= 0) 
+  if (check(self, str_check, str___call__, (PyObject *)NULL) >= 0)
     {
       result = PyObject_Call(self->proxy.proxy_object, args, kwds);
       PROXY_RESULT(self, result);
@@ -560,7 +594,8 @@ proxy_pow(PyObject *self, PyObject *other, PyObject *modulus)
 
   if (Proxy_Check(self)) 
     {
-      if (check((SecurityProxy*)self, str_check, str___pow__) >= 0)
+      if (check((SecurityProxy*)self, str_check, str___pow__,
+    		    (PyObject *)NULL) >= 0)
         {
           result = PyNumber_Power(((SecurityProxy*)self)->proxy.proxy_object,
                                   other, modulus);
@@ -569,17 +604,19 @@ proxy_pow(PyObject *self, PyObject *other, PyObject *modulus)
     }
   else if (Proxy_Check(other)) 
     {
-      if (check((SecurityProxy*)other, str_check, str___rpow__) >= 0)
+      if (check((SecurityProxy*)other, str_check, str___rpow__,
+    		    (PyObject *)NULL) >= 0)
         {      
           result = PyNumber_Power(self, 
-                                  ((SecurityProxy*)other)->proxy.proxy_object, 
+                                  ((SecurityProxy*)other)->proxy.proxy_object,
                                   modulus);
           PROXY_RESULT(((SecurityProxy*)other), result);
         }
     }
   else if (modulus != NULL && Proxy_Check(modulus)) 
     {
-      if (check((SecurityProxy*)modulus, str_check, str___3pow__) >= 0)
+      if (check((SecurityProxy*)modulus, str_check, str___3pow__,
+    		    (PyObject *)NULL) >= 0)
         {      
           result = PyNumber_Power(self, other, 
                                ((SecurityProxy*)modulus)->proxy.proxy_object);
@@ -608,7 +645,8 @@ proxy_coerce(PyObject **p_self, PyObject **p_other)
 
   assert(Proxy_Check(self));
 
-  if (check((SecurityProxy*)self, str_check, str___coerce__) >= 0) 
+  if (check((SecurityProxy*)self, str_check, str___coerce__,
+		    (PyObject *)NULL) >= 0)
     {
       PyObject *left = ((SecurityProxy*)self)->proxy.proxy_object;
       PyObject *right = other;
@@ -692,7 +730,7 @@ INPLACE(truediv, PyNumber_InPlaceTrueDivide)
 static Py_ssize_t
 proxy_length(SecurityProxy *self)
 {
-  if (check(self, str_check, str___len__) >= 0)
+  if (check(self, str_check, str___len__, (PyObject *)NULL) >= 0)
     return PyObject_Length(self->proxy.proxy_object);
   return -1;
 }
@@ -733,7 +771,7 @@ proxy_slice(SecurityProxy *self, Py_ssize_t start, Py_ssize_t end)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___getslice__) >= 0) {
+  if (check(self, str_check, str___getslice__, (PyObject *)NULL) >= 0) {
     result = PySequence_GetSlice(self->proxy.proxy_object, start, end);
     PROXY_RESULT(self, result);
   }
@@ -741,9 +779,10 @@ proxy_slice(SecurityProxy *self, Py_ssize_t start, Py_ssize_t end)
 }
 
 static int
-proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j, PyObject *value)
+proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j,
+				PyObject *value)
 {
-  if (check(self, str_check, str___setslice__) >= 0)
+  if (check(self, str_check, str___setslice__, value) >= 0)
     return PySequence_SetSlice(self->proxy.proxy_object, i, j, value);
   return -1;
 }
@@ -751,7 +790,7 @@ proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j, PyObject *value
 static int
 proxy_contains(SecurityProxy *self, PyObject *value)
 {
-  if (check(self, str_check, str___contains__) >= 0)
+  if (check(self, str_check, str___contains__, (PyObject *)NULL) >= 0)
     return PySequence_Contains(self->proxy.proxy_object, value);
   return -1;
 }
@@ -765,7 +804,7 @@ proxy_getitem(SecurityProxy *self, PyObject *key)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___getitem__) >= 0) 
+  if (check(self, str_check, str___getitem__, (PyObject *)NULL) >= 0)
     {
       result = PyObject_GetItem(self->proxy.proxy_object, key);
       PROXY_RESULT(self, result);
@@ -777,11 +816,11 @@ static int
 proxy_setitem(SecurityProxy *self, PyObject *key, PyObject *value)
 {
   if (value == NULL) {
-    if (check(self, str_check, str___delitem__) >= 0)
+    if (check(self, str_check, str___delitem__, (PyObject *)NULL) >= 0)
       return PyObject_DelItem(self->proxy.proxy_object, key);
   }
   else {
-    if (check(self, str_check, str___setitem__) >= 0)
+    if (check(self, str_check, str___setitem__, value) >= 0)
       return PyObject_SetItem(self->proxy.proxy_object, key, value);
   }
   return -1;
@@ -999,8 +1038,11 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   INIT_STRING(__3pow__);
   INIT_STRING(__call__);
   INIT_STRING(check);
+  INIT_STRING(check_with_value);
   INIT_STRING(check_getattr);
   INIT_STRING(check_setattr);
+  INIT_STRING(check_setattr_with_value);
+  INIT_STRING(check_delattr);
   INIT_STRING(__cmp__);
   INIT_STRING(__coerce__);
   INIT_STRING(__contains__);

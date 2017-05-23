@@ -149,6 +149,28 @@ class IChecker(Interface):
         """
 
 
+class IValueBasedChecker(IChecker):
+    """Security checker that also checks the operands of attribute
+    assignment and in-place mutation operations.
+    """
+
+    def check_delattr(ob, name):
+        """As ``check_delattr`` but only applies when the attribute
+        is being deleted via ``del`` or ``delattr``.
+        """
+
+    def check_setattr_with_value(ob, name, value):
+        """As ``check_setattr`` but also includes the value to be
+        assigned.
+        """
+
+    def check_with_value(ob, name, value):
+        """As ``check`` but also includes the operand.
+
+        Only called for in-place mutation operations.
+        """
+
+
 class INameBasedChecker(IChecker):
     """Security checker that uses permissions to check attribute access."""
 

@@ -47,6 +47,10 @@ Utilities
       :members:
       :member-order: bysource
 
+   .. autointerface:: IValueBasedChecker
+      :members:
+      :member-order: bysource
+
    .. autointerface:: ISecurityPolicy
       :members:
       :member-order: bysource
