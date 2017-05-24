@@ -4,7 +4,17 @@ Changes
 4.1.2 (unreleased)
 ------------------
 
-- TBD
+- Added ability to perform checks based on values assigned to
+  attributes, or operands of in-place mutation operations.
+
+- Added ability to check for attribute deletion separately from
+  attribute assignment.
+
+- Added ability to perform checks based on values assigned to
+  attributes, or operands of in-place mutation operations.
+
+- Added ability to check for attribute deletion separately from
+  attribute assignment.
 
 4.1.1 (2017-05-17)
 ------------------
