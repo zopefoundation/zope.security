@@ -1881,7 +1881,7 @@ class ProxyTests(unittest.TestCase):
 
 class Test_ValuesChecker(unittest.TestCase):
 
-    def _callFUT(self, object, *args, **kw):
+    def _callFUT(self, obj, *args, **kw):
         from zope.interface import implementer
         from zope.security.checker import ProxyFactory
         from zope.security.interfaces import IValueBasedChecker
@@ -1926,7 +1926,7 @@ class Test_ValuesChecker(unittest.TestCase):
                 return self.check(ob, name)
 
         checker = ValuesChecker(*args, **kw)
-        return ProxyFactory(object, checker)
+        return ProxyFactory(obj, checker)
 
     def test_in_place_mutation(self):
         from zope.security.interfaces import Unauthorized
@@ -2121,6 +2121,7 @@ def test_suite():
         unittest.makeSuite(Test_isinstance),
         # pre-geddon
         unittest.makeSuite(ProxyTests),
+        unittest.makeSuite(Test_ValuesChecker),
         unittest.makeSuite(LocationProxySecurityCheckerTests),
     ))
     if not (PYPY or PURE_PYTHON):
