@@ -343,6 +343,7 @@ proxy_clear(SecurityProxy *self)
 static void
 proxy_dealloc(SecurityProxy *self)
 {
+  PyObject_GC_UnTrack((PyObject*)self);
   proxy_clear(self);
   SecurityProxyType.tp_base->tp_dealloc((PyObject*)self);
 }
