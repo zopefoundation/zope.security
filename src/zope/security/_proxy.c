@@ -177,8 +177,8 @@ check(SecurityProxy *self, PyObject *meth, PyObject *name)
     return self->proxy_checker->ob_type->tp_as_mapping->
       mp_ass_subscript(self->proxy_checker, self->proxy.proxy_object, name);
 
-  r = PyObject_CallMethodObjArgs(self->proxy_checker, meth, 
-                                 self->proxy.proxy_object, name, 
+  r = PyObject_CallMethodObjArgs(self->proxy_checker, meth,
+                                 self->proxy.proxy_object, name,
                                  NULL);
   if (r == NULL)
     return -1;
@@ -227,26 +227,26 @@ check2(PyObject *self, PyObject *other,
 {
   PyObject *result = NULL;
 
-  if (Proxy_Check(self)) 
+  if (Proxy_Check(self))
     {
       if (check((SecurityProxy*)self, str_check, opname) >= 0)
         {
-          result = operation(((SecurityProxy*)self)->proxy.proxy_object, 
+          result = operation(((SecurityProxy*)self)->proxy.proxy_object,
                              other);
           PROXY_RESULT(((SecurityProxy*)self), result);
         }
     }
-  else if (Proxy_Check(other)) 
+  else if (Proxy_Check(other))
     {
       if (check((SecurityProxy*)other, str_check, ropname) >= 0)
         {
-          result = operation(self, 
+          result = operation(self,
                              ((SecurityProxy*)other)->proxy.proxy_object);
-    
+
           PROXY_RESULT(((SecurityProxy*)other), result);
         }
     }
-  else 
+  else
     {
       Py_INCREF(Py_NotImplemented);
       return Py_NotImplemented;
@@ -261,10 +261,10 @@ check2i(SecurityProxy *self, PyObject *other,
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, opname) >= 0) 
+  if (check(self, str_check, opname) >= 0)
     {
       result = operation(self->proxy.proxy_object, other);
-      if (result == self->proxy.proxy_object) 
+      if (result == self->proxy.proxy_object)
         {
           /* If the operation was really carried out inplace,
              don't create a new proxy, but use the old one. */
@@ -272,7 +272,7 @@ check2i(SecurityProxy *self, PyObject *other,
           Py_INCREF((PyObject *)self);
           result = (PyObject *)self;
         }
-      else 
+      else
         PROXY_RESULT(self, result);
     }
   return result;
@@ -372,7 +372,7 @@ proxy_iter(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___iter__) >= 0) 
+  if (check(self, str_check, str___iter__) >= 0)
     {
       result = PyObject_GetIter(self->proxy.proxy_object);
       PROXY_RESULT(self, result);
@@ -385,7 +385,7 @@ proxy_iternext(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check_getattr, str_next) >= 0) 
+  if (check(self, str_check_getattr, str_next) >= 0)
     {
       result = PyIter_Next(self->proxy.proxy_object);
       PROXY_RESULT(self, result);
@@ -398,7 +398,7 @@ proxy_getattro(SecurityProxy *self, PyObject *name)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check_getattr, name) >= 0) 
+  if (check(self, str_check_getattr, name) >= 0)
     {
       result = PyObject_GetAttr(self->proxy.proxy_object, name);
       PROXY_RESULT(self, result);
@@ -449,7 +449,7 @@ default_repr(PyObject *object)
   Py_DECREF(klass);
   Py_XDECREF(name);
   Py_XDECREF(module);
-  
+
   return result;
 }
 
@@ -458,11 +458,11 @@ proxy_str(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___str__) >= 0) 
+  if (check(self, str_check, str___str__) >= 0)
     {
       result = PyObject_Str(self->proxy.proxy_object);
     }
-  else 
+  else
     {
       PyErr_Clear();
       result = default_repr(self->proxy.proxy_object);
@@ -504,7 +504,7 @@ proxy_call(SecurityProxy *self, PyObject *args, PyObject *kwds)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___call__) >= 0) 
+  if (check(self, str_check, str___call__) >= 0)
     {
       result = PyObject_Call(self->proxy.proxy_object, args, kwds);
       PROXY_RESULT(self, result);
@@ -558,7 +558,7 @@ proxy_pow(PyObject *self, PyObject *other, PyObject *modulus)
 {
   PyObject *result = NULL;
 
-  if (Proxy_Check(self)) 
+  if (Proxy_Check(self))
     {
       if (check((SecurityProxy*)self, str_check, str___pow__) >= 0)
         {
@@ -567,21 +567,21 @@ proxy_pow(PyObject *self, PyObject *other, PyObject *modulus)
           PROXY_RESULT(((SecurityProxy*)self), result);
         }
     }
-  else if (Proxy_Check(other)) 
+  else if (Proxy_Check(other))
     {
       if (check((SecurityProxy*)other, str_check, str___rpow__) >= 0)
-        {      
-          result = PyNumber_Power(self, 
-                                  ((SecurityProxy*)other)->proxy.proxy_object, 
+        {
+          result = PyNumber_Power(self,
+                                  ((SecurityProxy*)other)->proxy.proxy_object,
                                   modulus);
           PROXY_RESULT(((SecurityProxy*)other), result);
         }
     }
-  else if (modulus != NULL && Proxy_Check(modulus)) 
+  else if (modulus != NULL && Proxy_Check(modulus))
     {
       if (check((SecurityProxy*)modulus, str_check, str___3pow__) >= 0)
-        {      
-          result = PyNumber_Power(self, other, 
+        {
+          result = PyNumber_Power(self, other,
                                ((SecurityProxy*)modulus)->proxy.proxy_object);
           PROXY_RESULT(((SecurityProxy*)modulus), result);
         }
@@ -608,7 +608,7 @@ proxy_coerce(PyObject **p_self, PyObject **p_other)
 
   assert(Proxy_Check(self));
 
-  if (check((SecurityProxy*)self, str_check, str___coerce__) >= 0) 
+  if (check((SecurityProxy*)self, str_check, str___coerce__) >= 0)
     {
       PyObject *left = ((SecurityProxy*)self)->proxy.proxy_object;
       PyObject *right = other;
@@ -697,6 +697,21 @@ proxy_length(SecurityProxy *self)
   return -1;
 }
 
+static PyObject *
+proxy_length_hint(SecurityProxy *self)
+{
+  PyObject *result = NULL;
+  result = PyObject_CallMethod(self->proxy.proxy_object, "__length_hint__", NULL);
+  if (result == NULL) {
+      if (PyErr_ExceptionMatches(PyExc_AttributeError)) {
+            PyErr_Clear();
+            result = Py_NotImplemented;
+            Py_INCREF(result);
+      }
+  }
+  return result;
+}
+
 /* sq_item and sq_ass_item may be called by PySequece_{Get,Set}Item(). */
 static PyObject *proxy_getitem(SecurityProxy *, PyObject *);
 static int proxy_setitem(SecurityProxy *, PyObject *, PyObject *);
@@ -765,7 +780,7 @@ proxy_getitem(SecurityProxy *self, PyObject *key)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check, str___getitem__) >= 0) 
+  if (check(self, str_check, str___getitem__) >= 0)
     {
       result = PyObject_GetItem(self->proxy.proxy_object, key);
       PROXY_RESULT(self, result);
@@ -884,6 +899,13 @@ disallowed.  The proxy method should return a proxy for the object\n\
 if one is needed, otherwise the object itself.\n\
 ";
 
+static PyMethodDef proxy_methods[] = {
+    {"__length_hint__", (PyCFunction)proxy_length_hint, METH_NOARGS,
+     "Guess the length of the object"},
+    {NULL,              NULL}           /* sentinel */
+};
+
+
 static PyTypeObject SecurityProxyType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "zope.security._proxy._Proxy",
@@ -925,7 +947,7 @@ static PyTypeObject SecurityProxyType = {
     0,                                        /* tp_weaklistoffset */
     (getiterfunc)proxy_iter,                  /* tp_iter */
     (iternextfunc)proxy_iternext,             /* tp_iternext */
-    0,                                        /* tp_methods */
+    proxy_methods,                            /* tp_methods */
     0,                                        /* tp_members */
     0,                                        /* tp_getset */
     0,                                        /* tp_base */
@@ -963,7 +985,7 @@ module_getObject(PyObject *self, PyObject *arg)
     result = arg;
   else
     result = ((SecurityProxy*)arg)->proxy.proxy_object;
-  
+
   Py_INCREF(result);
   return result;
 }
@@ -974,7 +996,7 @@ module___doc__[] = "Security proxy implementation.";
 static PyMethodDef
 module_functions[] = {
   {"getChecker", module_getChecker, METH_O, "get checker from proxy"},
-  {"getObject", module_getObject, METH_O, 
+  {"getObject", module_getObject, METH_O,
    "Get the proxied object\n\nReturn the original object if not proxied."},
   {NULL}
 };
@@ -1069,19 +1091,19 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   INIT_STRING(__setitem__);
   INIT_STRING(__setslice__);
   INIT_STRING(__str__);
-  
+
 
   __class__str = FROM_STRING("__class__");
   if (! __class__str)
      return MOD_ERROR_VAL;
-  
+
   __name__str = FROM_STRING("__name__");
   if (! __name__str)
     return MOD_ERROR_VAL;
-  
+
   __module__str = FROM_STRING("__module__");
   if (! __module__str) return MOD_ERROR_VAL;
-  
+
   SecurityProxyType.tp_alloc = PyType_GenericAlloc;
   SecurityProxyType.tp_free = PyObject_GC_Del;
   SecurityProxyType.tp_base = &ProxyType;

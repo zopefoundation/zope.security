@@ -604,7 +604,8 @@ _typeChecker = NamesChecker(
      '__implemented__'])
 _namedChecker = NamesChecker(['__name__'])
 
-_iteratorChecker = NamesChecker(['next', '__next__', '__iter__', '__len__'])
+_iteratorChecker = NamesChecker(['next', '__next__', '__iter__', '__len__',
+                                 '__length_hint__',])
 
 _setChecker = NamesChecker(['__iter__', '__len__', '__str__', '__contains__',
                             'copy', 'difference', 'intersection', 'issubset',
@@ -822,6 +823,42 @@ else:
     del _fixup_btrees
 
 del _fixup_dictlike
+
+def _fixup_zope_interface():
+    # Make sure the provided and implementedBy objects
+    # can be iterated.
+    # Note that we DO NOT use the _iteratorChecker, but instead
+    # we use NoProxy to be sure that the results (of iteration or not) are not
+    # proxied. On Python 2, these objects are builtin and don't go through the
+    # checking process at all, much like BTrees, so NoProxy is necessary for
+    # compatibility. On Python 3, prior to this, iteration was simply not allowed.
+    from zope.interface import providedBy
+    from zope.interface import alsoProvides
+
+    class I1(Interface):
+        pass
+
+    class I2(Interface):
+        pass
+
+    @implementer(I1)
+    class O(object):
+        pass
+
+    o = O()
+
+
+    # This will be athe zope.interface.implementedBy from the class
+    # a zope.interface.declarations.Implements
+    _default_checkers[type(providedBy(o))] = NoProxy
+
+    alsoProvides(o, I2)
+    # This will be the zope.interface.Provides from the instance
+    _default_checkers[type(providedBy(o))] = NoProxy
+
+_fixup_zope_interface()
+del _fixup_zope_interface
+
 
 def _clear():
     _checkers.clear()

@@ -4,7 +4,14 @@ Changes
 4.1.2 (unreleased)
 ------------------
 
-- TBD
+- Fix `issue 27 <https://github.com/zopefoundation/zope.security/issues/27>`_:
+  iteration of ``zope.interface.providedBy()`` is now allowed by
+  default on all versions of Python. Previously it only worked on
+  Python 2. Note that ``providedBy`` returns unproxied objects for backwards
+  compatibility.
+
+- Fix ``__length_hint__`` of proxied iterator objects. Previously it
+  was ignored.
 
 4.1.1 (2017-05-17)
 ------------------

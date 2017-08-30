@@ -434,6 +434,125 @@ class CheckerTestsBase(object):
         # iteration of regular dict is allowed by default
         self._check_iteration_of_dict_like(dict())
 
+    def test_iteration_of_interface_implementedBy(self):
+        # Iteration of implementedBy is allowed by default
+        # See https://github.com/zopefoundation/zope.security/issues/27
+        from zope.security.proxy import Proxy
+        from zope.security.checker import Checker
+
+        from zope.interface import providedBy
+        from zope.interface import implementer
+        from zope.interface import Interface
+
+        class I1(Interface):
+            pass
+
+        @implementer(I1)
+        class O(object):
+            pass
+
+        o = O()
+
+        checker = Checker({})
+
+        proxy = Proxy(o, checker)
+
+        # Since the object itself doesn't have any interfaces,
+        # the providedBy will return the implementedBy of the class
+        l = list(providedBy(proxy))
+
+        self.assertEqual(l, [I1])
+
+    def test_iteration_of_interface_providesBy(self):
+        # Iteration of zope.interface.Provides is allowed by default
+        # See https://github.com/zopefoundation/zope.security/issues/27
+        from zope.security.proxy import Proxy
+        from zope.security.checker import Checker
+
+        from zope.interface import providedBy
+        from zope.interface import alsoProvides
+        from zope.interface import implementer
+        from zope.interface import Interface
+
+        class I1(Interface):
+            pass
+
+        class I2(Interface):
+            pass
+
+        @implementer(I1)
+        class O(object):
+            pass
+
+        o = O()
+        alsoProvides(o, I2)
+
+        checker = Checker({})
+
+        proxy = Proxy(o, checker)
+
+        # Since the object has its own interfaces, provided
+        # by will return a zope.interface.Provides object
+        l = list(providedBy(proxy))
+
+        self.assertEqual(l, [I2, I1])
+
+    def test_iteration_with_length_hint(self):
+        # PEP 424 implemented officially in Python 3.4 and
+        # unofficially before in cPython and PyPy that allows for a
+        # __length_hint__ method to be defined on iterators. It should
+        # be allowed by default. See
+        # https://github.com/zopefoundation/zope.security/issues/27
+        from zope.security.proxy import Proxy
+        from zope.security.checker import _iteratorChecker
+        from zope.security.checker import Checker
+
+        class Iter(object):
+            __Security_checker__ = _iteratorChecker
+
+            items = (0, 1, 2)
+            index = 0
+            hint = len(items)
+            hint_called = False
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                try:
+                    return self.items[self.index]
+                except IndexError:
+                    raise StopIteration()
+                finally:
+                    self.index += 1
+
+            next = __next__
+
+            def __length_hint__(self):
+                self.hint_called = True
+                return self.hint
+
+        # The hint is called on raw objects
+        i = Iter()
+        list(i)
+        self.assertTrue(i.hint_called, "__length_hint__ should be called")
+
+        # The hint is called when we proxy the root object
+        i = Iter()
+        proxy = Proxy(i, _iteratorChecker)
+        l = list(proxy)
+        self.assertEqual(l, [0, 1, 2])
+        self.assertTrue(i.hint_called, "__length_hint__ should be called")
+
+        # The hint is called when we proxy its iterator
+        i = Iter()
+        it = iter(i)
+        proxy = Proxy(it, _iteratorChecker)
+        l = list(proxy)
+        self.assertEqual(l, [0, 1, 2])
+        self.assertTrue(i.hint_called, "__length_hint__ should be called")
+
+
 class CheckerPyTests(unittest.TestCase, CheckerTestsBase):
 
     def _getTargetClass(self):
