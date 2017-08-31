@@ -199,6 +199,11 @@ class ProxyPy(PyProxyBase):
         return bool(wrapped)
     __bool__ = __nonzero__
 
+    def __length_hint__(self):
+        # no check
+        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        return wrapped.__length_hint__()
+
     def __coerce__(self, other):
         # For some reason _check_name does not work for coerce()
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')

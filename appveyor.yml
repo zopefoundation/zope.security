@@ -20,10 +20,12 @@ install:
 # We need to install the C extensions that BTrees setup-requires
 # separately because we've seen problems with the BTrees build cleanup step trying
 # to delete a .pyd that was still open.
-  - pip install persistent
-  - pip install BTrees
-  - pip install zope.testrunner
-  - pip install .[test]
+  - python -m pip install -U pip
+  - pip install -U setuptools
+  - pip install -U persistent
+  - pip install -U BTrees
+  - pip install -U zope.testrunner
+  - pip install -U .[test]
 
 build: false
 
