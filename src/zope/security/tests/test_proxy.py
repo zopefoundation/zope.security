@@ -1996,7 +1996,11 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
         import sys
         from zope.location.location import LocationProxy
         import zope.security
-        from zope.security._compat import reload
+        try:
+            from imp import reload
+        except ImportError:
+            reload = reload # Python 2
+
         # This attribute is set when zope.security.decorator is imported, to
         # show that it will be set too, if zope.security.proxy is imported
         # we set it to a different value at first:

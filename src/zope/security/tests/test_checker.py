@@ -868,13 +868,12 @@ class _SelectCheckerBase(object):
     def test_w_basic_types_NoProxy(self):
         import datetime
         from zope.i18nmessageid import Message
-        from zope.security._compat import _u
         msg = Message('msg')
         for obj in [object(),
                     42,
                     3.14,
                     None,
-                    _u('text'),
+                    u'text',
                     b'binary',
                     msg,
                     True,
@@ -1044,13 +1043,12 @@ class Test_defineChecker(unittest.TestCase):
         return defineChecker(type_, checker)
 
     def test_w_wrong_type(self):
-        from zope.security._compat import _u
         checker = object()
         for obj in [object(),
                     42,
                     3.14,
                     None,
-                    _u('text'),
+                    u'text',
                     b'binary',
                     True,
                    ]:
@@ -2108,11 +2106,10 @@ class TestSecurityPolicy(unittest.TestCase):
 class TestCheckerPublic(unittest.TestCase):
 
     def test_that_pickling_CheckerPublic_retains_identity(self):
-        from zope.security._compat import _pickle
+        import pickle
         from zope.security.checker import CheckerPublic
-        self.assertTrue(_pickle.loads(_pickle.dumps(CheckerPublic))
-                     is
-                     CheckerPublic)
+        self.assertIs(pickle.loads(pickle.dumps(CheckerPublic)),
+                      CheckerPublic)
 
     def test_that_CheckerPublic_identity_works_even_when_proxied(self):
         from zope.security.checker import ProxyFactory

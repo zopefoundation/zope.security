@@ -25,7 +25,6 @@ from zope.interface import Interface
 import zope.security.zcml
 from zope.security.i18n import ZopeMessageFactory as _
 from zope.security.zcml import Permission
-from zope.security._compat import _u
 
 class IClassDirective(zope.interface.Interface):
     """Make statements about a class"""
@@ -149,8 +148,8 @@ class IModule(Interface):
     """Group security declarations about a module"""
 
     module = GlobalObject(
-        title=_u("Module"),
-        description=_u("Pointer to the module object."),
+        title=u"Module",
+        description=u"Pointer to the module object.",
         required=True)
 
 
@@ -163,17 +162,17 @@ class IAllow(Interface):
     """
 
     attributes = Tokens(
-        title=_u("Attributes"),
-        description=_u("The attributes to provide access to."),
-        value_type = PythonIdentifier(),
+        title=u"Attributes",
+        description=u"The attributes to provide access to.",
+        value_type=PythonIdentifier(),
         required=False)
 
     interface = Tokens(
-        title=_u("Interface"),
-        description=_u("Interfaces whos names to provide access to. Access "
-                       "will be provided to all of the names defined by the "
-                       "interface(s). Multiple interfaces can be supplied."),
-        value_type = GlobalInterface(),
+        title=u"Interface",
+        description=(u"Interfaces whos names to provide access to. Access "
+                       u"will be provided to all of the names defined by the "
+                       u"interface(s). Multiple interfaces can be supplied."),
+        value_type=GlobalInterface(),
         required=False)
 
 
@@ -182,15 +181,15 @@ class IRequire(Interface):
 
     The given permission is required to access any names provided
     directly in the attributes attribute or any names defined by
-    interfaces listed in the interface attribute.  
+    interfaces listed in the interface attribute.
     """
 
     attributes = Tokens(
-        title=_u("Attributes"),
-        description=_u("The attributes to require permission for."),
-        value_type = PythonIdentifier(),
+        title=u"Attributes",
+        description=u"The attributes to require permission for.",
+        value_type=PythonIdentifier(),
         required=False)
 
     permission = Permission(
-        title=_u("Permission ID"),
-        description=_u("The id of the permission to require."))
+        title=u"Permission ID",
+        description=u"The id of the permission to require.")

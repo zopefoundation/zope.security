@@ -17,12 +17,11 @@ import threading
 import zope.interface
 
 from zope.security import interfaces
-from zope.security._compat import _u
 
 thread_local = threading.local()
 
 @zope.interface.provider(interfaces.IPrincipal)
 class system_user(object):
-    id = _u('zope.security.management.system_user')
-    title = _u('System')
-    description = _u('')
+    id = u'zope.security.management.system_user'
+    title = u'System'
+    description = u''
