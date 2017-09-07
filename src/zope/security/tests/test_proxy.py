@@ -19,31 +19,10 @@ import sys
 from zope.security._compat import PYTHON2, PYPY, PURE_PYTHON
 
 def _skip_if_not_Py2(testfunc):
-    from functools import update_wrapper
-    if not PYTHON2:
-        def dummy(self):
-            pass
-        update_wrapper(dummy, testfunc)
-        return dummy
-    return testfunc
+    return unittest.skipUnless(PYTHON2, "Only on Py2")(testfunc)
 
 def _skip_if_Py2(testfunc):
-    from functools import update_wrapper
-    if PYTHON2:
-        def dummy(self):
-            pass
-        update_wrapper(dummy, testfunc)
-        return dummy
-    return testfunc
-
-def _skip_if_pypy250(testfunc):
-    from functools import update_wrapper
-    if PYPY and sys.pypy_version_info[:3] == (2,5,0):
-        def dummy(self):
-            pass
-        update_wrapper(dummy, testfunc)
-        return dummy
-    return testfunc
+    return unittest.skipIf(PYTHON2, "Only on Py3")(testfunc)
 
 class ProxyTestBase(object):
 
@@ -168,6 +147,20 @@ class ProxyTestBase(object):
                          '<security proxied %s.object '
                              'instance at %s>' % (_BUILTINS, address))
 
+    def test__str__fails_return(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class CustomStr(object):
+            def __str__(self):
+                "<CustomStr>" # Docstring, not a return
+
+        target = CustomStr()
+        checker = DummyChecker(ForbiddenAttribute, allowed=('__str__'))
+        proxy = self._makeOne(target, checker)
+        with self.assertRaises(TypeError):
+            str(target)
+        with self.assertRaises(TypeError):
+            str(proxy)
+
     def test___repr___checker_allows_str(self):
         target = object()
         checker = DummyChecker()
@@ -185,6 +178,59 @@ class ProxyTestBase(object):
         self.assertEqual(repr(proxy),
                          '<security proxied %s.object '
                              'instance at %s>' % (_BUILTINS, address))
+
+    def test__str__falls_through_to_repr_when_both_allowed(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class CustomRepr(object):
+            def __repr__(self):
+                return "<CustomRepr>"
+
+        target = CustomRepr()
+        checker = DummyChecker(ForbiddenAttribute, allowed=("__str__", '__repr__'))
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(repr(proxy), "<CustomRepr>")
+        self.assertEqual(str(target), "<CustomRepr>")
+        self.assertEqual(str(proxy), str(target))
+
+    def test__str__doesnot_fall_through_to_repr_when_str_not_allowed(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class CustomRepr(object):
+            def __repr__(self):
+                return "<CustomRepr>"
+
+        target = CustomRepr()
+        checker = DummyChecker(ForbiddenAttribute, allowed=('__repr__'))
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(repr(proxy), "<CustomRepr>")
+        self.assertEqual(str(target), "<CustomRepr>")
+        self.assertIn("<security proxied zope.security", str(proxy))
+
+    def test__str__doesnot_fall_through_to_repr_when_repr_not_allowed(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class CustomRepr(object):
+            def __repr__(self):
+                return "<CustomRepr>"
+
+        target = CustomRepr()
+        checker = DummyChecker(ForbiddenAttribute, allowed=('__str__'))
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(str(target), "<CustomRepr>")
+        self.assertEqual(str(proxy), str(target))
+        self.assertIn("<security proxied zope.security", repr(proxy))
+
+    def test__str__falls_through_to_repr_but_repr_fails_return(self):
+        from zope.security.interfaces import ForbiddenAttribute
+        class CustomRepr(object):
+            def __repr__(self):
+                "<CustomRepr>" # Docstring, not a return
+
+        target = CustomRepr()
+        checker = DummyChecker(ForbiddenAttribute, allowed=('__repr__'))
+        proxy = self._makeOne(target, checker)
+        with self.assertRaises(TypeError):
+            repr(target)
+        with self.assertRaises(TypeError):
+            repr(proxy)
 
     @_skip_if_not_Py2
     def test___cmp___w_self(self):
@@ -1713,12 +1759,6 @@ class ProxyTests(unittest.TestCase):
         self.assertEqual(self.c, getChecker(self.p))
 
 
-    # XXX: PyPy 2.5.0 has a bug where proxys around types
-    # aren't correctly hashable, which breaks this part of the
-    # test. This is fixed in 2.5.1+, but as of 2015-05-28,
-    # TravisCI still uses 2.5.0.
-
-    @_skip_if_pypy250
     def testProxiedClassicClassAsDictKey(self):
         from zope.security.proxy import ProxyFactory
         class C(object):
@@ -1727,7 +1767,6 @@ class ProxyTests(unittest.TestCase):
         pC = ProxyFactory(C, self.c)
         self.assertEqual(d[pC], d[C])
 
-    @_skip_if_pypy250
     def testProxiedNewClassAsDictKey(self):
         from zope.security.proxy import ProxyFactory
         class C(object):
