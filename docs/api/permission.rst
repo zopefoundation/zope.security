@@ -45,9 +45,9 @@ The :data:`zope.security.checker.CheckerPublic` permission always exists:
    >>> y = Permission('y')
    >>> provideUtility(y, IPermission, 'y')
 
-   >>> ids = list(allPermissions(None))
-   >>> ids.sort()
-   >>> for i in ids: print(i)
+   >>> ids = sorted(allPermissions(None))
+   >>> for perm in sorted(allPermissions(None)):
+   ...     print(perm)
    x
    y
 
@@ -124,7 +124,8 @@ listed first:
 
 .. doctest::
 
-   >>> for t in [term.title for term in vocab]: print(t)
+   >>> for term in vocab:
+   ...    print(term.title)
    Public
    x
    y
