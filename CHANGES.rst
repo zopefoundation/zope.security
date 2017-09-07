@@ -13,6 +13,11 @@ Changes
 - Fix ``__length_hint__`` of proxied iterator objects. Previously it
   was ignored.
 
+- Drop support for Python 3.3.
+
+- Enable coveralls.io for coverage measurement and run doctests on all
+  supported Python versions.
+
 4.1.1 (2017-05-17)
 ------------------
 

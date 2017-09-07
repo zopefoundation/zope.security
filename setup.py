@@ -102,7 +102,7 @@ else:
                  ),
         Extension("zope.security._zope_security_checker",
                   [os.path.join('src', 'zope', 'security',
-                                        "_zope_security_checker.c")]
+                                "_zope_security_checker.c")]
                  ),
     ]
 
@@ -126,7 +126,6 @@ setup(name='zope.security',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
@@ -140,7 +139,7 @@ setup(name='zope.security',
       url='http://pypi.python.org/pypi/zope.security',
       license='ZPL 2.1',
       packages=find_packages('src'),
-      package_dir = {'': 'src'},
+      package_dir={'': 'src'},
       namespace_packages=['zope'],
       setup_requires=setup_requires,
       ext_modules=ext_modules,
@@ -153,9 +152,9 @@ setup(name='zope.security',
           'zope.proxy >= 4.1.0',
           'zope.schema',
       ],
-      test_suite = '__main__.alltests',
+      test_suite='__main__.alltests',
       tests_require=TESTS_REQUIRE,
-      extras_require = dict(
+      extras_require=dict(
           pytz=["pytz"],
           untrustedpython=['zope.untrustedpython'] if not py3 else [],
           zcml=['zope.configuration'],
@@ -163,6 +162,6 @@ setup(name='zope.security',
           testing=TESTS_REQUIRE + ['nose', 'coverage'],
           docs=['Sphinx', 'repoze.sphinx.autointerface'],
       ),
-      include_package_data = True,
-      zip_safe = False,
-      )
+      include_package_data=True,
+      zip_safe=False,
+)

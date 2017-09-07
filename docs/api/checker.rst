@@ -45,7 +45,7 @@ name and permission:
    >>> cdict = checker.get_permissions
    >>> pprint(cdict)
    {'foo': 'zope.security.metaconfigure.test'}
-   
+
    If we define additional names, they will be added to the dict:
 
    >>> protectModule(test_zcml_functest, 'bar', TEST_PERM)
@@ -54,7 +54,7 @@ name and permission:
    {'bar': 'zope.security.metaconfigure.test',
     'baz': 'zope.security.metaconfigure.test',
     'foo': 'zope.security.metaconfigure.test'}
-        
+
 The allow directive creates actions for each named defined
 directly, or via interface:
 
@@ -543,7 +543,7 @@ we can do everything we expect to be able to do with proxied sets.
 
    >>> str(s) == str(us)
    True
-   
+
    >>> repr(s) == repr(us)
    True
 
@@ -565,7 +565,7 @@ we can do everything we expect to be able to do with proxied sets.
 Note that you can't compare proxied sets with other proxied sets
 due a limitaion in the set comparison functions which won't work
 with any kind of proxy.
-   
+
 .. doctest::
 
    >>> bool(s)
@@ -723,7 +723,7 @@ we can do everything we expect to be able to do with proxied frozensets.
 
    >>> str(s) == str(us)
    True
-   
+
    >>> repr(s) == repr(us)
    True
 
@@ -745,7 +745,7 @@ we can do everything we expect to be able to do with proxied frozensets.
 Note that you can't compare proxied sets with other proxied sets
 due a limitaion in the frozenset comparison functions which won't work
 with any kind of proxy.
-   
+
 .. doctest::
 
    >>> bool(s)
@@ -906,7 +906,11 @@ Classic Classes
    >>> s = repr(C)
    >>> int(C.__module__ == __name__)
    1
-   >>> len(C.__bases__)
+
+Note that these are really only classic on Python 2:
+
+   >>> import sys
+   >>> len(C.__bases__) + (1 if sys.version_info[0] == 2 else 0)
    1
 
 Always available:
@@ -992,8 +996,7 @@ We work with the ABCMeta meta class:
 .. doctest::
 
    >>> import abc
-   >>> class MyABC:
-   ...     __metaclass__ = abc.ABCMeta
+   >>> MyABC = abc.ABCMeta('MyABC', (object,), {})
    >>> class Foo(MyABC): pass
    >>> class Bar(Foo): pass
    >>> PBar = ProxyFactory(Bar)
@@ -1021,4 +1024,4 @@ Always available:
    >>> int(bool(PBar))
    1
    >>> int(PBar.__class__ == type)
-   1
+   0
