@@ -57,7 +57,7 @@ Using `selectChecker()`, we can confirm that a `Foo` object uses
    ...     fooChecker.check(foo, 'b')  # doctest: +ELLIPSIS
    ... except ForbiddenAttribute as e:
    ...     e
-   ForbiddenAttribute('b', <Foo object ...>)
+   ForbiddenAttribute('b', <...Foo object ...>)
 
 and that a `Wrapper` object uses `wrappeChecker`:
 
@@ -71,7 +71,7 @@ and that a `Wrapper` object uses `wrappeChecker`:
    ...     wrapperChecker.check(wrapper, 'a')  # doctest: +ELLIPSIS
    ... except ForbiddenAttribute as e:
    ...     e
-   ForbiddenAttribute('a', <Foo object ...>)
+   ForbiddenAttribute('a', <...Foo object ...>)
 
 (Note that the object description says `Foo` because the object is a
 proxy and generally looks and acts like the object it's proxying.)
@@ -103,7 +103,7 @@ illustrate, we'll proxify `foo`:
    ...     secure_foo.b  # doctest: +ELLIPSIS
    ... except ForbiddenAttribute as e:
    ...     e
-   ForbiddenAttribute('b', <Foo object ...>)
+   ForbiddenAttribute('b', <...Foo object ...>)
 
 when we wrap the secured `foo`:
 
