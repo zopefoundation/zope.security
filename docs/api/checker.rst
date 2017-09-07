@@ -209,43 +209,43 @@ Rocks are immuatle, non-callable objects without interesting methods.  They
 
 .. doctest::
 
-   >>> int(type(ProxyFactory(  object()  )) is object)
-   1
-   >>> int(type(ProxyFactory(  1  )) is int)
-   1
-   >>> int(type(ProxyFactory(  1.0  )) is float)
-   1
-   >>> int(type(ProxyFactory(  1j  )) is complex)
-   1
-   >>> int(type(ProxyFactory(  None  )) is type(None))
-   1
-   >>> int(type(ProxyFactory(  'xxx'  )) is str)
-   1
-   >>> int(type(ProxyFactory(  True  )) is type(True))
-   1
+   >>> type(ProxyFactory(  object()  )) is object
+   True
+   >>> type(ProxyFactory(  1  )) is int
+   True
+   >>> type(ProxyFactory(  1.0  )) is float
+   True
+   >>> type(ProxyFactory(  1j  )) is complex
+   True
+   >>> type(ProxyFactory(  None  )) is type(None)
+   True
+   >>> type(ProxyFactory(  'xxx'  )) is str
+   True
+   >>> type(ProxyFactory(  True  )) is type(True)
+   True
 
 Datetime-reltatd instances are rocks, too:
 
 .. doctest::
 
    >>> from datetime import timedelta, datetime, date, time, tzinfo
-   >>> int(type(ProxyFactory(  timedelta(1)  )) is timedelta)
-   1
-   >>> int(type(ProxyFactory(  datetime(2000, 1, 1)  )) is datetime)
-   1
-   >>> int(type(ProxyFactory(  date(2000, 1, 1)  )) is date)
-   1
-   >>> int(type(ProxyFactory(  time()  )) is time)
-   1
-   >>> int(type(ProxyFactory(  tzinfo() )) is tzinfo)
-   1
+   >>> type(ProxyFactory(  timedelta(1)  )) is timedelta
+   True
+   >>> type(ProxyFactory(  datetime(2000, 1, 1)  )) is datetime
+   True
+   >>> type(ProxyFactory(  date(2000, 1, 1)  )) is date
+   True
+   >>> type(ProxyFactory(  time()  )) is time
+   True
+   >>> type(ProxyFactory(  tzinfo() )) is tzinfo
+   True
    >>> try:
    ...     from pytz import UTC
    ... except ImportError:  # pytz checker only if pytz is present.
-   ...     1
+   ...     True
    ... else:
-   ...      int(type(ProxyFactory(  UTC )) is type(UTC))
-   1
+   ...      type(ProxyFactory(  UTC )) is type(UTC)
+   True
 
 
 dicts
@@ -268,15 +268,15 @@ We can do everything we expect to be able to do with proxied dicts.
    ['a', 'b']
    >>> d.get('a')
    1
-   >>> int('a' in d)
-   1
+   >>> 'a' in d
+   True
    >>> c = d.copy()
    >>> check_forbidden_get(c, 'clear')
    'ForbiddenAttribute: clear'
-   >>> int(str(c) in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}"))
-   1
-   >>> int(repr(c) in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}"))
-   1
+   >>> str(c) in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}")
+   True
+   >>> repr(c) in ("{'a': 1, 'b': 2}", "{'b': 2, 'a': 1}")
+   True
    >>> def sorted(x):
    ...    x = list(x)
    ...    x.sort()
@@ -293,12 +293,12 @@ not checking that under python > 2):
 
 .. doctest::
 
-    >>> int(d != d)
-    0
-    >>> int(bool(d))
-    1
-    >>> int(d.__class__ == dict)
-    1
+    >>> d != d
+    False
+    >>> bool(d)
+    True
+    >>> d.__class__ == dict
+    True
 
 lists
 #####
@@ -322,8 +322,8 @@ We can do everything we expect to be able to do with proxied lists.
    2
    >>> tuple(l)
    (1, 2)
-   >>> int(1 in l)
-   1
+   >>> 1 in l
+   True
    >>> l.index(2)
    1
    >>> l.count(2)
@@ -339,22 +339,22 @@ Always available:
 
 .. doctest::
 
-   >>> int(l < l)
-   0
-   >>> int(l > l)
-   0
-   >>> int(l <= l)
-   1
-   >>> int(l >= l)
-   1
-   >>> int(l == l)
-   1
-   >>> int(l != l)
-   0
-   >>> int(bool(l))
-   1
-   >>> int(l.__class__ == list)
-   1
+   >>> l < l
+   False
+   >>> l > l
+   False
+   >>> l <= l
+   True
+   >>> l >= l
+   True
+   >>> l == l
+   True
+   >>> l != l
+   False
+   >>> bool(l)
+   True
+   >>> l.__class__ == list
+   True
 
 tuples
 ######
@@ -373,8 +373,8 @@ We can do everything we expect to be able to do with proxied tuples.
    2
    >>> list(l)
    [1, 2]
-   >>> int(1 in l)
-   1
+   >>> 1 in l
+   True
    >>> str(l)
    '(1, 2)'
    >>> repr(l)
@@ -386,22 +386,22 @@ Always available:
 
 .. doctest::
 
-   >>> int(l < l)
-   0
-   >>> int(l > l)
-   0
-   >>> int(l <= l)
-   1
-   >>> int(l >= l)
-   1
-   >>> int(l == l)
-   1
-   >>> int(l != l)
-   0
-   >>> int(bool(l))
-   1
-   >>> int(l.__class__ == tuple)
-   1
+   >>> l < l
+   False
+   >>> l > l
+   False
+   >>> l <= l
+   True
+   >>> l >= l
+   True
+   >>> l == l
+   True
+   >>> l != l
+   False
+   >>> bool(l)
+   True
+   >>> l.__class__ == tuple
+   True
 
 sets
 ####
@@ -838,8 +838,8 @@ New-style classes
    'ForbiddenAttribute: __dict__'
    >>> s = str(C)
    >>> s = repr(C)
-   >>> int(C.__module__ == __name__)
-   1
+   >>> C.__module__ == __name__
+   True
    >>> len(C.__bases__)
    1
    >>> len(C.__mro__)
@@ -849,14 +849,14 @@ Always available:
 
 .. doctest::
 
-   >>> int(C == C)
-   1
-   >>> int(C != C)
-   0
-   >>> int(bool(C))
-   1
-   >>> int(C.__class__ == type)
-   1
+   >>> C == C
+   True
+   >>> C != C
+   False
+   >>> bool(C)
+   True
+   >>> C.__class__ == type
+   True
 
 New-style Instances
 ###################
@@ -873,21 +873,21 @@ New-style Instances
    'ForbiddenAttribute: z'
    >>> c.x
    1
-   >>> int(c.__class__ == C)
-   1
+   >>> c.__class__ == C
+   True
 
 Always available:
 
 .. doctest::
 
-   >>> int(c == c)
-   1
-   >>> int(c != c)
-   0
-   >>> int(bool(c))
-   1
-   >>> int(c.__class__ == C)
-   1
+   >>> c == c
+   True
+   >>> c != c
+   False
+   >>> bool(c)
+   True
+   >>> c.__class__ == C
+   True
 
 
 Classic Classes
@@ -904,25 +904,25 @@ Classic Classes
    'ForbiddenAttribute: __dict__'
    >>> s = str(C)
    >>> s = repr(C)
-   >>> int(C.__module__ == __name__)
-   1
+   >>> C.__module__ == __name__
+   True
 
 Note that these are really only classic on Python 2:
 
    >>> import sys
-   >>> len(C.__bases__) + (1 if sys.version_info[0] == 2 else 0)
-   1
+   >>> len(C.__bases__) == (0 if sys.version_info[0] == 2 else 1)
+   True
 
 Always available:
 
 .. doctest::
 
-   >>> int(C == C)
-   1
-   >>> int(C != C)
-   0
-   >>> int(bool(C))
-   1
+   >>> C == C
+   True
+   >>> C != C
+   False
+   >>> bool(C)
+   True
 
 Classic Instances
 #################
@@ -938,21 +938,21 @@ Classic Instances
    'ForbiddenAttribute: z'
    >>> c.x
    1
-   >>> int(c.__class__ == C)
-   1
+   >>> c.__class__ == C
+   True
 
 Always available:
 
 .. doctest::
 
-   >>> int(c == c)
-   1
-   >>> int(c != c)
-   0
-   >>> int(bool(c))
-   1
-   >>> int(c.__class__ == C)
-   1
+   >>> c == c
+   True
+   >>> c != c
+   False
+   >>> bool(c)
+   True
+   >>> c.__class__ == C
+   True
 
 Interfaces and declarations
 ###########################
@@ -1008,8 +1008,8 @@ We work with the ABCMeta meta class:
    'ForbiddenAttribute: __dict__'
    >>> s = str(PBar)
    >>> s = repr(PBar)
-   >>> int(PBar.__module__ == __name__)
-   1
+   >>> PBar.__module__ == __name__
+   True
    >>> len(PBar.__bases__)
    1
 
@@ -1017,11 +1017,11 @@ Always available:
 
 .. doctest::
 
-   >>> int(PBar == PBar)
-   1
-   >>> int(PBar != PBar)
-   0
-   >>> int(bool(PBar))
-   1
-   >>> int(PBar.__class__ == type)
-   0
+   >>> PBar == PBar
+   True
+   >>> PBar != PBar
+   False
+   >>> bool(PBar)
+   True
+   >>> PBar.__class__ == type
+   False
