@@ -553,21 +553,51 @@ class CheckerTestsBase(object):
         self.assertTrue(i.hint_called, "__length_hint__ should be called")
 
 
-class CheckerPyTests(unittest.TestCase, CheckerTestsBase):
+    def test_iteration_of_itertools_groupby(self):
+        # itertools.groupby is a custom iterator type.
+        # The groups it returns are also custom.
+        from zope.security.checker import ProxyFactory
+        from zope.security.checker import Checker
+
+        from itertools import groupby
+
+        group = groupby([0])
+        list_group = list(group)
+        self.assertEqual(1, len(list_group))
+        self.assertEqual(0, list_group[0][0])
+
+        proxy = ProxyFactory(groupby([0]))
+        list_group = list(proxy)
+        self.assertEqual(1, len(list_group))
+        self.assertEqual(0, list_group[0][0])
+
+        # Note that groupby docs say: "The returned group is itself an
+        # iterator that shares the underlying iterable with groupby().
+        # Because the source is shared, when the groupby() object is
+        # advanced, the previous group is no longer visible."
+        # For a one-item list, this doesn't make a difference on CPython,
+        # but it does on PyPy (if we use list(group), the list_group[0][0] is
+        # empty); probably this has to do with GC
+        proxy = ProxyFactory(groupby([0]))
+        _key, subiter = next(proxy)
+        self.assertEqual([0], list(subiter))
+
+
+class TestCheckerPy(CheckerTestsBase, unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.checker import CheckerPy
         return CheckerPy
 
 
-class CheckerTests(unittest.TestCase, CheckerTestsBase):
+class TestChecker(CheckerTestsBase, unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.checker import Checker
         return Checker
 
 
-class TracebackSupplementTests(unittest.TestCase):
+class TestTracebackSupplement(unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.checker import TracebackSupplement
@@ -610,7 +640,7 @@ class TracebackSupplementTests(unittest.TestCase):
                          ])
 
 
-class GlobalTests(unittest.TestCase):
+class TestGlobal(unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.checker import Global
@@ -909,7 +939,7 @@ class _SelectCheckerBase(object):
 
 
 
-class Test_selectCheckerPy(unittest.TestCase, _SelectCheckerBase):
+class Test_selectCheckerPy(_SelectCheckerBase, unittest.TestCase):
 
     def _callFUT(self, obj):
         from zope.security.checker import selectCheckerPy
@@ -917,7 +947,7 @@ class Test_selectCheckerPy(unittest.TestCase, _SelectCheckerBase):
 
 
 
-class Test_selectChecker(unittest.TestCase, _SelectCheckerBase):
+class Test_selectChecker(_SelectCheckerBase, unittest.TestCase):
 
     def _callFUT(self, obj):
         from zope.security.checker import selectChecker
@@ -1040,7 +1070,7 @@ class Test_undefineChecker(unittest.TestCase):
         self.assertFalse(Foo in _checkers)
 
 
-class CombinedCheckerTests(unittest.TestCase):
+class TestCombinedChecker(unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.checker import CombinedChecker
@@ -1264,7 +1294,7 @@ class CombinedCheckerTests(unittest.TestCase):
             del thread_local.interaction
 
 
-class CheckerLoggingMixinTests(unittest.TestCase):
+class TestCheckerLoggingMixin(unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.checker import CheckerLoggingMixin
@@ -1481,7 +1511,7 @@ class Test_moduleChecker(unittest.TestCase):
         self.assertTrue(self._callFUT(verify) is checker)
 
 
-class BasicTypesTests(unittest.TestCase):
+class TestBasicTypes(unittest.TestCase):
 
     def setUp(self):
         from zope.security.checker import _clear
@@ -1529,7 +1559,7 @@ class BasicTypesTests(unittest.TestCase):
 
 # Pre-geddon tests start here
 
-class Test(unittest.TestCase):
+class TestSecurityPolicy(unittest.TestCase):
 
     def setUp(self):
         from zope.security.management import newInteraction
@@ -2215,31 +2245,4 @@ class TestBasicTypes(unittest.TestCase):
         self.assertRaises(NotImplementedError, BasicTypes.clear)
 
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(Test_ProxyFactory),
-        unittest.makeSuite(Test_canWrite),
-        unittest.makeSuite(Test_canAccess),
-        unittest.makeSuite(Test_canAccess),
-        unittest.makeSuite(CheckerPyTests),
-        unittest.makeSuite(CheckerTests),
-        unittest.makeSuite(TracebackSupplementTests),
-        unittest.makeSuite(GlobalTests),
-        unittest.makeSuite(Test_NamesChecker),
-        unittest.makeSuite(Test_InterfaceChecker),
-        unittest.makeSuite(Test_MultiChecker),
-        unittest.makeSuite(Test_selectCheckerPy),
-        unittest.makeSuite(Test_selectChecker),
-        unittest.makeSuite(Test_getCheckerForInstancesOf),
-        unittest.makeSuite(Test_defineChecker),
-        unittest.makeSuite(Test_undefineChecker),
-        unittest.makeSuite(CombinedCheckerTests),
-        unittest.makeSuite(CheckerLoggingMixinTests),
-        unittest.makeSuite(Test__instanceChecker),
-        unittest.makeSuite(Test_moduleChecker),
-        unittest.makeSuite(BasicTypesTests),
-        # pre-geddon fossils
-        unittest.makeSuite(Test),
-        unittest.makeSuite(TestCheckerPublic),
-        unittest.makeSuite(TestCombinedChecker),
-        unittest.makeSuite(TestBasicTypes),
-    ))
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)

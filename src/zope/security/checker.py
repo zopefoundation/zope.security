@@ -860,6 +860,29 @@ _fixup_zope_interface()
 del _fixup_zope_interface
 
 
+def _fixup_itertools_groupby():
+    # itertools.groupby is a built-in custom iterator type introduced
+    # in python2.4. It should have the same checker as other built-in
+    # iterators.
+
+    # Also, itertools._grouper also needs to be exposed as an
+    # iterator. Its type is not exposed by name, but can be accessed
+    # like so: type(list(itertools.groupby([0]))[0][1])
+
+    from itertools import groupby
+
+    group = groupby([0])
+    type_group = type(group)
+    if type_group not in _default_checkers:
+        _default_checkers[type_group] = _iteratorChecker
+
+    type_grouper = type(list(group)[0][1])
+    if type_grouper not in _default_checkers:
+        _default_checkers[type_grouper] = _iteratorChecker
+
+_fixup_itertools_groupby()
+del _fixup_itertools_groupby
+
 def _clear():
     _checkers.clear()
     _checkers.update(_default_checkers)
