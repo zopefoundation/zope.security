@@ -20,7 +20,9 @@ Changes
 
 - Fix `issue 9
   <https://github.com/zopefoundation/zope.security/issues/9>`_:
-  iteration of ``itertools.groupby`` objects is now allowed by default.
+  iteration of ``itertools.groupby`` objects is now allowed by
+  default. In addition, iteration of all the custom iterator types
+  defined in itertools are also allowed by default.
 
 4.1.1 (2017-05-17)
 ------------------

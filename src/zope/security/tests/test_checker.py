@@ -14,6 +14,7 @@
 """Tests for zope.security.checker
 """
 import unittest
+from zope.security import checker
 
 def _skip_if_not_Py2(testfunc):
     import sys
@@ -201,8 +202,7 @@ _marker = []
 class CheckerTestsBase(object):
 
     def _getTargetClass(self):
-        from zope.security.checker import Checker
-        return Checker
+        raise NotImplementedError("Subclasses must define")
 
     def _makeOne(self, get_permissions=_marker, set_permissions=_marker):
         if get_permissions is _marker:
@@ -937,6 +937,52 @@ class _SelectCheckerBase(object):
         _checkers[Foo] = _factory_factory
         self.assertTrue(self._callFUT(Foo()) is checker)
 
+    def test_itertools_checkers(self):
+        from zope.security.checker import _iteratorChecker
+        import sys
+        import itertools
+        pred = lambda x: x
+        iterable = (1, 2, 3)
+        pred_iterable = (pred, iterable)
+        missing_in_py3 = {'ifilter', 'ifilterfalse', 'imap',
+                          'izip', 'izip_longest'}
+        missing_in_py2 = {'zip_longest', 'accumulate', 'compress',
+                          'combinations', 'combinations_with_replacement'}
+        missing = missing_in_py3 if sys.version_info[0] >= 3 else missing_in_py2
+        for func, args in (('count', ()),
+                           ('cycle', ((),)),
+                           ('dropwhile', pred_iterable),
+                           ('ifilter', pred_iterable),
+                           ('ifilterfalse', pred_iterable),
+                           ('imap', pred_iterable),
+                           ('islice', (iterable, 2)),
+                           ('izip', (iterable,)),
+                           ('izip_longest', (iterable,)),
+                           ('permutations', (iterable,)),
+                           ('product', (iterable,)),
+                           ('repeat', (1, 2)),
+                           ('starmap', pred_iterable),
+                           ('takewhile', pred_iterable),
+                           ('tee', (iterable,)),
+                           # Python 3 additions
+                           ('zip_longest', (iterable,)),
+                           ('accumulate', (iterable,)),
+                           ('compress', (iterable, ())),
+                           ('combinations', (iterable, 1)),
+                           ('combinations_with_replacement', (iterable, 1)),
+        ):
+            try:
+                func = getattr(itertools, func)
+            except AttributeError:
+                if func in missing:
+                    continue
+                raise
+            __traceback_info__ = func
+            result = func(*args)
+            if func == itertools.tee:
+                result = result[0]
+
+            self.assertIs(self._callFUT(result), _iteratorChecker)
 
 
 class Test_selectCheckerPy(_SelectCheckerBase, unittest.TestCase):
@@ -947,6 +993,8 @@ class Test_selectCheckerPy(_SelectCheckerBase, unittest.TestCase):
 
 
 
+@unittest.skipIf(checker.selectChecker is checker.selectCheckerPy,
+                 "Pure Python")
 class Test_selectChecker(_SelectCheckerBase, unittest.TestCase):
 
     def _callFUT(self, obj):
@@ -2148,7 +2196,7 @@ class TestMixinDecoratedChecker(unittest.TestCase):
         from zope.security.checker import Checker
         return Checker(self.decorationGetMap, self.decorationSetMap)
 
-class TestCombinedChecker(TestMixinDecoratedChecker, unittest.TestCase):
+class TestCombinedCheckerMixin(TestMixinDecoratedChecker, unittest.TestCase):
 
     def setUp(self):
         unittest.TestCase.setUp(self)
