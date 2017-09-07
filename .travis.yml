@@ -2,25 +2,25 @@ language: python
 sudo: false
 matrix:
   include:
+    - python: 2.7
+    - python: 3.4
     - python: 3.5
-      env: TOXENV=py35
     - python: 3.6
-      env: TOXENV=py36
-env:
-    - TOXENV=py27
-    - TOXENV=py27-pure
-    - TOXENV=py33
-    - TOXENV=py33-pure
-    - TOXENV=py34
-    - TOXENV=pypy
-    - TOXENV=coverage
-    - TOXENV=docs
+    - python: pypy
+    - python: pypy3
+    - python: 2.7
+      env: PURE_PYTHON=1
+    - python: 3.4
+      env: PURE_PYTHON=1
 install:
-    - pip install -U pip
-    - pip install -U setuptools
-    - pip install -U tox
+    - pip install -U pip setuptools
+    - pip install -U coveralls coverage
+    - pip install -U -e .[test,docs]
 script:
-    - tox
+    - coverage run -m zope.testrunner --test-path=src
+    - coverage run -a -m sphinx -b doctest -d docs/_build/doctrees docs docs/_build/doctest
+after_success:
+    - coveralls
 notifications:
     email: false
 cache: pip

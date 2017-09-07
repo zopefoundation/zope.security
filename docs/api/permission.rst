@@ -27,11 +27,11 @@
    Traceback (most recent call last):
    ...
    ValueError: ('Undefined permission id', 'y')
-   
+
 The :data:`zope.security.checker.CheckerPublic` permission always exists:
 
 .. doctest::
-   
+
    >>> from zope.security.checker import CheckerPublic
    >>> checkPermission(None, CheckerPublic)
 
@@ -45,10 +45,11 @@ The :data:`zope.security.checker.CheckerPublic` permission always exists:
    >>> y = Permission('y')
    >>> provideUtility(y, IPermission, 'y')
 
-   >>> ids = list(allPermissions(None))
-   >>> ids.sort()
-   >>> ids
-   ['x', 'y']
+   >>> ids = sorted(allPermissions(None))
+   >>> for perm in sorted(allPermissions(None)):
+   ...     print(perm)
+   x
+   y
 
 
 .. autofunction:: zope.security.permission.PermissionsVocabulary
@@ -99,10 +100,10 @@ The non-public permissions 'x' and 'y' are string values:
 
 .. doctest::
 
-   >>> vocab.getTermByToken('x').value
-   'x'
-   >>> vocab.getTermByToken('y').value
-   'y'
+   >>> print(vocab.getTermByToken('x').value)
+   x
+   >>> print(vocab.getTermByToken('y').value)
+   y
 
 However, the public permission value is CheckerPublic:
 
@@ -115,16 +116,19 @@ and its title is shortened:
 
 .. doctest::
 
-   >>> vocab.getTermByToken('zope.Public').title
-   'Public'
+   >>> print(vocab.getTermByToken('zope.Public').title)
+   Public
 
 The terms are sorted by title except for the public permission, which is
 listed first:
 
 .. doctest::
 
-   >>> [term.title for term in vocab]
-   ['Public', 'x', 'y']
+   >>> for term in vocab:
+   ...    print(term.title)
+   Public
+   x
+   y
 
 
 .. testcleanup::

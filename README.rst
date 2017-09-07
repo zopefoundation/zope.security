@@ -12,5 +12,9 @@
         :target: http://zopesecurity.readthedocs.org/en/latest/
         :alt: Documentation Status
 
+.. image:: https://coveralls.io/repos/github/zopefoundation/zope.security/badge.svg?branch=master
+        :target: https://coveralls.io/github/zopefoundation/zope.security?branch=master
+
+
 The Security framework provides a generic mechanism to implement security
 policies on Python objects.
