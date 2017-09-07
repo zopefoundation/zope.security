@@ -202,7 +202,12 @@ class ProxyPy(PyProxyBase):
     def __length_hint__(self):
         # no check
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        return wrapped.__length_hint__()
+        try:
+            hint = wrapped.__length_hint__
+        except AttributeError:
+            return NotImplemented
+        else:
+            return hint()
 
     def __coerce__(self, other):
         # For some reason _check_name does not work for coerce()
