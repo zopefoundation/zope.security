@@ -49,6 +49,7 @@ from zope.security.interfaces import Unauthorized
 from zope.security._definitions import thread_local
 from zope.security._compat import CLASS_TYPES
 from zope.security._compat import PYTHON2
+from zope.security._compat import PURE_PYTHON
 from zope.security.proxy import Proxy
 from zope.security.proxy import getChecker
 
@@ -438,11 +439,14 @@ _defaultChecker = Checker({})
 _available_by_default = []
 
 # Get optimized versions
-try:
-    import zope.security._zope_security_checker
-except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
-    pass
-else:
+_c_available = not PURE_PYTHON
+if _c_available:
+    try:
+        import zope.security._zope_security_checker
+    except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
+        _c_available = False
+
+if _c_available:
     from zope.security._zope_security_checker import _checkers, selectChecker
     from zope.security._zope_security_checker import NoProxy, Checker
     from zope.security._zope_security_checker import _defaultChecker
