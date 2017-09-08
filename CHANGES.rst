@@ -4,6 +4,11 @@ Changes
 4.1.2 (unreleased)
 ------------------
 
+- Fix `issue 7
+  <https://github.com/zopefoundation/zope.security/issues/7`_: The
+  pure-Python proxy didn't propagate ``TypeError`` from ``__repr__``
+  and ``__str__`` like the C implementation did.
+
 - Fix `issue 27 <https://github.com/zopefoundation/zope.security/issues/27>`_:
   iteration of ``zope.interface.providedBy()`` is now allowed by
   default on all versions of Python. Previously it only worked on

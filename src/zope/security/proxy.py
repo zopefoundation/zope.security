@@ -219,6 +219,11 @@ class ProxyPy(PyProxyBase):
     def __str__(self):
         try:
             return _check_name(PyProxyBase.__str__)(self)
+        # The C implementation catches almost all exceptions; the
+        # exception is a TypeError that's raised when the repr returns
+        # the wrong type of object.
+        except TypeError:
+            raise
         except:
             # The C implementation catches all exceptions.
             wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
@@ -229,8 +234,12 @@ class ProxyPy(PyProxyBase):
     def __repr__(self):
         try:
             return _check_name(PyProxyBase.__repr__)(self)
+        # The C implementation catches almost all exceptions; the
+        # exception is a TypeError that's raised when the repr returns
+        # the wrong type of object.
+        except TypeError:
+            raise
         except:
-            # The C implementation catches all exceptions.
             wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
             return '<security proxied %s.%s instance at %s>' %(
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
