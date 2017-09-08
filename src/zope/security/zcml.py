@@ -24,7 +24,6 @@ from zope.schema.interfaces import IFromUnicode
 
 from zope.security.permission import checkPermission
 from zope.security.management import setSecurityPolicy
-from zope.security._compat import _u
 
 @implementer(IFromUnicode)
 class Permission(Id):
@@ -42,9 +41,9 @@ class Permission(Id):
 
         if value != 'zope.Public':
             self.context.action(
-                discriminator = None,
-                callable = checkPermission,
-                args = (None, value),
+                discriminator=None,
+                callable=checkPermission,
+                args=(None, value),
 
                 # Delay execution till end. This is an
                 # optimization. We don't want to intersperse utility
@@ -53,39 +52,40 @@ class Permission(Id):
                 # utility definition, as extensive caches have to be
                 # rebuilt.
                 order=9999999,
-                )
+            )
 
 
 class ISecurityPolicyDirective(Interface):
     """Defines the security policy that will be used for Zope."""
 
     component = GlobalObject(
-        title=_u("Component"),
-        description=_u("Pointer to the object that will handle the security."),
+        title=u"Component",
+        description=u"Pointer to the object that will handle the security.",
         required=True)
 
 def securityPolicy(_context, component):
     _context.action(
-            discriminator = 'defaultPolicy',
-            callable = setSecurityPolicy,
-            args = (component,) )
+        discriminator='defaultPolicy',
+        callable=setSecurityPolicy,
+        args=(component,)
+    )
 
 class IPermissionDirective(Interface):
     """Define a new security object."""
 
     id = Id(
-        title=_u("Id"),
-        description=_u("Id as which this object will be known and used."),
+        title=u"Id",
+        description=u"Id as which this object will be known and used.",
         required=True)
 
     title = MessageID(
-        title=_u("Title"),
-        description=_u("Provides a title for the object."),
+        title=u"Title",
+        description=u"Provides a title for the object.",
         required=True)
 
     description = MessageID(
-        title=_u("Description"),
-        description=_u("Provides a description for the object."),
+        title=u"Description",
+        description=u"Provides a description for the object.",
         required=False)
 
 def permission(_context, id, title, description=''):
@@ -99,13 +99,13 @@ class IRedefinePermission(Interface):
     """Define a permission to replace another permission."""
 
     from_ = Permission(
-        title=_u("Original permission"),
-        description=_u("Original permission id to redefine."),
+        title=u"Original permission",
+        description=u"Original permission id to redefine.",
         required=True)
 
     to = Permission(
-        title=_u("Substituted permission"),
-        description=_u("Substituted permission id."),
+        title=u"Substituted permission",
+        description=u"Substituted permission id.",
         required=True)
 
 def redefinePermission(_context, from_, to):
@@ -113,6 +113,6 @@ def redefinePermission(_context, from_, to):
 
     # check if context has any permission mappings yet
     if not hasattr(_context, 'permission_mapping'):
-        _context.permission_mapping={}
+        _context.permission_mapping = {}
 
     _context.permission_mapping[from_] = to

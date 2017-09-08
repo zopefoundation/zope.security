@@ -14,24 +14,19 @@
 """Directives Tests
 """
 import unittest
-
+import io
 
 def _skip_wo_zope_configuration(testfunc):
     try:
         import zope.configuration.xmlconfig
     except ImportError:
-        from functools import update_wrapper
-        def dummy(self):
-            pass
-        update_wrapper(dummy, testfunc)
-        return dummy
+        return unittest.skip("No zope.configuration")(testfunc)
     else:
         return testfunc
 
 
 def configfile(s):
-    from zope.security._compat import StringIO
-    return StringIO("""<configure
+    return io.StringIO(u"""<configure
       xmlns='http://namespaces.zope.org/zope'
       i18n_domain='zope'>
       %s
@@ -270,11 +265,10 @@ class Context(object):
         self.actions += ((discriminator, callable, args), )
 
     def __repr__(self):
-        from zope.security._compat import StringIO
         import re
         import pprint
         atre = re.compile(' at [0-9a-fA-Fx]+')
-        stream = StringIO()
+        stream = io.StringIO() if bytes is not str else io.BytesIO()
         pprinter = pprint.PrettyPrinter(stream=stream, width=60)
         pprinter.pprint(self.actions)
         r = stream.getvalue()
@@ -339,19 +333,18 @@ def _pfx(name):
     return module.__name__ + '.' + name
 
 def defineDirectives():
-    from zope.security._compat import StringIO
     from zope.configuration.xmlconfig import XMLConfig
     from zope.configuration.xmlconfig import xmlconfig
     import zope.security
     XMLConfig('meta.zcml', zope.security)()
-    xmlconfig(StringIO("""<configure
+    xmlconfig(io.StringIO(u"""<configure
         xmlns='http://namespaces.zope.org/zope'
         i18n_domain='zope'>
        <permission id="zope.Extravagant" title="extravagant" />
        <permission id="zope.Paltry" title="paltry" />
     </configure>"""))
 
-NOTSET = []
+NOTSET = ()
 
 P1 = "zope.Extravagant"
 P2 = "zope.Paltry"
@@ -655,19 +648,19 @@ class TestRequireDirective(unittest.TestCase):
 
 def apply_declaration(declaration):
     '''Apply the xmlconfig machinery.'''
-    from zope.security._compat import StringIO
     from zope.configuration.xmlconfig import xmlconfig
-    return xmlconfig(StringIO(declaration))
+    if isinstance(declaration, bytes):
+        declaration = declaration.decode("utf-8")
+    return xmlconfig(io.StringIO(declaration))
 
 
 @_skip_wo_zope_configuration
 def make_dummy():
     from zope.interface import Interface
     import zope.security.zcml
-    from zope.security._compat import _u
     global IDummy
     class IDummy(Interface):
-        perm = zope.security.zcml.Permission(title=_u(''))
+        perm = zope.security.zcml.Permission(title=u'')
 
 
 perms = []
@@ -706,11 +699,4 @@ class DirectivesTest(unittest.TestCase):
 
 
 def test_suite():
-
-    return unittest.TestSuite((
-        unittest.makeSuite(TestClassDirective),
-        unittest.makeSuite(TestFactorySubdirective),
-        unittest.makeSuite(TestFactoryDirective),
-        unittest.makeSuite(TestRequireDirective),
-        unittest.makeSuite(DirectivesTest),
-    ))
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)

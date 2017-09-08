@@ -49,7 +49,6 @@ from zope.security.interfaces import Unauthorized
 from zope.security._definitions import thread_local
 from zope.security._compat import CLASS_TYPES
 from zope.security._compat import PYTHON2
-from zope.security._compat import _u
 from zope.security.proxy import Proxy
 from zope.security.proxy import getChecker
 
@@ -687,7 +686,7 @@ BasicTypes_examples = {
 }
 
 if PYTHON2:
-    BasicTypes_examples[unicode] = _u('uabc')
+    BasicTypes_examples[unicode] = u'uabc'
     BasicTypes_examples[long] = long(65536)
 
 
