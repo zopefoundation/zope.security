@@ -860,6 +860,74 @@ _fixup_zope_interface()
 del _fixup_zope_interface
 
 
+def _fixup_itertools():
+    # itertools.groupby is a built-in custom iterator type introduced
+    # in python2.4. It should have the same checker as other built-in
+    # iterators.
+
+    # Also, itertools._grouper also needs to be exposed as an
+    # iterator. Its type is not exposed by name, but can be accessed
+    # like so: type(list(itertools.groupby([0]))[0][1])
+
+    import itertools
+
+    group = itertools.groupby([0])
+    type_group = type(group)
+    if type_group not in _default_checkers:
+        _default_checkers[type_group] = _iteratorChecker
+
+    type_grouper = type(list(group)[0][1])
+    if type_grouper not in _default_checkers:
+        _default_checkers[type_grouper] = _iteratorChecker
+
+    # There are also many other custom types in itertools that need the
+    # same treatment. See a similar list in test_checker.py:test_itertools_checkers
+    pred = lambda x: x
+    iterable = (1, 2, 3)
+    pred_iterable = (pred, iterable)
+    missing_in_py3 = {'ifilter', 'ifilterfalse', 'imap',
+                      'izip', 'izip_longest'}
+    missing_in_py2 = {'zip_longest', 'accumulate', 'compress',
+                      'combinations', 'combinations_with_replacement'}
+    missing = missing_in_py3 if sys.version_info[0] >= 3 else missing_in_py2
+    for func, args in (('count', ()),
+                       ('cycle', ((),)),
+                       ('dropwhile', pred_iterable),
+                       ('ifilter', pred_iterable),
+                       ('ifilterfalse', pred_iterable),
+                       ('imap', pred_iterable),
+                       ('islice', (iterable, 2)),
+                       ('izip', (iterable,)),
+                       ('izip_longest', (iterable,)),
+                       ('permutations', (iterable,)),
+                       ('product', (iterable,)),
+                       ('repeat', (1, 2)),
+                       ('starmap', pred_iterable),
+                       ('takewhile', pred_iterable),
+                       ('tee', (iterable,)),
+                       # Python 3 additions
+                       ('zip_longest', (iterable,)),
+                       ('accumulate', (iterable,)),
+                       ('compress', (iterable, ())),
+                       ('combinations', (iterable, 1)),
+                       ('combinations_with_replacement', (iterable, 1)),
+    ):
+        try:
+            func = getattr(itertools, func)
+        except AttributeError:
+            if func in missing:
+                continue
+            raise
+        result = func(*args)
+        if func == itertools.tee:
+            result = result[0]
+        tresult = type(result)
+        if tresult not in _default_checkers:
+            _default_checkers[tresult] = _iteratorChecker
+
+_fixup_itertools()
+del _fixup_itertools
+
 def _clear():
     _checkers.clear()
     _checkers.update(_default_checkers)
