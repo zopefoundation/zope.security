@@ -20,7 +20,7 @@ import types
 
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 PYPY = py_impl() == 'PyPy'
-PURE_PYTHON = os.environ.get('PURE_PYTHON', False)
+PURE_PYTHON = os.environ.get('PURE_PYTHON', PYPY)
 
 if sys.version_info[0] < 3: # pragma: no cover
 

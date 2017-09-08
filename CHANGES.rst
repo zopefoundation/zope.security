@@ -29,6 +29,9 @@ Changes
   default. In addition, iteration of all the custom iterator types
   defined in itertools are also allowed by default.
 
+- Simplify the internal ``_compat.py`` module now that we only run on
+  newer Python versions. See `PR 32 <https://github.com/zopefoundation/zope.security/pull/32>`_.
+
 4.1.1 (2017-05-17)
 ------------------
 

@@ -14,9 +14,8 @@
 """Security proxy tests
 """
 import unittest
-import sys
 
-from zope.security._compat import PYTHON2, PYPY, PURE_PYTHON
+from zope.security._compat import PYTHON2, PURE_PYTHON
 
 def _skip_if_not_Py2(testfunc):
     return unittest.skipUnless(PYTHON2, "Only on Py2")(testfunc)
@@ -24,7 +23,20 @@ def _skip_if_not_Py2(testfunc):
 def _skip_if_Py2(testfunc):
     return unittest.skipIf(PYTHON2, "Only on Py3")(testfunc)
 
-class ProxyTestBase(object):
+# pylint:disable=protected-access,eval-used,too-many-lines,too-many-public-methods
+
+if not PYTHON2:
+    def coerce(*args):
+        raise NotImplementedError("Not on Python 3")
+    cmp = coerce
+    long = int
+
+class AbstractProxyTestBase(object):
+
+    # pylint:disable=no-member,blacklisted-name
+
+    def _getTargetClass(self):
+        raise NotImplementedError("Subclass responsibility")
 
     def _makeOne(self, object, checker):
         return self._getTargetClass()(object, checker)
@@ -108,9 +120,9 @@ class ProxyTestBase(object):
     def test___delattr___w_checker_unauthorized(self):
         from zope.security.interfaces import Unauthorized
         class Foo(object):
-            pass
+            def __init__(self):
+                self.bar = 'Bar'
         target = Foo()
-        target.bar = 'Bar'
         checker = DummyChecker(Unauthorized)
         proxy = self._makeOne(target, checker)
         self.assertRaises(Unauthorized, delattr, proxy, 'bar')
@@ -120,9 +132,9 @@ class ProxyTestBase(object):
     def test___delattr___w_checker_forbidden_attribute(self):
         from zope.security.interfaces import ForbiddenAttribute
         class Foo(object):
-            pass
+            def __init__(self):
+                self.bar = 'Bar'
         target = Foo()
-        target.bar = 'Bar'
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(target, checker)
         self.assertRaises(ForbiddenAttribute, delattr, proxy, 'bar')
@@ -145,7 +157,7 @@ class ProxyTestBase(object):
         address = _fmt_address(target)
         self.assertEqual(str(proxy),
                          '<security proxied %s.object '
-                             'instance at %s>' % (_BUILTINS, address))
+                         'instance at %s>' % (_BUILTINS, address))
 
     def test__str__fails_return(self):
         from zope.security.interfaces import ForbiddenAttribute
@@ -177,7 +189,7 @@ class ProxyTestBase(object):
         address = _fmt_address(target)
         self.assertEqual(repr(proxy),
                          '<security proxied %s.object '
-                             'instance at %s>' % (_BUILTINS, address))
+                         'instance at %s>' % (_BUILTINS, address))
 
     def test__str__falls_through_to_repr_when_both_allowed(self):
         from zope.security.interfaces import ForbiddenAttribute
@@ -257,7 +269,6 @@ class ProxyTestBase(object):
     @_skip_if_not_Py2
     def test___cmp___w_other_proxy(self):
         target = object()
-        other = object()
         checker = object() # checker not consulted
         proxy = self._makeOne(target, checker)
         o_proxy = self._makeOne(target, checker)
@@ -516,7 +527,7 @@ class ProxyTestBase(object):
 
     def test___pow___w_x_proxied_forbidden(self):
         from zope.security.interfaces import ForbiddenAttribute
-        x, y, z = 3, 4, 7
+        y, z = 4, 7
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(y, checker)
         self.assertRaises(ForbiddenAttribute, lambda: pow(proxy, y, z))
@@ -1380,14 +1391,18 @@ class ProxyTestBase(object):
                                          "x=%r; y=%r; expr=%r" % (x, y, expr))
 
 
-class ProxyCTests(unittest.TestCase, ProxyTestBase):
+@unittest.skipIf(PURE_PYTHON,
+                 "Needs C extension")
+class ProxyCTests(AbstractProxyTestBase,
+                  unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.proxy import _Proxy
         return _Proxy
 
 
-class ProxyPyTests(unittest.TestCase, ProxyTestBase):
+class ProxyPyTests(AbstractProxyTestBase,
+                   unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.proxy import ProxyPy
@@ -1537,7 +1552,7 @@ class Checker(object):
 
     ok = 1
 
-    unproxied_types = str,
+    unproxied_types = {str,}
 
     def check_getattr(self, object, name):
         if name not in ("foo", "next", "__class__", "__name__", "__module__"):
@@ -1560,7 +1575,7 @@ class Checker(object):
 
 class Something:
     def __init__(self):
-        self.foo = [1,2,3]
+        self.foo = [1, 2, 3]
     def __getitem__(self, key):
         return self.foo[key]
     def __setitem__(self, key, value):
@@ -1605,7 +1620,6 @@ class ProxyTests(unittest.TestCase):
         self.c.ok = 1
 
     def testDerivation(self):
-        from zope.security._compat import PURE_PYTHON
         if PURE_PYTHON:
             from zope.proxy import PyProxyBase as ProxyBase
         else:
@@ -1642,7 +1656,7 @@ class ProxyTests(unittest.TestCase):
 
     def testGetAttrOK(self):
         from zope.security.proxy import removeSecurityProxy
-        self.assertEqual(removeSecurityProxy(self.p.foo), [1,2,3])
+        self.assertEqual(removeSecurityProxy(self.p.foo), [1, 2, 3])
 
     def testGetAttrFail(self):
         self.assertRaises(RuntimeError, lambda: self.p.bar)
@@ -1652,7 +1666,8 @@ class ProxyTests(unittest.TestCase):
         self.assertEqual(self.p.foo, 42)
 
     def testSetAttrFail(self):
-        def doit(): self.p.bar = 42
+        def doit():
+            self.p.bar = 42
         self.assertRaises(RuntimeError, doit)
 
     def testGetItemOK(self):
@@ -1666,7 +1681,8 @@ class ProxyTests(unittest.TestCase):
         self.assertEqual(self.p[0], 42)
 
     def testSetItemFail(self):
-        def doit(): del self.p[0]
+        def doit():
+            del self.p[0]
         self.shouldFail(doit)
 
     def testDelItemOK(self):
@@ -1676,7 +1692,8 @@ class ProxyTests(unittest.TestCase):
         self.shouldFail(lambda: self.p[0])
 
     def testDelItemFail(self):
-        def doit(): self.p[10] = 42
+        def doit():
+            self.p[10] = 42
         self.shouldFail(doit)
 
     def testCallOK(self):
@@ -1741,7 +1758,8 @@ class ProxyTests(unittest.TestCase):
         self.p[:] = [42]
 
     def testSetSliceFail(self):
-        def doit(): self.p[:] = [42]
+        def doit():
+            self.p[:] = [42]
         self.shouldFail(doit)
 
     def testContainsOK(self):
@@ -1786,9 +1804,9 @@ class ProxyTests(unittest.TestCase):
         # aren't proxied.
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
-        self.c.unproxied_types = [str, int, float]
+        self.c.unproxied_types = {str, int, float}
         if PYTHON2:
-            self.c.unproxied_types.append(long)
+            self.c.unproxied_types.add(long)
         for expr in self.unops:
             x = 1
             y = eval(expr)
@@ -1804,9 +1822,9 @@ class ProxyTests(unittest.TestCase):
         # unops that don't return a proxy
         P = self.c.proxy
         for func in (
-            hex, oct,
-            # lambda x: not x,
-            ):
+                hex, oct,
+                # lambda x: not x,
+        ):
             self.assertEqual(func(P(100)), func(100))
             self.shouldFail(func, P(100))
 
@@ -1864,58 +1882,63 @@ class ProxyTests(unittest.TestCase):
         from zope.security.proxy import removeSecurityProxy
         P = self.c.proxy
 
-        # Before 2.3, coerce() of two proxies returns them unchanged
-        import sys
-        fixed_coerce = sys.version_info >= (2, 3, 0)
-
         x = P(1)
         y = P(2)
         a, b = coerce(x, y)
-        self.assertTrue(a is x and b is y)
+        self.assertIs(a, x)
+        self.assertIs(b, y)
 
         x = P(1)
         y = P(2.1)
         a, b = coerce(x, y)
-        self.assertTrue(removeSecurityProxy(a) == 1.0 and b is y)
-        if fixed_coerce:
-            self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
+        self.assertEqual(removeSecurityProxy(a), 1.0)
+        self.assertIs(b, y)
+        self.assertIs(type(removeSecurityProxy(a)), float)
+        self.assertIs(b, y)
 
         x = P(1.1)
         y = P(2)
         a, b = coerce(x, y)
-        self.assertTrue(a is x and removeSecurityProxy(b) == 2.0)
-        if fixed_coerce:
-            self.assertTrue(a is x and type(removeSecurityProxy(b)) is float)
+        self.assertIs(a, x)
+        self.assertEqual(removeSecurityProxy(b), 2.0)
+        self.assertIs(a, x)
+        self.assertIs(type(removeSecurityProxy(b)), float)
 
         x = P(1)
         y = 2
         a, b = coerce(x, y)
-        self.assertTrue(a is x and b is y)
+        self.assertIs(a, x)
+        self.assertIs(b, y)
 
         x = P(1)
         y = 2.1
         a, b = coerce(x, y)
-        self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
+        self.assertIs(type(removeSecurityProxy(a)), float)
+        self.assertIs(b, y)
 
         x = P(1.1)
         y = 2
         a, b = coerce(x, y)
-        self.assertTrue(a is x and type(removeSecurityProxy(b)) is float)
+        self.assertIs(a, x)
+        self.assertIs(type(removeSecurityProxy(b)), float)
 
         x = 1
         y = P(2)
         a, b = coerce(x, y)
-        self.assertTrue(a is x and b is y)
+        self.assertIs(a, x)
+        self.assertIs(b, y)
 
         x = 1.1
         y = P(2)
         a, b = coerce(x, y)
-        self.assertTrue(a is x and type(removeSecurityProxy(b)) is float)
+        self.assertIs(a, x)
+        self.assertIs(type(removeSecurityProxy(b)), float)
 
         x = 1
         y = P(2.1)
         a, b = coerce(x, y)
-        self.assertTrue(type(removeSecurityProxy(a)) is float and b is y)
+        self.assertIs(type(removeSecurityProxy(a)), float)
+        self.assertIs(b, y)
 
 
 def test_using_mapping_slots_hack():
@@ -1997,9 +2020,9 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
         from zope.location.location import LocationProxy
         import zope.security
         try:
-            from imp import reload
+            from importlib import reload as _reload
         except ImportError:
-            reload = reload # Python 2
+            _reload = reload # Python 2
 
         # This attribute is set when zope.security.decorator is imported, to
         # show that it will be set too, if zope.security.proxy is imported
@@ -2010,20 +2033,10 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
         # After deleting zope.security.decorator and reloading
         # zope.security.proxy the attribute is set again:
         del sys.modules["zope.security.decorator"]
-        reload(zope.security)
+        _reload(zope.security)
         self.assertTrue(
             hasattr(LocationProxy, '__Security_checker__'))
 
 
 def test_suite():
-    suite = unittest.TestSuite((
-        unittest.makeSuite(ProxyPyTests),
-        unittest.makeSuite(Test_getTestProxyItems),
-        unittest.makeSuite(Test_isinstance),
-        # pre-geddon
-        unittest.makeSuite(ProxyTests),
-        unittest.makeSuite(LocationProxySecurityCheckerTests),
-    ))
-    if not (PYPY or PURE_PYTHON):
-        suite.addTest(unittest.makeSuite(ProxyCTests))
-    return suite
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
