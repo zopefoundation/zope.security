@@ -17,7 +17,7 @@ import functools
 import sys
 
 from zope.proxy import PyProxyBase
-from zope.security._compat import PYPY
+from zope.security._compat import PYPY, PURE_PYTHON
 from zope.security.interfaces import ForbiddenAttribute
 
 def _check_name(meth, wrap_result=True):
@@ -346,9 +346,14 @@ def getObjectPy(proxy):
         return proxy
     return super(PyProxyBase, proxy).__getattribute__('_wrapped')
 
-try:
-    from zope.security._proxy import _Proxy
-except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
+_c_available = not PURE_PYTHON
+if _c_available:
+    try:
+        from zope.security._proxy import _Proxy
+    except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
+        _c_available = False
+
+if not _c_available:
     getChecker = getCheckerPy
     getObject = getObjectPy
     Proxy = ProxyPy
