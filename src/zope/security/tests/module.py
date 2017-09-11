@@ -23,21 +23,21 @@ from zope.schema import Text
 
 class I(Interface):
     def m1():
-        pass
+        "m1"
     def m2():
-        pass
+        "m2"
 
 class I2(I):
     def m4():
-        pass
+        "m4"
 
 class I3(Interface):
     def m3():
-        pass
+        "m3"
 
 class I4(Interface):
     def m2():
-        pass
+        "m2"
 
 
 class S(Interface):
