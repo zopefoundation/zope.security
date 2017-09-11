@@ -9,9 +9,11 @@ matrix:
     - python: pypy
     - python: pypy3
     - python: 2.7
-      env: PURE_PYTHON=1
+      env:
+          - PURE_PYTHON=1
+          - ZOPE_WATCH_CHECKERS=1
     - python: 3.4
-      env: PURE_PYTHON=1
+      env: ZOPE_WATCH_CHECKERS=1
 install:
     - pip install -U pip setuptools
     - pip install -U coveralls coverage
