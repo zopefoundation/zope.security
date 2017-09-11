@@ -16,6 +16,12 @@ import unittest
 
 class ConformsToIInteraction(object):
 
+    def _getTargetClass(self):
+        raise NotImplementedError("Subclass responsibility")
+
+    def _makeOne(self, *participations):
+        return self._getTargetClass()(*participations)
+
     def test_class_conforms_to_IInteraction(self):
         from zope.interface.verify import verifyClass
         from zope.security.interfaces import IInteraction
@@ -34,9 +40,6 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
     def _getTargetClass(self):
         from zope.security.simplepolicies import ParanoidSecurityPolicy
         return ParanoidSecurityPolicy
-
-    def _makeOne(self, *participations):
-        return self._getTargetClass()(*participations)
 
     def test_ctor_no_participations(self):
         policy = self._makeOne()
@@ -70,7 +73,7 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         p1, p2, p3 = Participation(), Participation(), Participation()
         policy = self._makeOne(p1, p2, p3)
         policy.remove(p2)
-        target = object()
+
         self.assertEqual(policy.participations, [p1, p3])
         self.assertTrue(p1.interaction is policy)
         self.assertTrue(p2.interaction is None)
@@ -101,17 +104,19 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         target = object()
         self.assertFalse(policy.checkPermission(permission, target))
 
+    def test_checkPermission_w_no_participations(self):
+        # The permission and object don't matter: if there are no
+        # participations, access is allowed.
+        policy = self._makeOne()
+        self.assertTrue(policy.checkPermission(None, None))
+        self.assertTrue(policy.checkPermission(self, self))
 
 class PermissiveSecurityPolicyTests(unittest.TestCase,
-                                    ConformsToIInteraction,
-                                   ):
+                                    ConformsToIInteraction):
 
     def _getTargetClass(self):
         from zope.security.simplepolicies import PermissiveSecurityPolicy
         return PermissiveSecurityPolicy
-
-    def _makeOne(self, *participations):
-        return self._getTargetClass()(*participations)
 
     def test_checkPermission_w_public(self):
         policy = self._makeOne()
@@ -121,7 +126,4 @@ class PermissiveSecurityPolicyTests(unittest.TestCase,
 
 
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(ParanoidSecurityPolicyTests),
-        unittest.makeSuite(PermissiveSecurityPolicyTests),
-    ))
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
