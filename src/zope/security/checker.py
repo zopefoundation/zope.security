@@ -55,17 +55,17 @@ from zope.security.proxy import getChecker
 
 try:
     from zope.exceptions import DuplicationError
-except ImportError: #pragma NO COVER
+except ImportError: # pragma: no cover
     class DuplicationError(Exception):
         """A duplicate registration was attempted"""
 
-if os.environ.get('ZOPE_WATCH_CHECKERS'): #pragma NO COVER
+WATCH_CHECKERS = 0
+
+if os.environ.get('ZOPE_WATCH_CHECKERS'):
     try:
         WATCH_CHECKERS = int(os.environ.get('ZOPE_WATCH_CHECKERS'))
     except ValueError:
         WATCH_CHECKERS = 1
-else:
-    WATCH_CHECKERS = 0
 
 
 def ProxyFactory(object, checker=None):
@@ -256,19 +256,19 @@ class TracebackSupplement(object):
             cls = self.obj.__class__
             if hasattr(cls, "__module__"):
                 s = "%s.%s" % (cls.__module__, cls.__name__)
-            else: #pragma NO COVER XXX
+            else: # pragma: no cover XXX
                 s = str(cls.__name__)
             result.append("   - class: " + s)
-        except: #pragma NO COVER XXX
+        except: # pragma: no cover XXX
             pass
         try:
             cls = type(self.obj)
             if hasattr(cls, "__module__"):
                 s = "%s.%s" % (cls.__module__, cls.__name__)
-            else: #pragma NO COVER XXX
+            else: # pragma: no cover XXX
                 s = str(cls.__name__)
             result.append("   - type: " + s)
-        except: #pragma NO COVER XXX
+        except: # pragma: no cover XXX
             pass
         return "\n".join(result)
 
@@ -282,7 +282,7 @@ class Global(object):
     """
 
     def __init__(self, name, module=None):
-        if module is None: #pragma NO COVER XXX
+        if module is None: # pragma: no cover XXX
             module = sys._getframe(1).f_locals['__name__']
 
         self.__name__ = name
@@ -395,6 +395,7 @@ def selectCheckerPy(object):
 
     while not isinstance(checker, Checker):
         checker = checker(object)
+
         if checker is NoProxy or checker is None:
             return None
 
@@ -443,7 +444,7 @@ _c_available = not PURE_PYTHON
 if _c_available:
     try:
         import zope.security._zope_security_checker
-    except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
+    except (ImportError, AttributeError): # pragma: no cover PyPy / PURE_PYTHON
         _c_available = False
 
 if _c_available:
@@ -479,6 +480,7 @@ class CombinedChecker(Checker):
         Checker.__init__(self,
                          checker1.get_permissions,
                          checker1.set_permissions)
+
         self._checker2 = checker2
 
     def check(self, object, name):
@@ -580,11 +582,24 @@ class CheckerLoggingMixin(object):
             raise
 
 
-if WATCH_CHECKERS: #pragma NO COVER
-    class Checker(CheckerLoggingMixin, Checker):
-        verbosity = WATCH_CHECKERS
-    class CombinedChecker(CheckerLoggingMixin, CombinedChecker):
-        verbosity = WATCH_CHECKERS
+# We have to be careful with the order of inheritance
+# here. See https://github.com/zopefoundation/zope.security/issues/8
+class WatchingChecker(CheckerLoggingMixin, Checker):
+    verbosity = WATCH_CHECKERS
+class WatchingCombinedChecker(CombinedChecker, WatchingChecker):
+    verbosity = WATCH_CHECKERS
+
+if WATCH_CHECKERS: # pragma: no cover
+    # When we make these the default, we also need to be sure
+    # to update the _defaultChecker's type (if it's not the C
+    # extension) so that selectCheckerPy can properly recognize
+    # it as a Checker.
+    # See https://github.com/zopefoundation/zope.security/issues/8
+    Checker = WatchingChecker
+    CombinedChecker = WatchingCombinedChecker
+
+    if not _c_available:
+        _defaultChecker.__class__ = Checker
 
 def _instanceChecker(inst):
     return _checkers.get(inst.__class__, _defaultChecker)
@@ -658,7 +673,7 @@ _basic_types = {
 if PYTHON2:
     _basic_types[long] = NoProxy
     _basic_types[unicode] = NoProxy
-else: #pragma NO COVER
+else: # pragma: no cover
     _basic_types[type({}.values())] = NoProxy
     _basic_types[type({}.keys())] = NoProxy
     _basic_types[type({}.items())] = NoProxy
@@ -667,7 +682,7 @@ try:
     import pytz
 except ImportError:
     pass
-else: #pragma NO COVER
+else: # pragma: no cover
     _basic_types[type(pytz.UTC)] = NoProxy
 
 BasicTypes = BasicTypes(_basic_types)
@@ -694,7 +709,7 @@ if PYTHON2:
     BasicTypes_examples[long] = long(65536)
 
 
-class _Sequence(object): #pragma NO COVER
+class _Sequence(object): # pragma: no cover
     def __len__(self): return 0
     def __getitem__(self, i): raise IndexError
 
@@ -706,7 +721,7 @@ _Declaration_checker = InterfaceChecker(
     __call__=CheckerPublic,
     )
 
-def f(): #pragma NO COVER
+def f(): # pragma: no cover
     yield f
 
 
@@ -940,7 +955,7 @@ _clear()
 
 try:
     from zope.testing.cleanup import addCleanUp
-except ImportError: #pragma NO COVER
+except ImportError: # pragma: no cover
     pass
 else:
     addCleanUp(_clear)
