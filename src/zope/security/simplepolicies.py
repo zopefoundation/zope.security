@@ -24,7 +24,12 @@ from zope.security._definitions import system_user
 @zope.interface.implementer(IInteraction)
 @zope.interface.provider(ISecurityPolicy)
 class ParanoidSecurityPolicy(object):
-    """Prohibit all access exctp to public items, or by explicit principals"""
+    """
+    Prohibit all access by any non-system principal, unless the item is public.
+
+    This means that if there are no participations (and hence no
+    principals), then access is allowed.
+    """
 
     def __init__(self, *participations):
         self.participations = []
@@ -58,7 +63,9 @@ class ParanoidSecurityPolicy(object):
 
 @zope.interface.provider(ISecurityPolicy)
 class PermissiveSecurityPolicy(ParanoidSecurityPolicy):
-    """Allow all access."""
+    """
+    Allow all access.
+    """
 
     def checkPermission(self, permission, object):
         return True
