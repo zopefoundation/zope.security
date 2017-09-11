@@ -45,6 +45,8 @@ Changes
 
 - Remove unused internal files from ``tests/``.
 
+- Remove ``zope.security.setup``. It was unused and did not work anyway.
+
 4.1.1 (2017-05-17)
 ------------------
 
