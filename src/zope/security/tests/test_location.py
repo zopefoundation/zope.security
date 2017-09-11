@@ -15,21 +15,19 @@
 """
 import unittest
 
+from zope.security.tests import QuietWatchingChecker
 
 def _skip_wo_zope_location(testfunc):
     try:
-        import zope.location
+        import zope.location as zl
     except ImportError:
-        from functools import update_wrapper
-        def dummy(self):
-            pass
-        update_wrapper(dummy, testfunc)
-        return dummy
-    else:
-        return testfunc
+        zl = None
+
+    return unittest.skipIf(zl is None, "Need zope.location")(testfunc)
 
 
-class LocationSecurityProxyTests(unittest.TestCase):
+class LocationSecurityProxyTests(QuietWatchingChecker,
+                                 unittest.TestCase):
 
     @_skip_wo_zope_location
     def test_locationproxy_security(self):
@@ -53,6 +51,4 @@ class LocationSecurityProxyTests(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(LocationSecurityProxyTests),
-    ))
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)
