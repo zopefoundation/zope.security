@@ -13,8 +13,11 @@
 ##############################################################################
 """Tests for zope.security.checker
 """
+
 import unittest
+
 from zope.security import checker
+from zope.security.tests import QuietWatchingChecker
 
 def _skip_if_not_Py2(testfunc):
     import sys
@@ -27,6 +30,7 @@ def _skip_if_no_btrees(testfunc):
         return unittest.skip("BTrees is not installed")(testfunc)
     else:
         return testfunc
+
 
 class Test_ProxyFactory(unittest.TestCase):
 
@@ -199,7 +203,7 @@ class Test_canAccess(unittest.TestCase):
 
 
 _marker = []
-class CheckerTestsBase(object):
+class CheckerTestsBase(QuietWatchingChecker):
 
     def _getTargetClass(self):
         raise NotImplementedError("Subclasses must define")
@@ -586,16 +590,20 @@ class CheckerTestsBase(object):
 class TestCheckerPy(CheckerTestsBase, unittest.TestCase):
 
     def _getTargetClass(self):
-        from zope.security.checker import CheckerPy
-        return CheckerPy
+        return checker.CheckerPy
 
 
 class TestChecker(CheckerTestsBase, unittest.TestCase):
 
     def _getTargetClass(self):
-        from zope.security.checker import Checker
-        return Checker
+        return checker.Checker
 
+@unittest.skipIf(checker.Checker is checker.WatchingChecker,
+                 "WatchingChecker is the default")
+class TestWatchingChecker(TestChecker):
+
+    def _getTargetClass(self):
+        return checker.WatchingChecker
 
 class TestTracebackSupplement(unittest.TestCase):
 
@@ -1116,7 +1124,8 @@ class Test_undefineChecker(unittest.TestCase):
         self.assertFalse(Foo in _checkers)
 
 
-class TestCombinedChecker(unittest.TestCase):
+class TestCombinedChecker(QuietWatchingChecker,
+                          unittest.TestCase):
 
     def _getTargetClass(self):
         from zope.security.checker import CombinedChecker
@@ -1339,6 +1348,12 @@ class TestCombinedChecker(unittest.TestCase):
         finally:
             del thread_local.interaction
 
+@unittest.skipIf(checker.WatchingCombinedChecker is checker.CombinedChecker,
+                 "WatchingCombinedChecker is the default")
+class TestWatchingCombinedChecker(TestCombinedChecker):
+
+    def _getTargetClass(self):
+         return checker.WatchingCombinedChecker
 
 class TestCheckerLoggingMixin(unittest.TestCase):
 
@@ -1605,23 +1620,26 @@ class TestBasicTypes(unittest.TestCase):
 
 # Pre-geddon tests start here
 
-class TestSecurityPolicy(unittest.TestCase):
+class TestSecurityPolicy(QuietWatchingChecker,
+                         unittest.TestCase):
 
     def setUp(self):
+        super(TestSecurityPolicy, self).setUp()
+
         from zope.security.management import newInteraction
         from zope.security.management import setSecurityPolicy
-        from zope.security.checker import _clear
-        _clear()
+        checker._clear()
         self.__oldpolicy = setSecurityPolicy(self._makeSecurityPolicy())
         newInteraction()
 
     def tearDown(self):
+        super(TestSecurityPolicy, self).tearDown()
+
         from zope.security.management import endInteraction
         from zope.security.management import setSecurityPolicy
-        from zope.security.checker import _clear
         endInteraction()
         setSecurityPolicy(self.__oldpolicy)
-        _clear()
+        checker._clear()
 
     def _makeSecurityPolicy(self):
         from zope.interface import implementer
@@ -2193,15 +2211,17 @@ class TestMixinDecoratedChecker(unittest.TestCase):
         from zope.security.checker import Checker
         return Checker(self.decorationGetMap, self.decorationSetMap)
 
-class TestCombinedCheckerMixin(TestMixinDecoratedChecker, unittest.TestCase):
+class TestCombinedCheckerMixin(QuietWatchingChecker,
+                               TestMixinDecoratedChecker,
+                               unittest.TestCase):
 
     def setUp(self):
-        unittest.TestCase.setUp(self)
+        super(TestCombinedCheckerMixin, self).setUp()
         self.decoratedSetUp()
 
     def tearDown(self):
         self.decoratedTearDown()
-        unittest.TestCase.tearDown(self)
+        super(TestCombinedCheckerMixin, self).tearDown()
 
     def test_checking(self):
         from zope.security.interfaces import Unauthorized

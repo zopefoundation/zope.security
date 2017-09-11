@@ -14,14 +14,19 @@
 """Test zope.security.decorator
 """
 import unittest
+from zope.security.tests import QuietWatchingChecker
 
-class DecoratedSecurityCheckerDescriptorTests(unittest.TestCase):
+
+class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
+                                              unittest.TestCase):
 
     def setUp(self):
+        super(DecoratedSecurityCheckerDescriptorTests, self).setUp()
         from zope.security.checker import _clear
         _clear()
 
     def tearDown(self):
+        super(DecoratedSecurityCheckerDescriptorTests, self).tearDown()
         from zope.security.checker import _clear
         _clear()
 
@@ -168,6 +173,4 @@ class DecoratedSecurityCheckerDescriptorTests(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(DecoratedSecurityCheckerDescriptorTests),
-    ))
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)

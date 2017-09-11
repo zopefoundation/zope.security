@@ -35,6 +35,9 @@ Changes
 - Respect ``PURE_PYTHON`` at runtime. See `issue 33
   <https://github.com/zopefoundation/zope.security/issues/33>`_.
 
+- Fix watching checkers (``ZOPE_WATCH_CHECKERS=1``) in pure-Python
+  mode. See `issue 8 <https://github.com/zopefoundation/zope.security/issues/8>`_.
+
 4.1.1 (2017-05-17)
 ------------------
 
