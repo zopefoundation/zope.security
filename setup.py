@@ -21,33 +21,45 @@
 import os
 import platform
 import sys
+
+
+from distutils.errors import CCompilerError
+from distutils.errors import DistutilsExecError
+from distutils.errors import DistutilsPlatformError
+
+
 from setuptools import Extension
+from setuptools.command.build_ext import build_ext
 from setuptools import find_packages
 from setuptools import setup
+from setuptools import Feature
 
-TESTS_REQUIRE = [
-    'BTrees',
-    'zope.component',
-    'zope.configuration',
-    'zope.location',
-    'zope.testing',
-    'zope.testrunner',
-]
+class optional_build_ext(build_ext):
+    """This class subclasses build_ext and allows
+       the building of C extensions to fail.
+    """
+    def run(self):
+        try:
+            build_ext.run(self)
+        except DistutilsPlatformError as e:
+            self._unavailable(e)
 
-def alltests():
-    import os
-    import sys
-    import unittest
-    # use the zope.testrunner machinery to find all the
-    # test suites we've put under ourselves
-    import zope.testrunner.find
-    import zope.testrunner.options
-    here = os.path.abspath(os.path.join(os.path.dirname(__file__), 'src'))
-    args = sys.argv[:]
-    defaults = ["--test-path", here]
-    options = zope.testrunner.options.get_options(args, defaults)
-    suites = list(zope.testrunner.find.find_suites(options))
-    return unittest.TestSuite(suites)
+    def build_extension(self, ext):
+        try:
+            build_ext.build_extension(self, ext)
+        except (CCompilerError, DistutilsExecError, OSError) as e:
+            self._unavailable(e)
+
+    def _unavailable(self, e):
+        print('*' * 80)
+        print("""WARNING:
+        An optional code optimization (C extension) could not be compiled.
+        Optimizations for this package will not be available!""")
+        print()
+        print(e)
+        print('*' * 80)
+
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 def read(*rnames):
@@ -55,9 +67,7 @@ def read(*rnames):
         return f.read()
 
 # Include directories for C extensions
-# Sniff the location of the headers in 'persistent' or fall back
-# to local headers in the include sub-directory
-
+# Sniff the location of the headers in the package distribution
 class ModuleHeaderDir(object):
 
     def __init__(self, require_spec, where='../..'):
@@ -71,40 +81,55 @@ class ModuleHeaderDir(object):
     def __str__(self):
         from pkg_resources import require
         from pkg_resources import resource_filename
-        from pkg_resources import DistributionNotFound
-        try:
-            require(self._require_spec)
-            path = resource_filename(self._require_spec, self._where)
-        except DistributionNotFound:
-            path = os.path.join(here, 'include')
+        require(self._require_spec)
+        path = resource_filename(self._require_spec, self._where)
         return os.path.abspath(path)
 
 include = [ModuleHeaderDir('zope.proxy')]
+
+codeoptimization = Feature(
+    "Optional code optimizations",
+    standard=True,
+    ext_modules=[
+        Extension(
+            "zope.security._proxy",
+            [os.path.join('src', 'zope', 'security', "_proxy.c")],
+            include_dirs=include,
+        ),
+        Extension(
+            "zope.security._zope_security_checker",
+            [os.path.join('src', 'zope', 'security',
+                          "_zope_security_checker.c")]
+        ),
+    ]
+)
 
 # Jython cannot build the C optimizations, while on PyPy they are
 # anti-optimizations (the C extension compatibility layer is known-slow,
 # and defeats JIT opportunities).
 py3 = sys.version_info[0] >= 3
 py_impl = getattr(platform, 'python_implementation', lambda: None)
-pure_python = os.environ.get('PURE_PYTHON', False)
 is_pypy = py_impl() == 'PyPy'
 is_jython = 'java' in sys.platform
 
-if pure_python or is_pypy or is_jython:
+if is_pypy or is_jython:
     setup_requires = []
-    ext_modules = []
+    features = {}
 else:
     setup_requires = ['zope.proxy >= 4.1.0']
-    ext_modules = [
-        Extension("zope.security._proxy",
-                  [os.path.join('src', 'zope', 'security', "_proxy.c")],
-                  include_dirs=include,
-                 ),
-        Extension("zope.security._zope_security_checker",
-                  [os.path.join('src', 'zope', 'security',
-                                "_zope_security_checker.c")]
-                 ),
-    ]
+    features = {
+        'codeoptimization': codeoptimization,
+    }
+
+TESTS_REQUIRE = [
+    'BTrees',
+    'zope.component',
+    'zope.configuration',
+    'zope.location',
+    'zope.testing',
+    'zope.testrunner',
+]
+
 
 setup(name='zope.security',
       version='4.1.2.dev0',
@@ -142,7 +167,10 @@ setup(name='zope.security',
       package_dir={'': 'src'},
       namespace_packages=['zope'],
       setup_requires=setup_requires,
-      ext_modules=ext_modules,
+      cmdclass={
+          'build_ext': optional_build_ext,
+      },
+      features=features,
       install_requires=[
           'setuptools',
           'zope.component',
@@ -152,7 +180,6 @@ setup(name='zope.security',
           'zope.proxy >= 4.1.0',
           'zope.schema',
       ],
-      test_suite='__main__.alltests',
       tests_require=TESTS_REQUIRE,
       extras_require=dict(
           pytz=["pytz"],

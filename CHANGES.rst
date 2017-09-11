@@ -35,7 +35,9 @@ Changes
 - Simplify the internal ``_compat.py`` module now that we only run on
   newer Python versions. See `PR 32 <https://github.com/zopefoundation/zope.security/pull/32>`_.
 
-- Respect ``PURE_PYTHON`` at runtime. See `issue 33
+- Respect ``PURE_PYTHON`` at runtime. At build time, always try to
+  build the C extensions on supported platforms, ignoring
+  ``PURE_PYTHON``. See `issue 33
   <https://github.com/zopefoundation/zope.security/issues/33>`_.
 
 - Fix watching checkers (``ZOPE_WATCH_CHECKERS=1``) in pure-Python
