@@ -368,6 +368,7 @@ Checker_clear(Checker *self)
 static void
 Checker_dealloc(Checker *self)
 {
+  PyObject_GC_UnTrack((PyObject*)self);
   Checker_clear(self);
   Py_TYPE(self)->tp_free((PyObject*)self);
 }

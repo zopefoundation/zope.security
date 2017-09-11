@@ -4,6 +4,9 @@ Changes
 4.1.2 (unreleased)
 ------------------
 
+- Fix the extremely rare potential for a crash when the C extensions
+  are in use. See `issue 35 <https://github.com/zopefoundation/zope.security/issues/35>`_.
+
 - Fix `issue 7
   <https://github.com/zopefoundation/zope.security/issues/7`_: The
   pure-Python proxy didn't propagate ``TypeError`` from ``__repr__``
