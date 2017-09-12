@@ -319,6 +319,12 @@ class AbstractProxyTestBase(object):
         proxy = self._makeOne(target, checker)
         self.assertTrue(proxy >= 1)
 
+    def test__gt__(self):
+        target = 1
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        self.assertTrue(proxy > 0)
+
     def test___hash___w_self(self):
         target = object()
         checker = object() # checker not consulted

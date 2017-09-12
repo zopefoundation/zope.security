@@ -55,7 +55,10 @@
 
 - Fix the pure-Python proxy calling a wrapped ``__getattr__`` or
   ``__getattribute__`` more than once in situations where the C
-  implementation only called it one time (when it raised an AttributeError).
+  implementation only called it one time (when it raised an
+  AttributeError).
+
+- Reach 100% test coverage and maintain it via automated checks.
 
 4.1.1 (2017-05-17)
 ==================

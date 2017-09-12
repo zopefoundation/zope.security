@@ -15,33 +15,28 @@
 
 This module provides some helper/stub objects for setting up interactions.
 """
-import sys
+import contextlib
 import re
 
 from zope import interface, component
+
 from zope.security import interfaces
 from zope.security.permission import Permission
-import contextlib
 import zope.security.management
+from zope.security._compat import PYTHON2 as PY2
+
 from zope.testing import renormalizing
 
-PY2 = sys.version_info[0] == 2
+_str_prefix = 'b' if PY2 else 'u'
 
-if PY2:
-    _u = unicode
-    rules = [(re.compile("b('.*?')"), r"\1"),
-             (re.compile('b(".*?")'), r"\1"),
-            ]
-    output_checker = renormalizing.RENormalizing(rules)
-else:
-    _u = str
-    rules = [(re.compile("u('.*?')"), r"\1"),
-             (re.compile('u(".*?")'), r"\1"),
-            ]
-    output_checker = renormalizing.RENormalizing(rules)
+rules = [
+    (re.compile(_str_prefix + "('.*?')"), r"\1"),
+    (re.compile(_str_prefix + '(".*?")'), r"\1"),
+]
+output_checker = renormalizing.RENormalizing(rules)
 
 @interface.implementer(interfaces.IPrincipal)
-class Principal:
+class Principal(object):
 
     def __init__(self, id, title=None, description='', groups=None):
         self.id = id
@@ -53,7 +48,7 @@ class Principal:
 
 
 @interface.implementer(interfaces.IParticipation)
-class Participation:
+class Participation(object):
 
     def __init__(self, principal):
         self.principal = principal
@@ -63,16 +58,18 @@ class Participation:
 def addCheckerPublic():
     """Add the CheckerPublic permission as 'zope.Public'"""
 
-    perm = Permission('zope.Public', 'Public',
-            """Special permission used for resources that are always public
+    perm = Permission(
+        'zope.Public', 'Public',
+        """Special permission used for resources that are always public
 
-            The public permission is effectively an optimization, sine
-            it allows security computation to be bypassed.
-            """
-            )
+        The public permission is effectively an optimization, sine
+        it allows security computation to be bypassed.
+        """
+    )
     gsm = component.getGlobalSiteManager()
     gsm.registerUtility(perm, interfaces.IPermission, perm.id)
 
+    return perm
 
 def create_interaction(principal_id, **kw):
     principal = Principal(principal_id, **kw)
