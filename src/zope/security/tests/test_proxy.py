@@ -57,6 +57,7 @@ class AbstractProxyTestBase(object):
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
         self.assertEqual(proxy.bar, 'Bar')
+        self.assertEqual(getattr(proxy, 'bar'), 'Bar')
         self.assertEqual(checker._checked, 'bar')
         self.assertEqual(checker._proxied, 'Bar')
 
@@ -77,8 +78,28 @@ class AbstractProxyTestBase(object):
         target = Foo()
         checker = DummyChecker(ForbiddenAttribute)
         proxy = self._makeOne(target, checker)
-        self.assertRaises(ForbiddenAttribute, getattr, proxy, 'bar')
+
+        with self.assertRaises(ForbiddenAttribute):
+            getattr(proxy, 'bar')
         self.assertEqual(checker._checked, 'bar')
+
+    def test__getattr__w_checker_ok_dynamic_attribute_called_once(self):
+        class Dynamic(object):
+            count = 0
+            def __getattr__(self, name):
+                self.count += 1
+                if self.count == 1:
+                    # Called from __getattribute__
+                    raise AttributeError(name)
+                raise AssertionError("We should not be called more than once")
+
+        target = Dynamic()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+
+        with self.assertRaisesRegexp(AttributeError, "name"):
+            getattr(proxy, 'name')
+        self.assertEqual(1, target.count)
 
     def test___setattr___w_checker_ok(self):
         class Foo(object):
@@ -1290,7 +1311,7 @@ class AbstractProxyTestBase(object):
             pass
         class Get(object):
             def __getitem__(self, x):
-                raise Missing('__getitem__')
+                raise Missing('__getitem__') # pragma: no cover (only py3)
             def __getslice__(self, start, stop):
                 raise Missing("__getslice__")
         target = Get()
@@ -1355,7 +1376,7 @@ class AbstractProxyTestBase(object):
             pass
         class Set(object):
             def __setitem__(self, k, v):
-                raise Missing('__setitem__')
+                raise Missing('__setitem__') # pragma: no cover (only py3)
             def __setslice__(self, start, stop, value):
                 raise Missing("__setslice__")
         target = Set()
@@ -1470,6 +1491,16 @@ class ProxyPyTests(AbstractProxyTestBase,
         self.assertRaises(AttributeError, getattr, proxy, '_wrapped')
         self.assertRaises(AttributeError, getattr, proxy, '_checker')
 
+    def test_access_checker_from_subclass(self):
+        target = object()
+        checker = DummyChecker()
+        class Sub(self._getTargetClass()):
+            def get_checker(self):
+                return self._checker
+
+        sub = Sub(target, checker)
+        self.assertIs(checker, sub.get_checker())
+
     def test_ctor_w_checker(self):
         from zope.security.proxy import getObjectPy, getCheckerPy
         # Can't access '_wrapped' / '_checker' in C version
@@ -1534,6 +1565,32 @@ class ProxyPyTests(AbstractProxyTestBase,
             self.assertRaises(TypeError, zope.security.proxy.getObjectPy, proxy)
         finally:
             zope.security.proxy._builtin_isinstance = orig_builtin_isinstance
+
+    def test_getObjectPy_other_object(self):
+        # If it's not a proxy, return it
+        from zope.security.proxy import getObjectPy
+        self.assertIs(self, getObjectPy(self))
+
+    def test_get_reduce(self):
+        class Reduce(object):
+            def __reduce__(self):
+                return 1
+
+            def __reduce_ex__(self, prot):
+                return prot
+
+        reduce_ = Reduce()
+        proxy = self._makeOne(reduce_, DummyChecker())
+        self.assertEqual(1, proxy.__reduce__())
+        self.assertEqual(2, proxy.__reduce_ex__(2))
+
+    def test__module__(self):
+        class WithModule(object):
+            __module__ = 'foo'
+
+        module = WithModule()
+        proxy = self._makeOne(module, DummyChecker())
+        self.assertEqual(WithModule.__module__, proxy.__module__)
 
 class DummyChecker(object):
     _proxied = _checked = None

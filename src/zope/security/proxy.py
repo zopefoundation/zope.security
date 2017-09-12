@@ -54,10 +54,9 @@ def _fmt_address(obj):
     # directly (and ctypes seems like overkill).
     if sys.platform != 'win32':
         return '0x%0x' % id(obj)
-    elif sys.maxsize < 2**32:
+    if sys.maxsize < 2**32: # pragma: no cover
         return '0x%08X' % id(obj)
-    else:
-        return '0x%016X' % id(obj)
+    return '0x%016X' % id(obj) # pragma: no cover
 
 
 class ProxyPy(PyProxyBase):
@@ -117,10 +116,29 @@ class ProxyPy(PyProxyBase):
         return checker.proxy(val)
 
     def __getattr__(self, name):
+        # We only get here if __getattribute__ has already raised an
+        # AttributeError (we have to implement this because the super
+        # class does). We expect that we will also raise that same
+        # error, one way or another---either it will be forbidden by
+        # the checker or it won't exist. However, if the underlying
+        # object is playing games in *its*
+        # __getattribute__/__getattr__, and we call getattr() on it,
+        # (maybe there are threads involved), we might actually
+        # succeed this time.
+
+        # The C implementation *does not* do two checks; it only does
+        # one check, and raises either the ForbiddenAttribute or the
+        # underlying AttributeError, *without* invoking any defined
+        # __getattribute__/__getattr__ more than once. So we
+        # explicitly do the same. The consequence is that we lose a
+        # good stack trace if the object implemented its own methods
+        # but we're consistent. We would provide a better error
+        # message or even subclass of AttributeError, but that's liable to break
+        # (doc)tests.
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         checker = super(ProxyPy, self).__getattribute__('_checker')
         checker.check_getattr(wrapped, name)
-        return checker.proxy(getattr(wrapped, name))
+        raise AttributeError(name)
 
     def __setattr__(self, name, value):
         if name in ('_wrapped', '_checker'):
@@ -353,7 +371,7 @@ _c_available = not PURE_PYTHON
 if _c_available:
     try:
         from zope.security._proxy import _Proxy
-    except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
+    except (ImportError, AttributeError): # pragma: no cover PyPy / PURE_PYTHON
         _c_available = False
 
 

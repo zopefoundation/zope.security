@@ -53,6 +53,10 @@
   ``__setslice__`` fall through to ``__getitem__`` or ``__setitem__``,
   respectively, if it raised an error.
 
+- Fix the pure-Python proxy calling a wrapped ``__getattr__`` or
+  ``__getattribute__`` more than once in situations where the C
+  implementation only called it one time (when it raised an AttributeError).
+
 4.1.1 (2017-05-17)
 ==================
 
