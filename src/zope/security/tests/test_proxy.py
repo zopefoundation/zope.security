@@ -38,6 +38,8 @@ class AbstractProxyTestBase(object):
     idiv = itruediv
     div = '__truediv__' if not PYTHON2 else '__div__'
     truediv = div
+    getslice = '__getitem__' if not PYTHON2 else '__getslice__'
+    setslice = '__setitem__' if not PYTHON2 else '__setslice__'
 
     def _getTargetClass(self):
         raise NotImplementedError("Subclass responsibility")
@@ -277,6 +279,24 @@ class AbstractProxyTestBase(object):
         proxy = self._makeOne(target, checker)
         o_proxy = self._makeOne(target, checker)
         self.assertEqual(cmp(proxy, o_proxy), 0)
+
+    def test__le__(self):
+        target = 1
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        self.assertTrue(proxy <= 1)
+
+    def test__ne__(self):
+        target = 1
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        self.assertFalse(proxy != 1)
+
+    def test__ge__(self):
+        target = 1
+        checker = object() # checker not consulted
+        proxy = self._makeOne(target, checker)
+        self.assertTrue(proxy >= 1)
 
     def test___hash___w_self(self):
         target = object()
@@ -1169,6 +1189,20 @@ class AbstractProxyTestBase(object):
         self.assertRaises(ForbiddenAttribute, len, proxy)
         self.assertEqual(checker._checked, '__len__')
 
+    def test__length_hint_w_checker_allows(self):
+        target = iter([0, 1, 2])
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        hint = object.__getattribute__(proxy, '__length_hint__')
+        self.assertEqual(3, hint())
+
+    def test__length_hint_dne(self):
+        target = object()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        hint = object.__getattribute__(proxy, '__length_hint__')
+        self.assertEqual(NotImplemented, hint())
+
     def test___contains___hit_w_checker_allows(self):
         target = [0, 1, 2]
         checker = DummyChecker()
@@ -1246,7 +1280,46 @@ class AbstractProxyTestBase(object):
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
         self.assertEqual(proxy[1:3], [1, 2])
-        self.assertEqual(checker._checked, '__getslice__')
+        self.assertEqual(checker._checked, self.getslice)
+
+    @_skip_if_not_Py2
+    def test___getslice___error_propagates(self):
+        # This is currently broken on Python 3 because
+        # https://github.com/zopefoundation/zope.proxy/issues/21
+        class Missing(Exception):
+            pass
+        class Get(object):
+            def __getitem__(self, x):
+                raise Missing('__getitem__')
+            def __getslice__(self, start, stop):
+                raise Missing("__getslice__")
+        target = Get()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        with self.assertRaisesRegexp(Missing,
+                                     self.getslice):
+            proxy[1:2]
+
+        self.assertEqual(checker._checked, self.getslice)
+
+    @_skip_if_not_Py2
+    def test___getslice___dne_uses_getitem(self):
+        # This is currently broken on Python 3 because
+        # https://github.com/zopefoundation/zope.proxy/issues/21
+        class Missing(Exception):
+            pass
+        class Get(object):
+            def __getitem__(self, x):
+                raise Missing('__getitem__')
+
+        target = Get()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        with self.assertRaisesRegexp(Missing,
+                                     '__getitem__'):
+            proxy[1:2]
+
+        self.assertEqual(checker._checked, self.getslice)
 
     @_skip_if_not_Py2
     def test___getslice___w_checker_forbids(self):
@@ -1276,6 +1349,41 @@ class AbstractProxyTestBase(object):
             proxy[1:3] = [3, 4]
         self.assertRaises(ForbiddenAttribute, _try)
         self.assertEqual(checker._checked, '__setslice__')
+
+    def test___setslice___error_propagates(self):
+        class Missing(Exception):
+            pass
+        class Set(object):
+            def __setitem__(self, k, v):
+                raise Missing('__setitem__')
+            def __setslice__(self, start, stop, value):
+                raise Missing("__setslice__")
+        target = Set()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        with self.assertRaisesRegexp(Missing,
+                                     self.setslice):
+            proxy[1:2] = 1
+
+        self.assertEqual(checker._checked, self.setslice)
+
+    def test___setslice___dne_uses_getitem(self):
+        # This is currently broken on Python 3 because
+        # https://github.com/zopefoundation/zope.proxy/issues/21
+        class Missing(Exception):
+            pass
+        class Set(object):
+            def __setitem__(self, k, v):
+                raise Missing('__setitem__')
+
+        target = Set()
+        checker = DummyChecker()
+        proxy = self._makeOne(target, checker)
+        with self.assertRaisesRegexp(Missing,
+                                     '__setitem__'):
+            proxy[1:2] = 1
+
+        self.assertEqual(checker._checked, self.setslice)
 
     def test___getitem___mapping_hit_w_checker_allows(self):
         target = {'a': 0, 'b': 1, 'c': 2}

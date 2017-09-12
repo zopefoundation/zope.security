@@ -46,7 +46,12 @@
 
 - Remove unused internal files from ``tests/``.
 
-- Remove ``zope.security.setup``. It was unused and did not work anyway.
+- Remove ``zope.security.setup``. It was unused and did not work
+  anyway.
+
+- Fix the pure-Python proxy on Python 2 letting ``__getslice__`` and
+  ``__setslice__`` fall through to ``__getitem__`` or ``__setitem__``,
+  respectively, if it raised an error.
 
 4.1.1 (2017-05-17)
 ==================

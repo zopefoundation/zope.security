@@ -17,7 +17,8 @@ import functools
 import sys
 
 from zope.proxy import PyProxyBase
-from zope.security._compat import PYPY, PURE_PYTHON
+from zope.security._compat import PURE_PYTHON
+from zope.security._compat import _BUILTINS
 from zope.security.interfaces import ForbiddenAttribute
 
 def _check_name(meth, wrap_result=True):
@@ -139,19 +140,21 @@ class ProxyPy(PyProxyBase):
 
     @_check_name
     def __getslice__(self, start, end):
+        wrapped = object.__getattribute__(self, '_wrapped')
         try:
-            return self._wrapped.__getslice__(start, end)
-        except:
-            getitem = PyProxyBase.__getattribute__(self, '__getitem__')
-            return getitem(slice(start, end))
+            getslice = wrapped.__getslice__
+        except AttributeError:
+            return wrapped.__getitem__(slice(start, end))
+        return getslice(start, end)
 
     @_check_name
-    def __setslice__(self, i, j, value):
+    def __setslice__(self, start, end, value):
+        wrapped = object.__getattribute__(self, '_wrapped')
         try:
-            return self._wrapped.__setslice__(i, j, value)
-        except:
-            setitem = PyProxyBase.__getattribute__(self, '__setitem__')
-            return setitem(slice(i, j), value)
+            setslice = wrapped.__setslice__
+        except AttributeError:
+            return wrapped.__setitem__(slice(start, end), value)
+        return setslice(start, end, value)
 
     def __cmp__(self, other):
         # no check
@@ -311,8 +314,9 @@ for name in ['__call__',
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name(meth))
 
-for name in ['__len__',
-             ]:
+for name in (
+        '__len__',
+):
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name(meth, False))
 
@@ -336,15 +340,14 @@ for name in ['__iadd__',
 def getCheckerPy(proxy):
     return super(PyProxyBase, proxy).__getattribute__('_checker')
 
-if PYPY:
-    _builtin_isinstance = __builtins__.isinstance
-else:
-    _builtin_isinstance = __builtins__['isinstance']
+
+_builtin_isinstance = sys.modules[_BUILTINS].isinstance
 
 def getObjectPy(proxy):
     if not _builtin_isinstance(proxy, ProxyPy):
         return proxy
     return super(PyProxyBase, proxy).__getattribute__('_wrapped')
+
 
 _c_available = not PURE_PYTHON
 if _c_available:
@@ -353,11 +356,12 @@ if _c_available:
     except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
         _c_available = False
 
-if not _c_available:
-    getChecker = getCheckerPy
-    getObject = getObjectPy
-    Proxy = ProxyPy
-else: #pragma NO COVER CPython
+
+getChecker = getCheckerPy
+getObject = getObjectPy
+Proxy = ProxyPy
+
+if _c_available:
     from zope.security._proxy import getChecker
     from zope.security._proxy import getObject
     Proxy = _Proxy
