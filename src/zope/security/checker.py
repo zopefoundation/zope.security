@@ -633,7 +633,7 @@ _setChecker = NamesChecker(['__iter__', '__len__', '__str__', '__contains__',
                             '__eq__', '__ne__', '__lt__', '__gt__',
                             '__le__', '__ge__'])
 
-class BasicTypes(dict):
+class _BasicTypes(dict):
     """Basic Types Dictionary
 
     Make sure that checkers are really updated, when a new type is added.
@@ -685,7 +685,7 @@ except ImportError:
 else: # pragma: no cover
     _basic_types[type(pytz.UTC)] = NoProxy
 
-BasicTypes = BasicTypes(_basic_types)
+BasicTypes = _BasicTypes(_basic_types)
 del _basic_types
 
 # Available for tests. Located here so it can be kept in sync with BasicTypes.
