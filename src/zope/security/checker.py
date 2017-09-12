@@ -64,7 +64,7 @@ WATCH_CHECKERS = 0
 if os.environ.get('ZOPE_WATCH_CHECKERS'):
     try:
         WATCH_CHECKERS = int(os.environ.get('ZOPE_WATCH_CHECKERS'))
-    except ValueError:
+    except ValueError: # pragma: no cover
         WATCH_CHECKERS = 1
 
 
@@ -414,7 +414,7 @@ def defineChecker(type_, checker):
     """
     if not isinstance(type_, DEFINABLE_TYPES):
         raise TypeError(
-                'type_ must be a type, class or module, not a %s' % type_)
+            'type_ must be a type, class or module, not a %s' % type_)
     if type_ in _checkers:
         raise DuplicationError(type_)
     _checkers[type_] = checker
@@ -503,7 +503,8 @@ class CombinedChecker(Checker):
         except ForbiddenAttribute:
             self._checker2.check_setattr(object, name)
         except Unauthorized as unauthorized_exception:
-            try: self._checker2.check_setattr(object, name)
+            try:
+                self._checker2.check_setattr(object, name)
             except ForbiddenAttribute:
                 raise unauthorized_exception
 
@@ -530,7 +531,7 @@ class CheckerLoggingMixin(object):
             if self.verbosity > 1:
                 if name in _available_by_default:
                     self._log('[CHK] + Always available: %s on %r'
-                        % (name, object), 2)
+                              % (name, object), 2)
                 else:
                     self._log(
                         '[CHK] + Granted: %s on %r' % (name, object), 2)
@@ -608,30 +609,35 @@ def moduleChecker(module):
     return _checkers.get(module)
 
 
-_available_by_default[:] = ['__lt__', '__le__', '__eq__',
-                            '__gt__', '__ge__', '__ne__',
-                            '__hash__', '__nonzero__',
-                            '__class__', '__providedBy__', '__implements__',
-                            '__repr__', '__conform__',
-                            '__name__', '__parent__',
-                            ]
+_available_by_default[:] = [
+    '__lt__', '__le__', '__eq__',
+    '__gt__', '__ge__', '__ne__',
+    '__hash__', '__nonzero__',
+    '__class__', '__providedBy__', '__implements__',
+    '__repr__', '__conform__',
+    '__name__', '__parent__',
+]
 
 _callableChecker = NamesChecker(['__str__', '__name__', '__call__'])
-_typeChecker = NamesChecker(
-    ['__str__', '__name__', '__module__', '__bases__', '__mro__',
-     '__implemented__'])
+_typeChecker = NamesChecker([
+    '__str__', '__name__', '__module__', '__bases__', '__mro__',
+    '__implemented__',
+])
 _namedChecker = NamesChecker(['__name__'])
+_iteratorChecker = NamesChecker([
+    'next', '__next__', '__iter__', '__len__',
+    '__length_hint__',
+])
 
-_iteratorChecker = NamesChecker(['next', '__next__', '__iter__', '__len__',
-                                 '__length_hint__',])
-
-_setChecker = NamesChecker(['__iter__', '__len__', '__str__', '__contains__',
-                            'copy', 'difference', 'intersection', 'issubset',
-                            'issuperset', 'symmetric_difference', 'union',
-                            '__and__', '__or__', '__sub__', '__xor__',
-                            '__rand__', '__ror__', '__rsub__', '__rxor__',
-                            '__eq__', '__ne__', '__lt__', '__gt__',
-                            '__le__', '__ge__'])
+_setChecker = NamesChecker([
+    '__iter__', '__len__', '__str__', '__contains__',
+    'copy', 'difference', 'intersection', 'issubset',
+    'issuperset', 'symmetric_difference', 'union',
+    '__and__', '__or__', '__sub__', '__xor__',
+    '__rand__', '__ror__', '__rsub__', '__rxor__',
+    '__eq__', '__ne__', '__lt__', '__gt__',
+    '__le__', '__ge__',
+])
 
 class _BasicTypes(dict):
     """Basic Types Dictionary
@@ -639,11 +645,11 @@ class _BasicTypes(dict):
     Make sure that checkers are really updated, when a new type is added.
     """
     def __setitem__(self, name, value):
-        super(BasicTypes.__class__, self).__setitem__(name, value)
+        dict.__setitem__(self, name, value)
         _checkers[name] = value
 
     def __delitem__(self, name):
-        super(BasicTypes.__class__, self).__delitem__(name)
+        dict.__delitem__(self, name)
         del _checkers[name]
 
     def clear(self):
@@ -651,7 +657,7 @@ class _BasicTypes(dict):
         raise NotImplementedError
 
     def update(self, d):
-        super(BasicTypes.__class__, self).update(d)
+        dict.update(self, d)
         _checkers.update(d)
 
 _basic_types = {
@@ -680,9 +686,9 @@ else: # pragma: no cover
 
 try:
     import pytz
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
-else: # pragma: no cover
+else:
     _basic_types[type(pytz.UTC)] = NoProxy
 
 BasicTypes = _BasicTypes(_basic_types)
@@ -709,9 +715,11 @@ if PYTHON2:
     BasicTypes_examples[long] = long(65536)
 
 
-class _Sequence(object): # pragma: no cover
-    def __len__(self): return 0
-    def __getitem__(self, i): raise IndexError
+class _Sequence(object):
+    def __len__(self):
+        raise NotImplementedError()
+    def __getitem__(self, i):
+        raise NotImplementedError()
 
 _Declaration_checker = InterfaceChecker(
     IDeclaration,
@@ -773,7 +781,7 @@ _default_checkers = {
         __str__=CheckerPublic, _implied=CheckerPublic, subscribe=CheckerPublic,
         ),
     zope.interface.interface.Method: InterfaceChecker(
-                                        zope.interface.interfaces.IMethod),
+        zope.interface.interfaces.IMethod),
     zope.interface.declarations.ProvidesClass: _Declaration_checker,
     zope.interface.declarations.ClassProvides: _Declaration_checker,
     zope.interface.declarations.Implements: _Declaration_checker,
@@ -908,34 +916,35 @@ def _fixup_itertools():
     missing_in_py2 = {'zip_longest', 'accumulate', 'compress',
                       'combinations', 'combinations_with_replacement'}
     missing = missing_in_py3 if sys.version_info[0] >= 3 else missing_in_py2
-    for func, args in (('count', ()),
-                       ('cycle', ((),)),
-                       ('dropwhile', pred_iterable),
-                       ('ifilter', pred_iterable),
-                       ('ifilterfalse', pred_iterable),
-                       ('imap', pred_iterable),
-                       ('islice', (iterable, 2)),
-                       ('izip', (iterable,)),
-                       ('izip_longest', (iterable,)),
-                       ('permutations', (iterable,)),
-                       ('product', (iterable,)),
-                       ('repeat', (1, 2)),
-                       ('starmap', pred_iterable),
-                       ('takewhile', pred_iterable),
-                       ('tee', (iterable,)),
-                       # Python 3 additions
-                       ('zip_longest', (iterable,)),
-                       ('accumulate', (iterable,)),
-                       ('compress', (iterable, ())),
-                       ('combinations', (iterable, 1)),
-                       ('combinations_with_replacement', (iterable, 1)),
+    for func, args in (
+            ('count', ()),
+            ('cycle', ((),)),
+            ('dropwhile', pred_iterable),
+            ('ifilter', pred_iterable),
+            ('ifilterfalse', pred_iterable),
+            ('imap', pred_iterable),
+            ('islice', (iterable, 2)),
+            ('izip', (iterable,)),
+            ('izip_longest', (iterable,)),
+            ('permutations', (iterable,)),
+            ('product', (iterable,)),
+            ('repeat', (1, 2)),
+            ('starmap', pred_iterable),
+            ('takewhile', pred_iterable),
+            ('tee', (iterable,)),
+            # Python 3 additions
+            ('zip_longest', (iterable,)),
+            ('accumulate', (iterable,)),
+            ('compress', (iterable, ())),
+            ('combinations', (iterable, 1)),
+            ('combinations_with_replacement', (iterable, 1)),
     ):
         try:
             func = getattr(itertools, func)
         except AttributeError:
-            if func in missing:
-                continue
-            raise
+            assert func in missing, "Expected %s but not found" % (func,)
+            continue # pragma: no cover This is hit on Python 2, but it doesn't always show
+
         result = func(*args)
         if func == itertools.tee:
             result = result[0]
