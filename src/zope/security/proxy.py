@@ -17,7 +17,8 @@ import functools
 import sys
 
 from zope.proxy import PyProxyBase
-from zope.security._compat import PYPY, PURE_PYTHON
+from zope.security._compat import PURE_PYTHON
+from zope.security._compat import _BUILTINS
 from zope.security.interfaces import ForbiddenAttribute
 
 def _check_name(meth, wrap_result=True):
@@ -53,17 +54,16 @@ def _fmt_address(obj):
     # directly (and ctypes seems like overkill).
     if sys.platform != 'win32':
         return '0x%0x' % id(obj)
-    elif sys.maxsize < 2**32:
+    if sys.maxsize < 2**32: # pragma: no cover
         return '0x%08X' % id(obj)
-    else:
-        return '0x%016X' % id(obj)
+    return '0x%016X' % id(obj) # pragma: no cover
 
 
 class ProxyPy(PyProxyBase):
     __slots__ = ('_wrapped', '_checker')
 
     def __new__(cls, value, checker):
-        inst = super(PyProxyBase, cls).__new__(cls)
+        inst = super(ProxyPy, cls).__new__(cls)
         inst._wrapped = value
         inst._checker = checker
         return inst
@@ -80,10 +80,10 @@ class ProxyPy(PyProxyBase):
             # Only allow _wrapped and _checker to be accessed from inside.
             if sys._getframe(1).f_locals.get('self') is not self:
                 raise AttributeError(name)
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         if name == '_wrapped':
             return wrapped
-        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        checker = super(ProxyPy, self).__getattribute__('_checker')
         if name == '_checker':
             return checker
         if name not in ('__cmp__', '__hash__', '__bool__', '__nonzero__',
@@ -116,92 +116,113 @@ class ProxyPy(PyProxyBase):
         return checker.proxy(val)
 
     def __getattr__(self, name):
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        # We only get here if __getattribute__ has already raised an
+        # AttributeError (we have to implement this because the super
+        # class does). We expect that we will also raise that same
+        # error, one way or another---either it will be forbidden by
+        # the checker or it won't exist. However, if the underlying
+        # object is playing games in *its*
+        # __getattribute__/__getattr__, and we call getattr() on it,
+        # (maybe there are threads involved), we might actually
+        # succeed this time.
+
+        # The C implementation *does not* do two checks; it only does
+        # one check, and raises either the ForbiddenAttribute or the
+        # underlying AttributeError, *without* invoking any defined
+        # __getattribute__/__getattr__ more than once. So we
+        # explicitly do the same. The consequence is that we lose a
+        # good stack trace if the object implemented its own methods
+        # but we're consistent. We would provide a better error
+        # message or even subclass of AttributeError, but that's liable to break
+        # (doc)tests.
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        checker = super(ProxyPy, self).__getattribute__('_checker')
         checker.check_getattr(wrapped, name)
-        return checker.proxy(getattr(wrapped, name))
+        raise AttributeError(name)
 
     def __setattr__(self, name, value):
         if name in ('_wrapped', '_checker'):
-            return super(PyProxyBase, self).__setattr__(name, value)
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        checker = super(PyProxyBase, self).__getattribute__('_checker')
+            return super(ProxyPy, self).__setattr__(name, value)
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        checker = super(ProxyPy, self).__getattribute__('_checker')
         checker.check_setattr(wrapped, name)
         setattr(wrapped, name, value)
 
     def __delattr__(self, name):
         if name in ('_wrapped', '_checker'):
             raise AttributeError()
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        checker = super(ProxyPy, self).__getattribute__('_checker')
         checker.check_setattr(wrapped, name)
         delattr(wrapped, name)
 
     @_check_name
     def __getslice__(self, start, end):
+        wrapped = object.__getattribute__(self, '_wrapped')
         try:
-            return self._wrapped.__getslice__(start, end)
-        except:
-            getitem = PyProxyBase.__getattribute__(self, '__getitem__')
-            return getitem(slice(start, end))
+            getslice = wrapped.__getslice__
+        except AttributeError:
+            return wrapped.__getitem__(slice(start, end))
+        return getslice(start, end)
 
     @_check_name
-    def __setslice__(self, i, j, value):
+    def __setslice__(self, start, end, value):
+        wrapped = object.__getattribute__(self, '_wrapped')
         try:
-            return self._wrapped.__setslice__(i, j, value)
-        except:
-            setitem = PyProxyBase.__getattribute__(self, '__setitem__')
-            return setitem(slice(i, j), value)
+            setslice = wrapped.__setslice__
+        except AttributeError:
+            return wrapped.__setitem__(slice(start, end), value)
+        return setslice(start, end, value)
 
     def __cmp__(self, other):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return cmp(wrapped, other)
 
     def __lt__(self, other):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return wrapped < other
 
     def __le__(self, other):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return wrapped <= other
 
     def __eq__(self, other):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return wrapped == other
 
     def __ne__(self, other):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return wrapped != other
 
     def __ge__(self, other):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return wrapped >= other
 
     def __gt__(self, other):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return wrapped > other
 
     def __hash__(self):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return hash(wrapped)
 
     def __nonzero__(self):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         return bool(wrapped)
     __bool__ = __nonzero__
 
     def __length_hint__(self):
         # no check
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         try:
             hint = wrapped.__length_hint__
         except AttributeError:
@@ -211,8 +232,8 @@ class ProxyPy(PyProxyBase):
 
     def __coerce__(self, other):
         # For some reason _check_name does not work for coerce()
-        wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
-        checker = super(PyProxyBase, self).__getattribute__('_checker')
+        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        checker = super(ProxyPy, self).__getattribute__('_checker')
         checker.check(wrapped, '__coerce__')
         return super(ProxyPy, self).__coerce__(other)
 
@@ -226,7 +247,7 @@ class ProxyPy(PyProxyBase):
             raise
         except:
             # The C implementation catches all exceptions.
-            wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+            wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
             return '<security proxied %s.%s instance at %s>' %(
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
                 _fmt_address(wrapped))
@@ -240,7 +261,7 @@ class ProxyPy(PyProxyBase):
         except TypeError:
             raise
         except:
-            wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
+            wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
             return '<security proxied %s.%s instance at %s>' %(
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
                 _fmt_address(wrapped))
@@ -311,8 +332,9 @@ for name in ['__call__',
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name(meth))
 
-for name in ['__len__',
-             ]:
+for name in (
+        '__len__',
+):
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name(meth, False))
 
@@ -334,30 +356,30 @@ for name in ['__iadd__',
     setattr(ProxyPy, name, _check_name_inplace(meth))
 
 def getCheckerPy(proxy):
-    return super(PyProxyBase, proxy).__getattribute__('_checker')
+    return super(ProxyPy, proxy).__getattribute__('_checker')
 
-if PYPY:
-    _builtin_isinstance = __builtins__.isinstance
-else:
-    _builtin_isinstance = __builtins__['isinstance']
+
+_builtin_isinstance = sys.modules[_BUILTINS].isinstance
 
 def getObjectPy(proxy):
     if not _builtin_isinstance(proxy, ProxyPy):
         return proxy
-    return super(PyProxyBase, proxy).__getattribute__('_wrapped')
+    return super(ProxyPy, proxy).__getattribute__('_wrapped')
+
 
 _c_available = not PURE_PYTHON
 if _c_available:
     try:
         from zope.security._proxy import _Proxy
-    except (ImportError, AttributeError): #pragma NO COVER PyPy / PURE_PYTHON
+    except (ImportError, AttributeError): # pragma: no cover PyPy / PURE_PYTHON
         _c_available = False
 
-if not _c_available:
-    getChecker = getCheckerPy
-    getObject = getObjectPy
-    Proxy = ProxyPy
-else: #pragma NO COVER CPython
+
+getChecker = getCheckerPy
+getObject = getObjectPy
+Proxy = ProxyPy
+
+if _c_available:
     from zope.security._proxy import getChecker
     from zope.security._proxy import getObject
     Proxy = _Proxy

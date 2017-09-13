@@ -119,7 +119,7 @@ class IChecker(Interface):
 
     def check_setattr(ob, name):
         """Check whether attribute assignment is allowed.
-        
+
         May raise Unauthorized or Forbidden.  Returns no value.
         """
 
@@ -236,7 +236,7 @@ class IInteractionManagement(Interface):
 
         Does nothing if there is no interaction.
         """
-        
+
 class IPrincipal(Interface):
     """Principals are security artifacts that execute actions in a security
     environment.
@@ -268,13 +268,13 @@ class IPrincipal(Interface):
         title=_("Description"),
         description=_("A detailed description of the principal."),
         required=False)
-        
-        
+
+
 class IGroupAwarePrincipal(IPrincipal):
     """Group aware principal interface
     Extends IPrincipal to contain group information.
     """
-    
+
     groups = Attribute(
         'An iterable of groups to which the principal directly belongs')
 

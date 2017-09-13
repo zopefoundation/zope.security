@@ -170,8 +170,8 @@ class IAllow(Interface):
     interface = Tokens(
         title=u"Interface",
         description=(u"Interfaces whos names to provide access to. Access "
-                       u"will be provided to all of the names defined by the "
-                       u"interface(s). Multiple interfaces can be supplied."),
+                     u"will be provided to all of the names defined by the "
+                     u"interface(s). Multiple interfaces can be supplied."),
         value_type=GlobalInterface(),
         required=False)
 

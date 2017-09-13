@@ -14,7 +14,7 @@
 """Test permissions
 """
 import unittest
-
+from zope.component.testing import PlacelessSetup
 
 class PermissionTests(unittest.TestCase):
 
@@ -22,15 +22,9 @@ class PermissionTests(unittest.TestCase):
         from zope.security.permission import Permission
         return Permission
 
-    def _makeOne(self, id, title=None, description=None):
+    def _makeOne(self, id, *args):
         klass = self._getTargetClass()
-        if description is None:
-            if title is None:
-                return klass(id)
-            return klass(id, title)
-        if title is None:
-            return klass(id, description=description)
-        return klass(id, title, description)
+        return klass(id, *args)
 
     def test_class_conforms_to_IPermission(self):
         from zope.interface.verify import verifyClass
@@ -55,15 +49,7 @@ class PermissionTests(unittest.TestCase):
         self.assertEqual(permission.description, 'DESCRIPTION')
 
 
-class Test_checkPermission(unittest.TestCase):
-
-    def setUp(self):
-        from zope.component.testing import setUp
-        setUp()
-
-    def tearDown(self):
-        from zope.component.testing import tearDown
-        tearDown()
+class Test_checkPermission(PlacelessSetup, unittest.TestCase):
 
     def _callFUT(self, context, permission_id):
         from zope.security.permission import checkPermission
@@ -84,15 +70,7 @@ class Test_checkPermission(unittest.TestCase):
         self._callFUT(None, 'testing') # no raise
 
 
-class Test_allPermissions(unittest.TestCase):
-
-    def setUp(self):
-        from zope.component.testing import setUp
-        setUp()
-
-    def tearDown(self):
-        from zope.component.testing import tearDown
-        tearDown()
+class Test_allPermissions(PlacelessSetup, unittest.TestCase):
 
     def _callFUT(self):
         from zope.security.permission import allPermissions
@@ -120,15 +98,7 @@ class Test_allPermissions(unittest.TestCase):
         self.assertEqual(list(self._callFUT()), ['testing'])
 
 
-class Test_PermissionsVocabulary(unittest.TestCase):
-
-    def setUp(self):
-        from zope.component.testing import setUp
-        setUp()
-
-    def tearDown(self):
-        from zope.component.testing import tearDown
-        tearDown()
+class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
 
     def _callFUT(self):
         from zope.security.permission import PermissionsVocabulary
@@ -162,15 +132,7 @@ class Test_PermissionsVocabulary(unittest.TestCase):
                          ['testing', 'zope.Public'])
 
 
-class Test_PermissionIdsVocabulary(unittest.TestCase):
-
-    def setUp(self):
-        from zope.component.testing import setUp
-        setUp()
-
-    def tearDown(self):
-        from zope.component.testing import tearDown
-        tearDown()
+class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
 
     def _callFUT(self):
         from zope.security.permission import PermissionIdsVocabulary
@@ -208,10 +170,4 @@ class Test_PermissionIdsVocabulary(unittest.TestCase):
 
 
 def test_suite():
-    return unittest.TestSuite([
-            unittest.makeSuite(PermissionTests),
-            unittest.makeSuite(Test_checkPermission),
-            unittest.makeSuite(Test_allPermissions),
-            unittest.makeSuite(Test_PermissionsVocabulary),
-            unittest.makeSuite(Test_PermissionIdsVocabulary),
-        ])
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)

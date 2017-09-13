@@ -76,7 +76,7 @@ def newInteraction(*participations):
     """Start a new interaction."""
     if queryInteraction() is not None:
         raise ExistingInteraction("newInteraction called"
-                             " while another interaction is active.")
+                                  " while another interaction is active.")
     thread_local.interaction = getSecurityPolicy()(*participations)
 
 def endInteraction():
@@ -134,13 +134,9 @@ def _clear():
     global _defaultPolicy
     _defaultPolicy = ParanoidSecurityPolicy
 
-# XXX This code is used to support automated testing. However, it shouldn't be
-# here and needs to be refactored. The empty addCleanUp-method is a temporary
-# workaround to fix packages that depend on zope.security but don't have a
-# need for zope.testing.
 try:
     from zope.testing.cleanup import addCleanUp
-except ImportError: #pragma NO COVER
+except ImportError: # pragma: no cover
     pass
 else:
     addCleanUp(_clear)

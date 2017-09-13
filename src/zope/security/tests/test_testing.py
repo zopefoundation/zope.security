@@ -13,17 +13,17 @@
 ##############################################################################
 import unittest
 
+from zope.testing.cleanup import CleanUp
 
-class InteractionHelperTest(unittest.TestCase):
+from zope.security import testing
 
-    def tearDown(self):
-        from zope.security.management import endInteraction
-        endInteraction()
+class TestTestingFunctions(CleanUp,
+                           unittest.TestCase):
 
     def test_create_interaction_should_return_principal(self):
         from zope.security.management import getInteraction
-        from zope.security.testing import create_interaction
-        principal = create_interaction(
+
+        principal = testing.create_interaction(
             'foo', groups=['bar'], description='desc')
         ix = getInteraction()
         participation = ix.participations[0]
@@ -34,25 +34,41 @@ class InteractionHelperTest(unittest.TestCase):
     def test_usable_as_contextmanager(self):
         from zope.security.management import getInteraction
         from zope.security.management import queryInteraction
-        from zope.security.testing import interaction
-        with interaction('foo'):
+
+        with testing.interaction('foo'):
             ix = getInteraction()
             participation = ix.participations[0]
             self.assertEqual('foo', participation.principal.id)
+            # Nesting doesn't change anything
+            with testing.interaction('baz'):
+                ix = getInteraction()
+                participation = ix.participations[0]
+                self.assertEqual('foo', participation.principal.id)
+
         self.assertFalse(queryInteraction())
 
     def test_contextmanager_ends_interaction_on_exception(self):
         from zope.security.management import queryInteraction
-        from zope.security.testing import interaction
-        try:
-            with interaction('foo'):
-                raise RuntimeError()
-        except RuntimeError:
+        class MyError(Exception):
             pass
+
+        with self.assertRaises(MyError):
+            with testing.interaction('foo'):
+                raise MyError()
+
         self.assertFalse(queryInteraction())
 
 
+    def test_addCheckerPublic(self):
+        from zope import component
+        from zope.security.interfaces import IPermission
+
+        perm = testing.addCheckerPublic()
+        utility = component.getUtility(IPermission, name='zope.Public')
+        self.assertIs(perm, utility)
+
+
+
+
 def test_suite():
-    return unittest.TestSuite((
-        unittest.makeSuite(InteractionHelperTest),
-    ))
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)

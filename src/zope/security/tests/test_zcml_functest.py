@@ -16,14 +16,6 @@
 import unittest
 import io
 
-def _skip_wo_zope_configuration(testfunc):
-    try:
-        import zope.configuration.xmlconfig
-    except ImportError:
-        return unittest.skip("No zope.configuration")(testfunc)
-    else:
-        return testfunc
-
 
 def configfile(s):
     return io.StringIO(u"""<configure
@@ -42,12 +34,8 @@ class TestClassDirective(unittest.TestCase):
             del ExampleClass.__implements__
         except AttributeError:
             pass
-        try:
-            from zope.component.testing import setUp
-        except ImportError:
-            pass
-        else:
-            setUp()
+        from zope.component.testing import setUp
+        setUp()
 
     def tearDown(self):
         from zope.security.tests.exampleclass import ExampleClass
@@ -55,19 +43,16 @@ class TestClassDirective(unittest.TestCase):
             del ExampleClass.__implements__
         except AttributeError:
             pass
-        try:
-            from zope.component.testing import tearDown
-        except ImportError:
-            pass
-        else:
-            tearDown()
+
+        from zope.component.testing import tearDown
+        tearDown()
 
     def _meta(self):
         from zope.configuration.xmlconfig import XMLConfig
         import zope.security
         XMLConfig('meta.zcml', zope.security)()
 
-    @_skip_wo_zope_configuration
+
     def testEmptyDirective(self):
         from zope.configuration.xmlconfig import xmlconfig
         self._meta()
@@ -78,7 +63,6 @@ class TestClassDirective(unittest.TestCase):
         xmlconfig(f)
 
 
-    @_skip_wo_zope_configuration
     def testImplements(self):
         from zope.component.interface import queryInterface
         from zope.configuration.xmlconfig import xmlconfig
@@ -100,7 +84,6 @@ class TestClassDirective(unittest.TestCase):
             "zope.security.tests.exampleclass.IExample"), IExample)
 
 
-    @_skip_wo_zope_configuration
     def testMulImplements(self):
         from zope.component.interface import queryInterface
         from zope.configuration.xmlconfig import xmlconfig
@@ -131,7 +114,6 @@ class TestClassDirective(unittest.TestCase):
             "zope.security.tests.exampleclass.IExample2"),
                          IExample2)
 
-    @_skip_wo_zope_configuration
     def testRequire(self):
         from zope.configuration.xmlconfig import xmlconfig
         self._meta()
@@ -144,7 +126,6 @@ class TestClassDirective(unittest.TestCase):
                        """)
         xmlconfig(f)
 
-    @_skip_wo_zope_configuration
     def testAllow(self):
         from zope.configuration.xmlconfig import xmlconfig
         self._meta()
@@ -155,7 +136,6 @@ class TestClassDirective(unittest.TestCase):
                        """)
         xmlconfig(f)
 
-    @_skip_wo_zope_configuration
     def testMimic(self):
         from zope.configuration.xmlconfig import xmlconfig
         self._meta()
@@ -170,27 +150,19 @@ class TestClassDirective(unittest.TestCase):
 class TestFactorySubdirective(unittest.TestCase):
 
     def setUp(self):
-        try:
-            from zope.component.testing import setUp
-        except ImportError:
-            pass
-        else:
-            setUp()
+        from zope.component.testing import setUp
+        setUp()
 
     def tearDown(self):
-        try:
-            from zope.component.testing import tearDown
-        except ImportError:
-            pass
-        else:
-            tearDown()
+        from zope.component.testing import tearDown
+        tearDown()
 
     def _meta(self):
         from zope.configuration.xmlconfig import XMLConfig
         import zope.security
         XMLConfig('meta.zcml', zope.security)()
 
-    @_skip_wo_zope_configuration
+
     def testFactory(self):
         from zope.component import getUtility
         from zope.component.interfaces import IFactory
@@ -212,7 +184,6 @@ class TestFactorySubdirective(unittest.TestCase):
         self.assertEqual(factory.title, "Example content")
         self.assertEqual(factory.description, "Example description")
 
-    @_skip_wo_zope_configuration
     def testFactoryNoId(self):
         from zope.component import getUtility
         from zope.component.interfaces import IFactory
@@ -238,7 +209,6 @@ class TestFactorySubdirective(unittest.TestCase):
         self.assertEqual(factory.description, "Example description")
 
 
-    @_skip_wo_zope_configuration
     def testFactoryPublicPermission(self):
         from zope.component import getUtility
         from zope.component.interfaces import IFactory
@@ -258,23 +228,6 @@ class TestFactorySubdirective(unittest.TestCase):
         self.assertTrue(hasattr(factory, '__Security_checker__'))
 
 
-class Context(object):
-    actions = ()
-
-    def action(self, discriminator, callable, args):
-        self.actions += ((discriminator, callable, args), )
-
-    def __repr__(self):
-        import re
-        import pprint
-        atre = re.compile(' at [0-9a-fA-Fx]+')
-        stream = io.StringIO() if bytes is not str else io.BytesIO()
-        pprinter = pprint.PrettyPrinter(stream=stream, width=60)
-        pprinter.pprint(self.actions)
-        r = stream.getvalue()
-        return (''.join(atre.split(r))).strip()
-
-
 template = """<configure
    xmlns='http://namespaces.zope.org/zope'
    xmlns:test='http://www.zope.org/NS/Zope3/test'
@@ -286,27 +239,19 @@ template = """<configure
 class TestFactoryDirective(unittest.TestCase):
 
     def setUp(self):
-        try:
-            from zope.component.testing import setUp
-        except ImportError:
-            pass
-        else:
-            setUp()
+        from zope.component.testing import setUp
+        setUp()
 
     def tearDown(self):
-        try:
-            from zope.component.testing import tearDown
-        except ImportError:
-            pass
-        else:
-            tearDown()
+        from zope.component.testing import tearDown
+        tearDown()
 
     def meta(self):
         import zope.security
         from zope.configuration.xmlconfig import XMLConfig
         XMLConfig('meta.zcml', zope.security)()
 
-    @_skip_wo_zope_configuration
+
     def testFactory(self):
         from zope.component import createObject
         from zope.configuration.xmlconfig import xmlconfig
@@ -354,25 +299,23 @@ class TestRequireDirective(unittest.TestCase):
     def setUp(self):
         from zope.interface import implementer
         from zope.security.tests import module
-        try:
-            from zope.component.testing import setUp
-        except ImportError:
-            pass
-        else:
-            setUp()
+        from zope.component.testing import setUp
+        setUp()
         defineDirectives()
 
         class B(object):
             def m1(self):
-                return "m1"
+                raise AssertionError("Never called")
             def m2(self):
-                return "m2"
+                raise AssertionError("Never called")
+
         @implementer(module.I)
         class C(B):
             def m3(self):
-                return "m3"
+                raise AssertionError("Never called")
             def m4(self):
-                return "m4"
+                raise AssertionError("Never called")
+
         module.test_base = B
         module.test_class = C
         module.test_instance = C()
@@ -381,12 +324,8 @@ class TestRequireDirective(unittest.TestCase):
     def tearDown(self):
         from zope.security.tests import module
         module.test_class = None
-        try:
-            from zope.component.testing import tearDown
-        except ImportError:
-            pass
-        else:
-            tearDown()
+        from zope.component.testing import tearDown
+        tearDown()
 
     def assertState(self, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
         #Verify that class, instance, and methods have expected permissions
@@ -405,7 +344,6 @@ class TestRequireDirective(unittest.TestCase):
     # "testSimple*" exercises tags that do NOT have children.  This mode
     # inherently sets the instances as well as the class attributes.
 
-    @_skip_wo_zope_configuration
     def test_wo_any_attributes(self):
         from zope.configuration.exceptions import ConfigurationError
         from zope.security.tests import module
@@ -421,7 +359,6 @@ class TestRequireDirective(unittest.TestCase):
     # "testSimple*" exercises tags that do NOT have children.  This mode
     # inherently sets the instances as well as the class attributes.
 
-    @_skip_wo_zope_configuration
     def testSimpleMethodsPlural(self):
         declaration = ('''<class class="%s">
                             <require
@@ -431,19 +368,6 @@ class TestRequireDirective(unittest.TestCase):
                        % (_pfx("test_class"), P1))
         self.assertDeclaration(declaration, m1P=P1, m3P=P1)
 
-    def assertSetattrState(self, m1P=NOTSET, m2P=NOTSET, m3P=NOTSET):
-        # Verify that class, instance, and methods have expected permissions
-        from zope.security.checker import selectChecker
-        from zope.security.tests import module
-        checker = selectChecker(module.test_instance)
-        self.assertEqual(checker.setattr_permission_id('m1'), (m1P or None))
-        self.assertEqual(checker.setattr_permission_id('m2'), (m2P or None))
-        self.assertEqual(checker.setattr_permission_id('m3'), (m3P or None))
-
-    def assertSetattrDeclaration(self, declaration, **state):
-        self.assertSetattrState(**state)
-
-    @_skip_wo_zope_configuration
     def test_set_attributes(self):
         from zope.security.checker import selectChecker
         from zope.security.tests import module
@@ -459,7 +383,6 @@ class TestRequireDirective(unittest.TestCase):
         self.assertEqual(checker.setattr_permission_id('m2'), None)
         self.assertEqual(checker.setattr_permission_id('m3'), P1)
 
-    @_skip_wo_zope_configuration
     def test_set_schema(self):
         from zope.component.interface import queryInterface
         from zope.security.checker import selectChecker
@@ -485,7 +408,6 @@ class TestRequireDirective(unittest.TestCase):
         self.assertEqual(checker.setattr_permission_id('bar'), P1)
         self.assertEqual(checker.setattr_permission_id('baro'), None)
 
-    @_skip_wo_zope_configuration
     def test_multiple_set_schema(self):
         from zope.component.interface import queryInterface
         from zope.security.checker import selectChecker
@@ -515,7 +437,6 @@ class TestRequireDirective(unittest.TestCase):
         self.assertEqual(checker.setattr_permission_id('bar2'), P1)
         self.assertEqual(checker.setattr_permission_id('baro'), None)
 
-    @_skip_wo_zope_configuration
     def testSimpleInterface(self):
         from zope.component.interface import queryInterface
         from zope.security.tests import module
@@ -534,7 +455,6 @@ class TestRequireDirective(unittest.TestCase):
         self.assertEqual(queryInterface(_pfx("I")), module.I)
 
 
-    @_skip_wo_zope_configuration
     def testMultipleInterface(self):
         from zope.component.interface import queryInterface
         from zope.security.tests import module
@@ -558,7 +478,7 @@ class TestRequireDirective(unittest.TestCase):
     # "testComposite*TopPerm" exercises tags with permission in containing tag.
     # "testComposite*ElementPerm" exercises tags w/permission in children.
 
-    @_skip_wo_zope_configuration
+
     def testCompositeNoPerm(self):
         # Establish rejection of declarations lacking a permission spec.
         from zope.configuration.xmlconfig import ZopeXMLConfigurationError
@@ -572,8 +492,6 @@ class TestRequireDirective(unittest.TestCase):
                           declaration)
 
 
-
-    @_skip_wo_zope_configuration
     def testCompositeMethodsPluralElementPerm(self):
         declaration = ('''<class class="%s">
                             <require
@@ -584,7 +502,7 @@ class TestRequireDirective(unittest.TestCase):
         self.assertDeclaration(declaration,
                                m1P=P1, m3P=P1)
 
-    @_skip_wo_zope_configuration
+
     def testCompositeInterfaceTopPerm(self):
         declaration = ('''<class class="%s">
                             <require
@@ -596,7 +514,6 @@ class TestRequireDirective(unittest.TestCase):
                                m1P=P1, m2P=P1)
 
 
-    @_skip_wo_zope_configuration
     def testSubInterfaces(self):
         declaration = ('''<class class="%s">
                             <require
@@ -608,7 +525,6 @@ class TestRequireDirective(unittest.TestCase):
         self.assertDeclaration(declaration, m1P=P1, m2P=P1)
 
 
-    @_skip_wo_zope_configuration
     def testMimicOnly(self):
         declaration = ('''<class class="%s">
                             <require
@@ -625,7 +541,6 @@ class TestRequireDirective(unittest.TestCase):
                                m1P=P1, m2P=P1)
 
 
-    @_skip_wo_zope_configuration
     def testMimicAsDefault(self):
         declaration = ('''<class class="%s">
                             <require
@@ -654,7 +569,7 @@ def apply_declaration(declaration):
     return xmlconfig(io.StringIO(declaration))
 
 
-@_skip_wo_zope_configuration
+
 def make_dummy():
     from zope.interface import Interface
     import zope.security.zcml
@@ -673,23 +588,14 @@ def dummy(context_, perm):
 class DirectivesTest(unittest.TestCase):
 
     def setUp(self):
-        try:
-            from zope.component.testing import setUp
-        except ImportError:
-            pass
-        else:
-            setUp()
+        from zope.component.testing import setUp
+        setUp()
 
     def tearDown(self):
         del perms[:]
-        try:
-            from zope.component.testing import tearDown
-        except ImportError:
-            pass
-        else:
-            tearDown()
+        from zope.component.testing import tearDown
+        tearDown()
 
-    @_skip_wo_zope_configuration
     def testRedefinePermission(self):
         from zope.configuration import xmlconfig
         from zope.security import tests

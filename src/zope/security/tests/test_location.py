@@ -15,23 +15,14 @@
 """
 import unittest
 
+from zope.location.location import LocationProxy
 from zope.security.tests import QuietWatchingChecker
-
-def _skip_wo_zope_location(testfunc):
-    try:
-        import zope.location as zl
-    except ImportError:
-        zl = None
-
-    return unittest.skipIf(zl is None, "Need zope.location")(testfunc)
 
 
 class LocationSecurityProxyTests(QuietWatchingChecker,
                                  unittest.TestCase):
 
-    @_skip_wo_zope_location
     def test_locationproxy_security(self):
-        from zope.location.location import LocationProxy
         from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
         from zope.security.proxy import ProxyFactory

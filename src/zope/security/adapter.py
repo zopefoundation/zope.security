@@ -65,9 +65,8 @@ class LocatingTrustedAdapterFactory(object):
         return assertLocation(adapter, context)
 
     def _customizeUnprotected(self, adapter, context):
-        if (ILocation.providedBy(adapter)
-            and adapter.__parent__ is None):
-                    adapter.__parent__ = context
+        if ILocation.providedBy(adapter) and adapter.__parent__ is None:
+            adapter.__parent__ = context
         return adapter
 
     def __call__(self, *args):

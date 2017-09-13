@@ -47,9 +47,9 @@ def checkPermission(context, permission_id):
 def allPermissions(context=None):
     """Get the ids of all defined permissions
     """
-    for id, permission in getUtilitiesFor(IPermission, context):
-        if id != u'zope.Public':
-            yield id
+    for name, _permission in getUtilitiesFor(IPermission, context):
+        if name != u'zope.Public':
+            yield name
 
 def PermissionsVocabulary(context=None):
     """A vocabulary of permission IDs.
@@ -57,8 +57,8 @@ def PermissionsVocabulary(context=None):
     Term values are permissions, while term tokens are permission IDs.
     """
     terms = []
-    for id, permission in getUtilitiesFor(IPermission, context):
-        terms.append(SimpleTerm(permission, id))
+    for name, permission in getUtilitiesFor(IPermission, context):
+        terms.append(SimpleTerm(permission, name))
     return SimpleVocabulary(terms)
 
 directlyProvides(PermissionsVocabulary, IVocabularyFactory)
@@ -77,7 +77,7 @@ def PermissionIdsVocabulary(context=None):
     """
     terms = []
     has_public = False
-    for name, permission in getUtilitiesFor(IPermission, context):
+    for name, _permission in getUtilitiesFor(IPermission, context):
         if name == 'zope.Public':
             has_public = True
         else:
