@@ -24,6 +24,7 @@ from zope.schema.interfaces import IFromUnicode
 
 from zope.security.permission import checkPermission
 from zope.security.management import setSecurityPolicy
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 @implementer(IFromUnicode)
 class Permission(Id):
@@ -39,7 +40,7 @@ class Permission(Id):
     def _validate(self, value):
         super(Permission, self)._validate(value)
 
-        if value != 'zope.Public':
+        if value != zope_Public:
             self.context.action(
                 discriminator=None,
                 callable=checkPermission,

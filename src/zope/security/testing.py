@@ -24,6 +24,7 @@ from zope.security import interfaces
 from zope.security.permission import Permission
 import zope.security.management
 from zope.security._compat import PYTHON2 as PY2
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME
 
 from zope.testing import renormalizing
 
@@ -59,7 +60,8 @@ def addCheckerPublic():
     """Add the CheckerPublic permission as 'zope.Public'"""
 
     perm = Permission(
-        'zope.Public', 'Public',
+        PUBLIC_PERMISSION_NAME,
+        'Public',
         """Special permission used for resources that are always public
 
         The public permission is effectively an optimization, sine

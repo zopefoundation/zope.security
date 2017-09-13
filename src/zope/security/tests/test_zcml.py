@@ -12,7 +12,7 @@
 #
 ##############################################################################
 import unittest
-
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 class ConformsToIFromUnicode(object):
 
@@ -56,7 +56,7 @@ class PermissionTests(unittest.TestCase,
     def test__validate_w_public(self):
         context = DummyZCMLContext()
         permission = self._makeOne(context)
-        permission._validate('zope.Public')
+        permission._validate(zope_Public)
         self.assertEqual(len(context._actions), 0)
 
     def test__validate_w_non_public(self):

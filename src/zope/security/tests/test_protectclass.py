@@ -14,7 +14,7 @@
 """Test handler for 'protectClass' directive
 """
 import unittest
-
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 class Test_protectName(unittest.TestCase):
 
@@ -33,7 +33,7 @@ class Test_protectName(unittest.TestCase):
     def test_wo_existing_checker_w_zope_Public(self):
         from zope.security.checker import CheckerPublic
         from zope.security.checker import _checkers
-        self._callFUT(Foo, 'bar', 'zope.Public')
+        self._callFUT(Foo, 'bar', zope_Public)
         self.assertTrue(_checkers[Foo].get_permissions['bar'] is CheckerPublic)
 
     def test_w_existing_checker(self):
@@ -63,7 +63,7 @@ class Test_protectSetAttribute(unittest.TestCase):
     def test_wo_existing_checker_w_zope_Public(self):
         from zope.security.checker import CheckerPublic
         from zope.security.checker import _checkers
-        self._callFUT(Foo, 'bar', 'zope.Public')
+        self._callFUT(Foo, 'bar', zope_Public)
         self.assertTrue(_checkers[Foo].set_permissions['bar'] is CheckerPublic)
 
     def test_w_existing_checker(self):

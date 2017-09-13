@@ -27,6 +27,7 @@ from zope.schema.vocabulary import SimpleVocabulary
 
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IPermission
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 @implementer(IPermission)
 class Permission(object):
@@ -48,7 +49,7 @@ def allPermissions(context=None):
     """Get the ids of all defined permissions
     """
     for name, _permission in getUtilitiesFor(IPermission, context):
-        if name != u'zope.Public':
+        if name != zope_Public:
             yield name
 
 def PermissionsVocabulary(context=None):
@@ -78,13 +79,13 @@ def PermissionIdsVocabulary(context=None):
     terms = []
     has_public = False
     for name, _permission in getUtilitiesFor(IPermission, context):
-        if name == 'zope.Public':
+        if name == zope_Public:
             has_public = True
         else:
             terms.append(SimpleTerm(name, name, name))
     terms = sorted(terms, key=operator.attrgetter('title'))
     if has_public:
-        terms.insert(0, SimpleTerm(CheckerPublic, 'zope.Public', u'Public'))
+        terms.insert(0, SimpleTerm(CheckerPublic, zope_Public, u'Public'))
     return SimpleVocabulary(terms)
 
 directlyProvides(PermissionIdsVocabulary, IVocabularyFactory)
