@@ -19,14 +19,18 @@ from zope.interface.common.interfaces import IException, IAttributeError
 from zope.schema import Text, TextLine
 from zope.security.i18n import ZopeMessageFactory as _
 
+#: The name (id) of the registered :class:`IPermission` utility that signifies
+#: that the protected attribute is public.
+#:
+#: .. versionadded:: 4.2.0
+PUBLIC_PERMISSION_NAME = 'zope.Public'
+
 class IUnauthorized(IException):
     pass
 
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
     """Some user wasn't allowed to access a resource"""
-
-
 
 class IForbidden(IException):
     pass

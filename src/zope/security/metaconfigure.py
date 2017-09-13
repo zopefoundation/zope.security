@@ -32,8 +32,8 @@ from zope.security.checker import moduleChecker
 from zope.security.protectclass import protectLikeUnto
 from zope.security.protectclass import protectName
 from zope.security.protectclass import protectSetAttribute
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as PublicPermission
 
-PublicPermission = 'zope.Public'
 
 def dottedName(klass):
     if klass is None:
@@ -186,7 +186,7 @@ def protectModule(module, name, permission):
         checker = Checker({}, {})
         defineChecker(module, checker)
 
-    if permission == 'zope.Public':
+    if permission == PublicPermission:
         # Translate public permission to CheckerPublic
         permission = CheckerPublic
 
@@ -215,7 +215,7 @@ def allow(context, attributes=(), interface=()):
             discriminator=('http://namespaces.zope.org/zope:module',
                            context.module, name),
             callable=protectModule,
-            args=(context.module, name, 'zope.Public'),
+            args=(context.module, name, PublicPermission),
         )
 
 

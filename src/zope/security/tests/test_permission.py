@@ -15,6 +15,7 @@
 """
 import unittest
 from zope.component.testing import PlacelessSetup
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 class PermissionTests(unittest.TestCase):
 
@@ -94,7 +95,7 @@ class Test_allPermissions(PlacelessSetup, unittest.TestCase):
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
-        provideUtility(CheckerPublic, IPermission, 'zope.Public')
+        provideUtility(CheckerPublic, IPermission, zope_Public)
         self.assertEqual(list(self._callFUT()), ['testing'])
 
 
@@ -126,10 +127,10 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
-        provideUtility(CheckerPublic, IPermission, 'zope.Public')
+        provideUtility(CheckerPublic, IPermission, zope_Public)
         vocabulary = self._callFUT()
         self.assertEqual(sorted([x.token for x in vocabulary]),
-                         ['testing', 'zope.Public'])
+                         ['testing', zope_Public])
 
 
 class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
@@ -161,12 +162,12 @@ class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
-        provideUtility(CheckerPublic, IPermission, 'zope.Public')
+        provideUtility(CheckerPublic, IPermission, zope_Public)
         vocabulary = self._callFUT()
         self.assertEqual([x.value for x in vocabulary],
                          [CheckerPublic, 'testing'])
         self.assertEqual([x.token for x in vocabulary],
-                         ['zope.Public', 'testing'])
+                         [zope_Public, 'testing'])
 
 
 def test_suite():

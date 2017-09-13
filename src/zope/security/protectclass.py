@@ -18,6 +18,7 @@ from zope.security.checker import Checker
 from zope.security.checker import CheckerPublic
 from zope.security.checker import defineChecker
 from zope.security.checker import getCheckerForInstancesOf
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 
 def protectName(class_, name, permission):
@@ -28,7 +29,7 @@ def protectName(class_, name, permission):
         checker = Checker({}, {})
         defineChecker(class_, checker)
 
-    if permission == 'zope.Public':
+    if permission == zope_Public:
         # Translate public permission to CheckerPublic
         permission = CheckerPublic
 
@@ -43,7 +44,7 @@ def protectSetAttribute(class_, name, permission):
         checker = Checker({}, {})
         defineChecker(class_, checker)
 
-    if permission == 'zope.Public':
+    if permission == zope_Public:
         # Translate public permission to CheckerPublic
         permission = CheckerPublic
 

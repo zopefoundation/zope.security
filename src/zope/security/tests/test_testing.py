@@ -16,6 +16,7 @@ import unittest
 from zope.testing.cleanup import CleanUp
 
 from zope.security import testing
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 class TestTestingFunctions(CleanUp,
                            unittest.TestCase):
@@ -64,7 +65,7 @@ class TestTestingFunctions(CleanUp,
         from zope.security.interfaces import IPermission
 
         perm = testing.addCheckerPublic()
-        utility = component.getUtility(IPermission, name='zope.Public')
+        utility = component.getUtility(IPermission, name=zope_Public)
         self.assertIs(perm, utility)
 
 
