@@ -17,10 +17,9 @@ import unittest
 
 from zope.security import checker as sec_checker
 from zope.security.tests import QuietWatchingChecker
+from zope.security._compat import PYTHON3 as PY3
+from zope.security._compat import PYTHON2 as PY2
 
-def _skip_if_not_Py2(testfunc):
-    import sys
-    return unittest.skipIf(sys.version_info[0] >= 3, "Needs Python 2")(testfunc)
 
 # pylint:disable=protected-access,inherit-non-class,no-method-argument,old-style-class
 # pylint:disable=blacklisted-name,no-init
@@ -629,15 +628,17 @@ class TestTracebackSupplement(unittest.TestCase):
                           '   - type: %s.C' % self.__class__.__module__,
                          ])
 
-    @_skip_if_not_Py2
     def test_getInfo_classic_instance(self):
         class C:
             pass
         tbs = self._makeOne(C())
-        self.assertEqual(tbs.getInfo().splitlines(),
-                         ['   - class: %s.C' % self.__class__.__module__,
-                          '   - type: __builtin__.instance',
-                         ])
+
+        lines = tbs.getInfo().splitlines()
+        self.assertEqual(lines[0],
+                         '   - class: %s.C' % self.__class__.__module__)
+        kind = '__builtin__.instance' if PY2 else '%s.C' % self.__class__.__module__
+        self.assertEqual(lines[1],
+                         '   - type: ' + kind)
 
 
 class TestGlobal(unittest.TestCase):
@@ -1081,7 +1082,6 @@ class Test_defineChecker(unittest.TestCase):
         self._callFUT(zope.interface, checker)
         self.assertIs(_checkers[zope.interface], checker)
 
-    @_skip_if_not_Py2
     def test_w_oldstyle_class(self):
         from zope.security.checker import _checkers
         checker = object()
@@ -1592,6 +1592,14 @@ class TestSecurityPolicy(QuietWatchingChecker,
         setSecurityPolicy(self.__oldpolicy)
         sec_checker._clear()
 
+    def _get_old_class_type(self):
+        # Py3 has no ClassType and no old-style classes
+        import types
+        old_type = getattr(types, 'ClassType', type)
+        self.assertTrue((PY2 and old_type is not type)
+                        or (PY3 and old_type is type))
+        return old_type
+
     def _makeSecurityPolicy(self):
         from zope.interface import implementer
         from zope.security.interfaces import ISecurityPolicy
@@ -1601,20 +1609,22 @@ class TestSecurityPolicy(QuietWatchingChecker,
                 return permission == 'test_allowed'
         return SecurityPolicy
 
-    @_skip_if_not_Py2
     def test_defineChecker_oldstyle_class(self):
-        import types
         from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
+        old_type = self._get_old_class_type()
         class ClassicClass:
-            __metaclass__ = types.ClassType
+            __metaclass__ = old_type
+        self.assertIsInstance(ClassicClass, old_type)
+
         defineChecker(ClassicClass, NamesChecker())
 
     def test_defineChecker_newstyle_class(self):
         from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
-        class NewStyleClass:
-            __metaclass__ = type
+        class NewStyleClass(object):
+            pass
+        self.assertIsInstance(NewStyleClass, type)
         defineChecker(NewStyleClass, NamesChecker())
 
     def test_defineChecker_module(self):
@@ -1631,9 +1641,8 @@ class TestSecurityPolicy(QuietWatchingChecker,
                           defineChecker, not_a_type, NamesChecker())
 
     def _makeClasses(self):
-        import types
+        old_type = self._get_old_class_type()
         class OldInst:
-            __metaclass__ = types.ClassType
             a = 1
             def b(self):
                 raise AssertionError("Never called")
@@ -1646,7 +1655,9 @@ class TestSecurityPolicy(QuietWatchingChecker,
             def __setitem__(self, x, v):
                 raise AssertionError("Never called")
 
-        class NewInst(object, OldInst):
+        self.assertIsInstance(OldInst, old_type)
+
+        class NewInst(OldInst, object):
             # This is not needed, but left in to show the change of metaclass
             # __metaclass__ = type
             def gete(self):
@@ -1655,6 +1666,7 @@ class TestSecurityPolicy(QuietWatchingChecker,
                 raise AssertionError("Never called")
             e = property(gete, sete)
 
+        self.assertIsInstance(NewInst, type)
         return OldInst, NewInst
 
     # check_getattr cases:
@@ -1662,7 +1674,6 @@ class TestSecurityPolicy(QuietWatchingChecker,
     # - no attribute there
     # - method
     # - allow and disallow by permission
-    @_skip_if_not_Py2
     def test_check_getattr(self):
         # pylint:disable=attribute-defined-outside-init
         from zope.security.interfaces import Forbidden
@@ -1714,7 +1725,6 @@ class TestSecurityPolicy(QuietWatchingChecker,
             self.assertRaises(Forbidden, checker.check_getattr, inst, 'e')
             self.assertRaises(Forbidden, checker.check_getattr, inst, 'f')
 
-    @_skip_if_not_Py2
     def test_check_setattr(self):
         # pylint:disable=attribute-defined-outside-init
         from zope.security.interfaces import Forbidden
@@ -1756,7 +1766,6 @@ class TestSecurityPolicy(QuietWatchingChecker,
             self.assertRaises(Forbidden, checker.check_setattr, inst, 'e')
             self.assertRaises(Forbidden, checker.check_setattr, inst, 'f')
 
-    @_skip_if_not_Py2
     def test_proxy(self):
         from zope.security.proxy import getChecker
         from zope.security.proxy import removeSecurityProxy
@@ -1787,29 +1796,8 @@ class TestSecurityPolicy(QuietWatchingChecker,
                     self.assertEqual(checker.permission_id('__str__'),
                                      CheckerPublic)
 
-            #No longer doing anything special for transparent proxies.
-            #A proxy needs to provide its own security checker.
-            #
-            #special = NamesChecker(['a', 'b'], 'test_allowed')
-            #defineChecker(class_, special)
-            #
-            #class TransparentProxy(object):
-            #    def __init__(self, ob):
-            #        self._ob = ob
-            #
-            #   def __getattribute__(self, name):
-            #       ob = object.__getattribute__(self, '_ob')
-            #       return getattr(ob, name)
-            #for ob in inst, TransparentProxy(inst):
-            #    proxy = checker.proxy(ob)
-            #    self.assertIs(removeSecurityProxy(proxy), ob)
-            #
-            #    checker = getChecker(proxy)
-            #    self.assertTrue(checker is special,
-            #                    checker.get_permissions)
-            #
-            #    proxy2 = checker.proxy(proxy)
-            #    self.assertIs(proxy2, proxy, [proxy, proxy2])
+            # No longer doing anything special for transparent proxies.
+            # A proxy needs to provide its own security checker.
 
     def test_iteration(self):
         from zope.security.checker import ProxyFactory
@@ -1910,7 +1898,6 @@ class TestSecurityPolicy(QuietWatchingChecker,
         self.assertEqual(checker.check(C, '__name__'), None)
         self.assertEqual(checker.check(C, '__parent__'), None)
 
-    @_skip_if_not_Py2
     def test_setattr(self):
         from zope.security.interfaces import Forbidden
         from zope.security.checker import NamesChecker

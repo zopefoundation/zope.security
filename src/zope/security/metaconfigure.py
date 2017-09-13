@@ -56,17 +56,17 @@ class ClassDirective(object):
     def implements(self, _context, interface):
         for interface in interface:
             _context.action(
-                discriminator = (
-                'ContentDirective', self.__class, object()),
-                callable = classImplements,
-                args = (self.__class, interface),
-                )
+                discriminator=(
+                    'ContentDirective', self.__class, object()),
+                callable=classImplements,
+                args=(self.__class, interface),
+            )
             _context.action(
-                discriminator = None,
-                callable = provideInterface,
-                args = (interface.__module__ + '.' + interface.getName(),
-                        interface)
-                )
+                discriminator=None,
+                callable=provideInterface,
+                args=(interface.__module__ + '.' + interface.getName(),
+                      interface)
+            )
 
     def require(self, _context,
                 permission=None, attributes=None, interface=None,
@@ -101,7 +101,7 @@ class ClassDirective(object):
             discriminator=('mimic', self.__class, object()),
             callable=protectLikeUnto,
             args=(self.__class, class_),
-            )
+        )
 
     def allow(self, _context, attributes=None, interface=None):
         """Like require, but with permission_id zope.Public"""
@@ -112,19 +112,19 @@ class ClassDirective(object):
         for n, d in sorted(interface.namesAndDescriptions(1)):
             self.__protectName(n, permission_id)
         self.__context.action(
-            discriminator = None,
-            callable = provideInterface,
-            args = (interface.__module__ + '.' + interface.getName(),
-                    interface)
-            )
+            discriminator=None,
+            callable=provideInterface,
+            args=(interface.__module__ + '.' + interface.getName(),
+                  interface)
+        )
 
     def __protectName(self, name, permission_id):
         "Set a permission on a particular name."
         self.__context.action(
-            discriminator = ('protectName', self.__class, name),
-            callable = protectName,
-            args = (self.__class, name, permission_id)
-            )
+            discriminator=('protectName', self.__class, name),
+            callable=protectName,
+            args=(self.__class, name, permission_id)
+        )
 
     def __protectNames(self, names, permission_id):
         "Set a permission on a bunch of names."
@@ -135,10 +135,10 @@ class ClassDirective(object):
         "Set a permission on a bunch of names."
         for name in names:
             self.__context.action(
-                discriminator = ('protectSetAttribute', self.__class, name),
-                callable = protectSetAttribute,
-                args = (self.__class, name, permission_id)
-                )
+                discriminator=('protectSetAttribute', self.__class, name),
+                callable=protectSetAttribute,
+                args=(self.__class, name, permission_id)
+            )
 
     def __protectSetSchema(self, schema, permission_id):
         "Set a permission on a bunch of names."
@@ -147,16 +147,16 @@ class ClassDirective(object):
             field = schema[name]
             if IField.providedBy(field) and not field.readonly:
                 _context.action(
-                    discriminator = ('protectSetAttribute', self.__class, name),
-                    callable = protectSetAttribute,
-                    args = (self.__class, name, permission_id)
-                    )
+                    discriminator=('protectSetAttribute', self.__class, name),
+                    callable=protectSetAttribute,
+                    args=(self.__class, name, permission_id)
+                )
         _context.action(
-            discriminator = None,
-            callable = provideInterface,
-            args = (schema.__module__ + '.' + schema.getName(),
-                    schema)
-            )
+            discriminator=None,
+            callable=provideInterface,
+            args=(schema.__module__ + '.' + schema.getName(),
+                  schema)
+        )
 
     def __call__(self):
         "Handle empty/simple declaration."
@@ -214,9 +214,9 @@ def allow(context, attributes=(), interface=()):
         context.action(
             discriminator=('http://namespaces.zope.org/zope:module',
                            context.module, name),
-            callable = protectModule,
-            args = (context.module, name, 'zope.Public'),
-            )
+            callable=protectModule,
+            args=(context.module, name, 'zope.Public'),
+        )
 
 
 def require(context, permission, attributes=(), interface=()):
@@ -224,6 +224,6 @@ def require(context, permission, attributes=(), interface=()):
         context.action(
             discriminator=('http://namespaces.zope.org/zope:module',
                            context.module, name),
-            callable = protectModule,
-            args = (context.module, name, permission),
-            )
+            callable=protectModule,
+            args=(context.module, name, permission),
+        )
