@@ -1309,10 +1309,7 @@ class AbstractProxyTestBase(object):
         self.assertEqual(proxy[1:3], [1, 2])
         self.assertEqual(checker._checked, self.getslice)
 
-    @_skip_if_not_Py2
     def test___getslice___error_propagates(self):
-        # This is currently broken on Python 3 because
-        # https://github.com/zopefoundation/zope.proxy/issues/21
         class Missing(Exception):
             pass
         class Get(object):
@@ -1329,10 +1326,7 @@ class AbstractProxyTestBase(object):
 
         self.assertEqual(checker._checked, self.getslice)
 
-    @_skip_if_not_Py2
     def test___getslice___dne_uses_getitem(self):
-        # This is currently broken on Python 3 because
-        # https://github.com/zopefoundation/zope.proxy/issues/21
         class Missing(Exception):
             pass
         class Get(object):
@@ -1394,9 +1388,7 @@ class AbstractProxyTestBase(object):
 
         self.assertEqual(checker._checked, self.setslice)
 
-    def test___setslice___dne_uses_getitem(self):
-        # This is currently broken on Python 3 because
-        # https://github.com/zopefoundation/zope.proxy/issues/21
+    def test___setslice___dne_uses_setitem(self):
         class Missing(Exception):
             pass
         class Set(object):
