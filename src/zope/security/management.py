@@ -11,7 +11,11 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Default 'ISecurityManagement' and 'IInteractionManagement' implementation
+"""
+Default :class:`zope.security.interfaces.ISecurityManagement` and
+:class:`zope.security.interfaces.IInteractionManagement` implementation.
+
+Note that this module itself provides those interfaces.
 """
 
 from zope.interface import moduleProvides
@@ -58,6 +62,7 @@ def setSecurityPolicy(aSecurityPolicy):
 #
 
 def queryInteraction():
+    """Return a current interaction, if there is one."""
     return getattr(thread_local, 'interaction', None)
 
 def getInteraction():
@@ -70,7 +75,10 @@ def getInteraction():
 class ExistingInteraction(ValueError,
                           AssertionError, #BBB
                          ):
-    pass
+    """
+    The exception that :func:`newInteraction` will raise if called
+    during an existing interaction.
+    """
 
 def newInteraction(*participations):
     """Start a new interaction."""
@@ -109,16 +117,16 @@ def restoreInteraction():
 def checkPermission(permission, object, interaction=None):
     """Return whether security policy allows permission on object.
 
-    'permission' is a permission name.
-
-    'object' is the object being accessed according to the permission.
-
-    'interaction' is an interaction, providing access to information
-    such as authenticated principals.  If it is None, the current
-    interaction is used.
-
-    checkPermission is guaranteed to return True if permission is
-    CheckerPublic or None.
+    :param str permission: A permission name.
+    :param object: The object being accessed according to the permission.
+    :param interaction: An interaction, providing access to information
+        such as authenticated principals.  If it is None, the current
+        interaction is used.
+    :return: A boolean value. ``checkPermission`` is guaranteed to
+        return ``True`` if *permission* is
+        :data:`zope.security.checker.CheckerPublic` or ``None``.
+    :raise NoInteraction: If there is no current interaction and no
+        interaction argument was given.
     """
     if permission is CheckerPublic or permission is None:
         return True
