@@ -11,7 +11,13 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Simple 'ISecurityPolicy' implementations.
+"""
+Simple :class:`zope.security.interfaces.ISecurityPolicy` implementations.
+
+As a reminder, ``ISecurityPolicy`` objects are factories for producing
+:class:`zope.security.interfaces.IInteraction` objects. That means
+that the classes themselves are implementations of
+``ISecurityPolicy``.
 """
 import zope.interface
 
@@ -25,7 +31,8 @@ from zope.security._definitions import system_user
 @zope.interface.provider(ISecurityPolicy)
 class ParanoidSecurityPolicy(object):
     """
-    Prohibit all access by any non-system principal, unless the item is public.
+    Prohibit all access by any non-system principal, unless the item
+    is :data:`public <zope.security.checker.CheckerPublic>`.
 
     This means that if there are no participations (and hence no
     principals), then access is allowed.
