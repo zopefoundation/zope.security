@@ -1,40 +1,16 @@
-:mod:`zope.security.zcml`
-===============================
+====================
+ zope.security.zcml
+====================
 
-Configuring security via ZCML
------------------------------
+.. currentmodule:: zope.security.zcml
 
-:mod:`zope.security` provides a ZCML file that configures some utilities and
-a couple of permissions:
+Most users will not directly need to access the contents of this
+module; they will probably just :ref:`configure via ZCML <via-zcml>`.
 
-.. doctest::
+API Reference
+=============
 
-  >>> from zope.component import getGlobalSiteManager
-  >>> from zope.configuration.xmlconfig import XMLConfig
-  >>> from zope.component.testing import setUp
-  >>> import zope.security
-  >>> setUp()  # clear global component registry
-  >>> XMLConfig('permissions.zcml', zope.security)()
-
-  >>> len(list(getGlobalSiteManager().registeredUtilities()))
-  7
-
-Clear the current state:
-
-.. doctest::
-
-  >>> from zope.component.testing import setUp, tearDown
-  >>> tearDown()
-  >>> setUp()
-
-  >>> XMLConfig('configure.zcml', zope.security)()
-
-  >>> len(list(getGlobalSiteManager().registeredUtilities()))
-  10
-
-.. autoclass:: zope.security.zcml.Permission
-   :members:
-   :member-order: bysource
+.. autoclass:: Permission
 
 Let's look at an example:
 
@@ -77,20 +53,47 @@ Now let's see whether validation works alright
    >>> field._validate('zope.Public')
 
 
-.. autointerface:: zope.security.zcml.ISecurityPolicyDirective
-   :members:
-   :member-order: bysource
+.. autointerface:: ISecurityPolicyDirective
 
-.. autofunction:: zope.security.zcml.securityPolicy
+.. autofunction:: securityPolicy
 
-.. autointerface:: zope.security.zcml.IPermissionDirective
-   :members:
-   :member-order: bysource
+.. autointerface:: IPermissionDirective
 
-.. autofunction:: zope.security.zcml.permission
+.. autofunction:: permission
 
-.. autointerface:: zope.security.zcml.IRedefinePermission
-   :members:
-   :member-order: bysource
+.. autointerface:: IRedefinePermission
 
-.. autofunction:: zope.security.zcml.redefinePermission
+.. autofunction:: redefinePermission
+
+.. _via-zcml:
+
+Configuring security via ZCML
+=============================
+
+:mod:`zope.security` provides a ZCML file that configures some
+utilities and a couple of standard permissions:
+
+.. doctest::
+
+  >>> from zope.component import getGlobalSiteManager
+  >>> from zope.configuration.xmlconfig import XMLConfig
+  >>> from zope.component.testing import setUp
+  >>> import zope.security
+  >>> setUp()  # clear global component registry
+  >>> XMLConfig('permissions.zcml', zope.security)()
+
+  >>> len(list(getGlobalSiteManager().registeredUtilities()))
+  7
+
+Clear the current state:
+
+.. doctest::
+
+  >>> from zope.component.testing import setUp, tearDown
+  >>> tearDown()
+  >>> setUp()
+
+  >>> XMLConfig('configure.zcml', zope.security)()
+
+  >>> len(list(getGlobalSiteManager().registeredUtilities()))
+  10
