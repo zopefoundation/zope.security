@@ -1,5 +1,8 @@
-:mod:`zope.security.permission`
-===============================
+==========================
+ zope.security.permission
+==========================
+
+.. currentmodule:: zope.security.permission
 
 .. testsetup::
 
@@ -105,7 +108,7 @@ The non-public permissions 'x' and 'y' are string values:
    >>> print(vocab.getTermByToken('y').value)
    y
 
-However, the public permission value is CheckerPublic:
+However, the public permission value is :data:`~.CheckerPublic`:
 
 .. doctest::
 
