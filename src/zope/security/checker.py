@@ -52,6 +52,8 @@ API
 
   The special constant that indicates that no permission
   checking needs to be done.
+
+.. autofunction:: selectChecker
 """
 import abc
 import os

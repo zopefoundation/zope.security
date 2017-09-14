@@ -1,14 +1,19 @@
-:mod:`zope.security.decorator`
-===============================
+=========================
+ zope.security.decorator
+=========================
+
+.. automodule:: zope.security.decorator
+
+API Examples
+============
+
+.. currentmodule:: zope.security.decorator
 
 .. testsetup::
 
    from zope.component.testing import setUp
    setUp()
 
-.. autoclass:: zope.security.decorator.DecoratedSecurityCheckerDescriptor
-   :members:
-   :member-order: bysource
 
 To illustrate, we'll create a class that will be proxied:
 
@@ -27,7 +32,7 @@ and a class to proxy it that uses a decorated security checker:
    ...     b = 'b'
    ...     __Security_checker__ = DecoratedSecurityCheckerDescriptor()
 
-Next we'll create and register a checker for `Foo`:
+Next we'll create and register a checker for ``Foo``:
 
 .. doctest::
 
@@ -35,15 +40,15 @@ Next we'll create and register a checker for `Foo`:
    >>> fooChecker = NamesChecker(['a'])
    >>> defineChecker(Foo, fooChecker)
 
-along with a checker for `Wrapper`:
+along with a checker for ``Wrapper``:
 
 .. doctest::
 
    >>> wrapperChecker = NamesChecker(['b'])
    >>> defineChecker(Wrapper, wrapperChecker)
 
-Using `selectChecker()`, we can confirm that a `Foo` object uses
- `fooChecker`:
+Using :func:`zope.security.checker.selectChecker`, we can confirm that
+ a ``Foo`` object uses ``fooChecker``:
 
 .. doctest::
 
@@ -59,7 +64,7 @@ Using `selectChecker()`, we can confirm that a `Foo` object uses
    ...     e
    ForbiddenAttribute('b', <...Foo object ...>)
 
-and that a `Wrapper` object uses `wrappeChecker`:
+and that a ``Wrapper`` object uses ``wrappeChecker``:
 
 .. doctest::
 
@@ -91,7 +96,7 @@ because both objects have checkers, we get a combined checker:
    >>> checker.check(wrapper, 'b')
 
 The decorator checker will work even with security proxied objects. To
-illustrate, we'll proxify `foo`:
+illustrate, we'll proxify ``foo``:
 
 .. doctest::
 
@@ -105,7 +110,7 @@ illustrate, we'll proxify `foo`:
    ...     e
    ForbiddenAttribute('b', <...Foo object ...>)
 
-when we wrap the secured `foo`:
+when we wrap the secured ``foo``:
 
 .. doctest::
 
@@ -123,9 +128,9 @@ we still get a combined checker:
 
 The decorator checker has three other scenarios:
 
-   - the wrapper has a checker but the proxied object doesn't
-   - the proxied object has a checker but the wrapper doesn't
-   - neither the wrapper nor the proxied object have checkers
+- the wrapper has a checker but the proxied object doesn't
+- the proxied object has a checker but the wrapper doesn't
+- neither the wrapper nor the proxied object have checkers
 
 When the wrapper has a checker but the proxied object doesn't:
 
@@ -187,24 +192,11 @@ the decorator doesn't have a checker:
      ...
    AttributeError: 'Foo' has no attribute '__Security_checker__'
 
- __Security_checker__ cannot be None, otherwise Checker.proxy blows
- up:
+``__Security_checker__`` cannot be None, otherwise Checker.proxy blows
+up:
 
    >>> checker.proxy(wrapper) is wrapper
    True
-
-
-.. autoclass:: zope.security.decorator.SecurityCheckerDecoratorBase
-   :members:
-   :member-order: bysource
-
-
-.. autoclass:: zope.security.decorator.DecoratorBase
-   :members:
-   :member-order: bysource
-
-
-
 
 .. testcleanup::
 
