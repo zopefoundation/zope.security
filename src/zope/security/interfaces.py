@@ -11,7 +11,40 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Interfaces for security machinery.
+"""
+Interfaces for security machinery.
+
+These can be categorized into a few different groups of related objects.
+
+* Exceptions
+
+  - :class:`IUnauthorized`
+  - :class:`IForbidden`
+  - :class:`IForbiddenAttribute`
+  - :class:`NoInteraction`
+
+* Utilities
+
+  - :class:`ISecurityManagement`
+  - :class:`ISecurityChecking`
+  - :class:`ISecurityProxyFactory`
+  - :class:`IChecker`
+  - :class:`INameBasedChecker`
+  - :class:`ISecurityPolicy`
+
+* Principals
+
+  - :class:`IInteraction`
+  - :class:`IParticipation`
+  - :class:`IInteractionManagement`
+  - :class:`IPrincipal`
+  - :class:`IGroupAwarePrincipal`
+  - :class:`IGroupClosureAwarePrincipal`
+  - :class:`IGroup`
+  - :class:`IMemberGetterGroup`
+  - :class:`IMemberAwareGroup`
+  - :class:`IPermission`
+
 """
 
 from zope.interface import Interface, Attribute, implementer
@@ -26,31 +59,57 @@ from zope.security.i18n import ZopeMessageFactory as _
 PUBLIC_PERMISSION_NAME = 'zope.Public'
 
 class IUnauthorized(IException):
-    pass
+    """
+    The action is not authorized.
+
+    Implemented in :class:`Unauthorized`.
+    """
 
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
-    """Some user wasn't allowed to access a resource"""
+    """
+    Some user wasn't allowed to access a resource.
+
+    Default implementation of :class:`IUnauthorized`.
+    """
 
 class IForbidden(IException):
-    pass
+    """
+    A resource cannot be accessed under any circumstances
+
+    Implemented in :class:`Forbidden`.
+    """
 
 @implementer(IForbidden)
 class Forbidden(Exception):
-    """A resource cannot be accessed under any circumstances
+    """
+    A resource cannot be accessed under any circumstances
+
+    Default implementation if :class:`IForbidden`.
     """
 
 class IForbiddenAttribute(IForbidden, IAttributeError):
-    pass
+    """
+    An attribute is unavailable because it is forbidden (private).
+
+    Implemented in :class:`ForbiddenAttribute`.
+    """
 
 @implementer(IForbiddenAttribute)
 class ForbiddenAttribute(Forbidden, AttributeError):
-    """An attribute is unavailable because it is forbidden (private)
+    """
+    An attribute is unavailable because it is forbidden (private).
+
+    Default implementation of :class:`IForbiddenAttribute`.
     """
 
 
 class ISecurityManagement(Interface):
-    """Public security management API."""
+    """
+    Public security management API.
+
+    This is implemented by :mod:`zope.security.management`.
+    """
 
     def getSecurityPolicy():
         """Get the system default security policy."""
@@ -64,28 +123,36 @@ class ISecurityManagement(Interface):
 
 
 class ISecurityChecking(Interface):
-    """Public security API."""
+    """
+    Public security API.
+    """
 
     def checkPermission(permission, object, interaction=None):
-        """Return whether security policy allows permission on object.
+        """
+        Return whether security policy allows permission on object.
 
-        'permission' is permission name.
-
-        'object' is the object being accessed according to the permission.
-
-        'interaction' is an interaction, providing access to information
-        such as authenticated principals.  If it is None, the current
-        interaction is used.
+        :param str permission: The permission name.
+        :param object: The object being accessed according to the permission.
+        :keyword interaction: An :class:`IInteraction`, providing access to information
+            such as authenticated principals.  If it is None, the current
+            interaction is used.
         """
 
 
 class ISecurityProxyFactory(Interface):
+    """
+    A factory for creating security-proxied objects.
+
+    See :class:`zope.security.checker.ProxyFactory` for the
+    default implementation.
+    """
 
     def __call__(object, checker=None):
-        """Create a security proxy
+        """
+        Create a security proxy
 
-        If a checker is given, then use it, otherwise, try to figure
-        out a checker.
+        If a checker (:class:`IChecker`) is given, then use it,
+        otherwise, try to figure out a checker.
 
         If the object is already a security proxy, then it will be
         returned.
@@ -93,93 +160,131 @@ class ISecurityProxyFactory(Interface):
 
 
 class IChecker(Interface):
-    """Security-proxy plugin objects that implement low-level checks
+    """
+    Security-proxy plugin objects that implement low-level checks.
 
     The checker is responsible for creating proxies for
-    operation return values, via the proxy method.
+    operation return values, via the ``proxy`` method.
 
-    There are check_getattr() and check_setattr() methods for checking
-    getattr and setattr, and a check() method for all other operations.
+    There are :meth:`check_getattr` and :meth:`check_setattr` methods
+    for checking getattr and setattr, and a :meth:`check` method for all
+    other operations.
 
-    The check methods may raise errors.  They return no value.
+    The check methods will raise errors if access is not allowed.
+    They return no value.
 
-    Example (for __getitem__):
+    Example (for ``__getitem__``)::
 
-           checker.check(ob, \"__getitem__\")
+           checker.check(ob, "__getitem__")
            return checker.proxy(ob[key])
+
+    .. seealso:: :mod:`zope.security.checker`
     """
 
     def check_getattr(ob, name):
-        """Check whether attribute access is allowed.
+        """
+        Check whether attribute access is allowed.
 
-        May raise Unauthorized or Forbidden.  Returns no value.
-
-        If a checker implements __setitem__, then __setitem__ will be
-        called rather than check_getattr to check whether an attribute
-        access is allowed.  This is a hack that allows significantly
+        If a checker implements ``__setitem__``, then ``__setitem__``
+        will be called rather than ``check`` to ascertain whether an
+        operation is allowed. This is a hack that allows significantly
         greater performance due to the fact that low-level operator
         access is much faster than method access.
+
+        :raises: :class:`Unauthorized`
+        :raises: :class:`Forbidden`
+        :return: Nothing
         """
 
     def check_setattr(ob, name):
-        """Check whether attribute assignment is allowed.
+        """
+        Check whether attribute assignment is allowed.
 
-        May raise Unauthorized or Forbidden.  Returns no value.
+        If a checker implements ``__setitem__``, then ``__setitem__``
+        will be called rather than ``check`` to ascertain whether an
+        operation is allowed. This is a hack that allows significantly
+        greater performance due to the fact that low-level operator
+        access is much faster than method access.
+
+        :raises: :class:`Unauthorized`
+        :raises: :class:`Forbidden`
+        :return: Nothing
         """
 
     def check(ob, operation):
-        """Check whether operation is allowed.
+        """
+        Check whether *operation* is allowed.
 
         The operation name is the Python special method name,
         e.g. "__getitem__".
 
         May raise Unauthorized or Forbidden.  Returns no value.
 
-        If a checker implements __setitem__, then __setitem__ will be
-        called rather than check to check whether an operation is
-        allowed.  This is a hack that allows significantly greater
-        performance due to the fact that low-level operator access is
-        much faster than method access.
+        If a checker implements ``__setitem__``, then ``__setitem__``
+        will be called rather than ``check`` to ascertain whether an
+        operation is allowed. This is a hack that allows significantly
+        greater performance due to the fact that low-level operator
+        access is much faster than method access.
+
+        :raises: :class:`Unauthorized`
+        :raises: :class:`Forbidden`
+        :return: Nothing
         """
 
     def proxy(value):
-        """Return a security proxy for the value.
+        """
+        Return a security proxy for the *value*.
 
-        If a checker implements __getitem__, then __getitem__ will be
-        called rather than proxy to proxy the value.  This is a hack
-        that allows significantly greater performance due to the fact
-        that low-level operator access is much faster than method
-        access.
+        If a checker implements ``__getitem__``, then ``__getitem__``
+        will be called rather than ``proxy`` to proxy the value. This
+        is a hack that allows significantly greater performance due to
+        the fact that low-level operator access is much faster than
+        method access.
         """
 
 
 class INameBasedChecker(IChecker):
-    """Security checker that uses permissions to check attribute access."""
+    """
+    Security checker that uses permissions to check attribute
+    access.
+    """
 
     def permission_id(name):
-        """Return the permission used to check attribute access on name.
+        """
+        Return the permission used to check attribute access on *name*.
 
-        This permission is used by both check and check_getattr.
+        This permission is used by both :meth:`check` and :meth:`check_getattr`.
         """
 
     def setattr_permission_id(name):
-        """Return the permission used to check attribute assignment on name.
+        """
+        Return the permission used to check attribute assignment on *name*.
 
-        This permission is used by check_setattr.
+        This permission is used by :meth:`check_setattr`.
         """
 
 
 class ISecurityPolicy(Interface):
+    """
+    A factory to get :class:`IInteraction` objects.
+
+    .. seealso:: :mod:`zope.security.simplepolicies`
+       For default implementations.
+    """
 
     def __call__(participation=None):
-        """Creates a new interaction for a given request.
+        """
+        Creates and returns a new :class:`IInteraction` for a given
+        request.
 
-        If participation is not None, it is added to the new interaction.
+        If *participation* is not None, it is added to the new interaction.
         """
 
 
 class IInteraction(Interface):
-    """A representation of an interaction between some actors and the system.
+    """
+    A representation of an interaction between some actors and the
+    system.
     """
 
     participations = Attribute("""An iterable of participations.""")
@@ -193,9 +298,10 @@ class IInteraction(Interface):
     def checkPermission(permission, object):
         """Return whether security context allows permission on object.
 
-        Arguments:
-        permission -- A permission name
-        object -- The object being accessed according to the permission
+        :param str permission: A permission name
+        :param object: The object being accessed according to the permission
+        :return: Whether the access is allowed or not.
+        :rtype: bool
         """
 
 
@@ -210,50 +316,58 @@ class NoInteraction(Exception):
     """
 
 class IInteractionManagement(Interface):
-    """Interaction management API.
+    """
+    Interaction management API.
 
     Every thread has at most one active interaction at a time.
+
+    .. seealso:: :mod:`zope.security.management`
+       That module provides the default implementation.
     """
 
     def newInteraction(participation=None):
-        """Start a new interaction.
+        """
+        Start a new interaction.
 
-        If participation is not None, it is added to the new interaction.
+        If *participation* is not None, it is added to the new interaction.
 
         Raises an error if the calling thread already has an interaction.
         """
 
     def queryInteraction():
-        """Return the current interaction.
+        """
+        Return the current interaction.
 
         Return None if there is no interaction.
         """
 
     def getInteraction():
-        """Return the current interaction.
+        """
+        Return the current interaction.
 
-        Raise NoInteraction if there isn't a current interaction.
+        :raise NoInteraction: if there isn't a current interaction.
         """
 
     def endInteraction():
-        """End the current interaction.
+        """
+        End the current interaction.
 
         Does nothing if there is no interaction.
         """
 
 class IPrincipal(Interface):
-    """Principals are security artifacts that execute actions in a security
-    environment.
+    """
+    Principals are security artifacts that execute actions in a
+    security environment.
 
-    The most common examples of principals include user and group objects.
+    The most common examples of principals include user and group
+    objects.
 
-    It is likely that IPrincipal objects will have associated views
-    used to list principals in management interfaces. For example, a
-    system in which other meta-data are provided for principals might
-    extend IPrincipal and register a view for the extended interface
-    that displays the extended information. We'll probably want to
-    define a standard view name (e.g.  'inline_summary') for this
-    purpose.
+    It is likely that ``IPrincipal`` objects will have associated
+    views used to list principals in management interfaces. For
+    example, a system in which other meta-data are provided for
+    principals might extend ``IPrincipal`` and register a view for the
+    extended interface that displays the extended information.
     """
 
     id = TextLine(
@@ -275,33 +389,47 @@ class IPrincipal(Interface):
 
 
 class IGroupAwarePrincipal(IPrincipal):
-    """Group aware principal interface
-    Extends IPrincipal to contain group information.
+    """
+    Group aware principal interface.
+
+    Extends ``IPrincipal`` to contain direct group information.
     """
 
     groups = Attribute(
-        'An iterable of groups to which the principal directly belongs')
+        'An iterable of :class:`IGroup` objects to which the principal directly belongs')
 
 class IGroupClosureAwarePrincipal(IGroupAwarePrincipal):
+    """
+    A group-aware principal that can recursively flatten the membership
+    of groups to return all the groups.
+    """
 
     allGroups = Attribute(
         "An iterable of the full closure of the principal's groups.")
 
 class IGroup(IPrincipal):
-    """Group of principals
+    """
+    Group of principals
     """
 
 class IMemberGetterGroup(IGroup):
-    """a group that can get its members"""
+    """
+    A group that can get its members.
+    """
 
     def getMembers():
-        """return an iterable of the members of the group"""
+        """Return an iterable of the members of the group"""
 
 class IMemberAwareGroup(IMemberGetterGroup):
-    """a group that can both set and get its members."""
+    """
+    A group that can both set and get its members.
+    """
 
     def setMembers(value):
-        """set members of group to the principal ids in the iterable value"""
+        """
+        Set members of group to the principal ids in the iterable
+        *value*.
+        """
 
 class IPermission(Interface):
     """A permission object."""
