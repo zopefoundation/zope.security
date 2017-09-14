@@ -19,12 +19,13 @@ from zope.security.proxy import removeSecurityProxy
 from zope.location import ILocation, LocationProxy
 
 def assertLocation(adapter, parent):
-    """Assert locatable adapters.
+    """
+    Assert locatable adapters.
 
-    This function asserts that the adapter get location-proxied if
-    it doesn't provide ILocation itself. Further more the returned
-    locatable adapter get its parent set if its __parent__ attribute
-    is currently None.
+    This function asserts that the adapter get location-proxied if it
+    doesn't provide :class:`zope.location.interfaces.ILocation`
+    itself. Furthermore, the returned locatable adapter get its parent
+    set if its ``__parent__`` attribute is currently None.
     """
     # handle none-locatable adapters (A)
     if not ILocation.providedBy(adapter):
@@ -42,7 +43,8 @@ def assertLocation(adapter, parent):
 
 
 class LocatingTrustedAdapterFactory(object):
-    """Adapt an adapter factory to provide trusted and (locatable) adapters.
+    """
+    Adapt an adapter factory to provide trusted and (locatable) adapters.
 
     Trusted adapters always adapt unproxied objects. If asked to
     adapt any proxied objects, it will unproxy them and then
@@ -50,10 +52,12 @@ class LocatingTrustedAdapterFactory(object):
     security-proxied before (N).
 
     Further locating trusted adapters provide a location for protected
-    adapters only (S). If such a protected adapter itself does not provide
-    ILocation it is wrapped within a location proxy and it parent will
-    be set. If the adapter does provide ILocation and it's __parent__ is None,
-    we set the __parent__ to the adapter's context:
+    adapters only (S). If such a protected adapter itself does not
+    provide ILocation it is wrapped within a location proxy and it
+    parent will be set. If the adapter does provide
+    :class:`zope.location.interfaces.ILocation` and its
+    ``__parent__`` is None, we set the ``__parent__`` to the adapter's
+    context.
     """
     def __init__(self, factory):
         self.factory = factory
@@ -83,15 +87,17 @@ class LocatingTrustedAdapterFactory(object):
 
 
 class TrustedAdapterFactory(LocatingTrustedAdapterFactory):
-    """Adapt an adapter factory to provide trusted adapters.
+    """
+    Adapt an adapter factory to provide trusted adapters.
 
     Trusted adapters always adapt unproxied objects. If asked to
     adapt any proxied objects, it will unproxy them and then
     security-proxy the resulting adapter unless the objects where not
     security-proxied before.
 
-    If the adapter does provide ILocation and it's __parent__ is None,
-    we set the __parent__ to the adapter's context.
+    If the adapter does provide
+    :class:`zope.location.interfaces.ILocation` and its ``__parent__``
+    is None, we set the ``__parent__`` to the adapter's context.
     """
 
     # do not location-proxy the adapter
@@ -100,17 +106,20 @@ class TrustedAdapterFactory(LocatingTrustedAdapterFactory):
 
 
 class LocatingUntrustedAdapterFactory(object):
-    """Adapt an adapter factory to provide locatable untrusted adapters
+    """
+    Adapt an adapter factory to provide locatable untrusted adapters
 
     Untrusted adapters always adapt proxied objects. If any permission
-    other than zope.Public is required, untrusted adapters need a location
-    in order that the local authentication mechanism can be inovked
-    correctly.
+    other than :const:`zope.Public
+    <zope.security.interfaces.PUBLIC_PERMISSION_NAME>` is required,
+    untrusted adapters need a location in order that the local
+    authentication mechanism can be inovked correctly.
 
-    If the adapter does not provide ILocation, we location proxy it and
-    set the parent. If the adapter does provide ILocation and
-    it's __parent__ is None, we set the __parent__ to the adapter's
-    context only:
+    If the adapter does not provide
+    :class:`zope.location.interfaces.ILocation`, we location proxy it
+    and set the parent. If the adapter does provide ``ILocation`` and
+    its ``__parent__`` is None, we set the ``__parent__`` to the
+    adapter's context only.
     """
 
     def __init__(self, factory):

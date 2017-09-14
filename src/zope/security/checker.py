@@ -11,17 +11,47 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Security Checkers
+"""
+Security Checkers.
 
-You can set the environment variable ZOPE_WATCH_CHECKERS to get additional
-security checker debugging output on the standard error.
+This module contains the primary implementations of
+:class:`zope.security.interfaces.IChecker` (:class:`Checker`,
+:class:`MultiChecker`, :func:`NamesChecker`) and
+:class:`zope.security.interfaces.IProxyFactory` (:func:`ProxyFactory`).
 
-Setting ZOPE_WATCH_CHECKERS to 1 will display messages about unauthorized or
+It also defines helpers for permission checking (:func:`canAccess`,
+:func:`canWrite`) and getting checkers
+(:func:`getCheckerForInstancesOf`, :func:`selectChecker`).
+
+This module is accelerated with a C implementation on CPython by
+default. If the environment variable ``PURE_PYTHON`` is set (to any
+value) before this module is imported, the C extensions will be
+bypassed and the reference Python implementations will be used. This
+can be helpful for debugging and tracing.
+
+Debugging Permissions Problems
+==============================
+
+You can set the environment variable ``ZOPE_WATCH_CHECKERS`` before
+this module is imported to get additional security checker debugging
+output on the standard error.
+
+Setting ``ZOPE_WATCH_CHECKERS`` to 1 will display messages about unauthorized or
 forbidden attribute access.  Setting it to a larger number will also display
 messages about granted attribute access.
 
-Note that the ZOPE_WATCH_CHECKERS mechanism will eventually be
+Note that the ``ZOPE_WATCH_CHECKERS`` mechanism may eventually be
 replaced with a more general security auditing mechanism.
+
+.. seealso:: :class:`CheckerLoggingMixin`, :class:`WatchingChecker`, :class:`WatchingCombinedChecker`
+
+API
+===
+
+.. py:data:: CheckerPublic
+
+  The special constant that indicates that no permission
+  checking needs to be done.
 """
 import abc
 import os
@@ -156,6 +186,13 @@ def canAccess(obj, name):
 
 @implementer(INameBasedChecker)
 class CheckerPy(object):
+    """
+    The Python reference implementation of
+    :class:`zope.security.interfaces.INameBasedChecker`.
+
+    Ordinarily there will be no reason to ever explicitly use this class;
+    instead use the class assigned to :class:`Checker`.
+    """
 
     def __init__(self, get_permissions, set_permissions=None):
         """Create a checker
@@ -163,8 +200,8 @@ class CheckerPy(object):
         A dictionary must be provided for computing permissions for
         names. The dictionary get will be called with attribute names
         and must return a permission id, None, or the special marker,
-        CheckerPublic. If None is returned, then access to the name is
-        forbidden. If CheckerPublic is returned, then access will be
+        :const:`CheckerPublic`. If None is returned, then access to the name is
+        forbidden. If :const:`CheckerPublic` is returned, then access will be
         granted without checking a permission.
 
         An optional setattr dictionary may be provided for checking
@@ -295,12 +332,14 @@ class Global(object):
         return "%s(%s,%s)" % (self.__class__.__name__,
                               self.__name__, self.__module__)
 
-# Marker for public attributes
+
 CheckerPublic = Global('CheckerPublic')
 CP_HACK_XXX = CheckerPublic
 
 # Now we wrap it in a security proxy so that it retains its
 # identity when it needs to be security proxied.
+# XXX: This means that we can't directly document it with
+# sphinx because issubclass() will fail.
 d = {}
 CheckerPublic = Proxy(CheckerPublic, Checker(d)) # XXX uses CheckerPy
 d['__reduce__'] = CheckerPublic
@@ -330,10 +369,15 @@ def NamesChecker(names=(), permission_id=CheckerPublic, **__kw__):
     return Checker(data)
 
 def InterfaceChecker(interface, permission_id=CheckerPublic, **__kw__):
+    """
+    Create a :func:`NamesChecker` for all the names defined in the *interface*
+    (a subclass of :class:`zope.interface.Interface`).
+    """
     return NamesChecker(interface.names(all=True), permission_id, **__kw__)
 
 def MultiChecker(specs):
-    """Create a checker from a sequence of specifications
+    """
+    Create a checker from a sequence of specifications
 
     A specification is:
 
@@ -346,7 +390,7 @@ def MultiChecker(specs):
       All the names in the sequence of names or the interface are
       protected by the permission.
 
-    - A dictionoid (having an items method), with items that are
+    - A dictionary (having an items method), with items that are
       name/permission-id pairs.
     """
     data = {}
@@ -409,8 +453,8 @@ DEFINABLE_TYPES = CLASS_TYPES + (types.ModuleType,)
 def defineChecker(type_, checker):
     """Define a checker for a given type of object
 
-    The checker can be a Checker, or a function that, when called with
-    an object, returns a Checker.
+    The checker can be a :class:`Checker`, or a function that, when called with
+    an object, returns a :class:`Checker`.
     """
     if not isinstance(type_, DEFINABLE_TYPES):
         raise TypeError(
@@ -463,16 +507,23 @@ class CombinedChecker(Checker):
 
     The following table describes the result of a combined checker in detail.
 
-    checker1           checker2           CombinedChecker(checker1, checker2)
-    ------------------ ------------------ -----------------------------------
-    ok                 anything           ok (checker2 is never called)
-    Unauthorized       ok                 ok
-    Unauthorized       Unauthorized       Unauthorized
-    Unauthorized       ForbiddenAttribute Unauthorized
-    ForbiddenAttribute ok                 ok
-    ForbiddenAttribute Unauthorized       Unauthorized
-    ForbiddenAttribute ForbiddenAttribute ForbiddenAttribute
-    ------------------ ------------------ -----------------------------------
+    +--------------------+--------------------+-------------------------------------+
+    | checker1           | checker2           | CombinedChecker(checker1, checker2) |
+    +====================+====================+=====================================+
+    | ok                 | anything           | ok (checker 2 never called)         |
+    +--------------------+--------------------+-------------------------------------+
+    | Unathorized        | ok                 | ok                                  |
+    +--------------------+--------------------+-------------------------------------+
+    | Unauthorized       | Unauthorized       | Unauthorized                        |
+    +--------------------+--------------------+-------------------------------------+
+    | Unauthorized       | ForbiddenAttribute | Unauthorized                        |
+    +--------------------+--------------------+-------------------------------------+
+    | ForbiddenAttribute | ok                 | ok                                  |
+    +--------------------+--------------------+-------------------------------------+
+    | ForbiddenAttribute | Unauthorized       | Unauthorized                        |
+    +--------------------+--------------------+-------------------------------------+
+    | ForbiddenAttribute | ForbiddenAttribute | ForbiddenAttribute                  |
+    +--------------------+--------------------+-------------------------------------+
     """
 
     def __init__(self, checker1, checker2):
@@ -509,15 +560,18 @@ class CombinedChecker(Checker):
                 raise unauthorized_exception
 
 class CheckerLoggingMixin(object):
-    """Debugging mixin for checkers.
+    """
+    Debugging mixin for checkers.
 
     Prints verbose debugging information about every performed check to
-    sys.stderr.
+    :data:`sys.stderr`.
 
-    If verbosity is set to 1, only displays Unauthorized and Forbidden messages.
-    If verbosity is set to a larger number, displays all messages.
     """
 
+    #: If set to 1 (the default), only displays ``Unauthorized`` and
+    #: ``Forbidden`` messages. If verbosity is set to a larger number,
+    #: displays all messages. Normally this is controlled via the environment
+    #: variable ``ZOPE_WATCH_CHECKERS``.
     verbosity = 1
     _file = sys.stderr
 
@@ -586,8 +640,18 @@ class CheckerLoggingMixin(object):
 # We have to be careful with the order of inheritance
 # here. See https://github.com/zopefoundation/zope.security/issues/8
 class WatchingChecker(CheckerLoggingMixin, Checker):
+    """
+    A checker that will perform verbose logging. This will be set
+    as the default when ``ZOPE_WATCH_CHECKERS`` is set when this
+    module is imported.
+    """
     verbosity = WATCH_CHECKERS
 class WatchingCombinedChecker(CombinedChecker, WatchingChecker):
+    """
+    A checker that will perform verbose logging. This will be set
+    as the default when ``ZOPE_WATCH_CHECKERS`` is set when this
+    module is imported.
+    """
     verbosity = WATCH_CHECKERS
 
 if WATCH_CHECKERS: # pragma: no cover
@@ -606,6 +670,13 @@ def _instanceChecker(inst):
     return _checkers.get(inst.__class__, _defaultChecker)
 
 def moduleChecker(module):
+    """
+    Return the :class:`zope.security.interfaces.IChecker` defined for the
+    *module*, if any.
+
+    .. seealso:: :func:`zope.security.metaconfigure.protectModule`
+       To define module protections.
+    """
     return _checkers.get(module)
 
 

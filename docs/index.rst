@@ -1,8 +1,9 @@
-:mod:`zope.security` Documentation
-==================================
+====================================
+ ``zope.security`` Documentation
+====================================
 
 Narrative Documentation
------------------------
+=======================
 
 .. toctree::
    :maxdepth: 2
@@ -11,7 +12,7 @@ Narrative Documentation
    hacking
 
 API Reference
--------------
+=============
 
 .. toctree::
    :maxdepth: 2
@@ -26,13 +27,14 @@ API Reference
    api/proxy
    api/simplepolicies
    api/testing
+   api/metaconfigure
    api/zcml
 
 
-Indices and tables
-==================
+====================
+ Indices and tables
+====================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

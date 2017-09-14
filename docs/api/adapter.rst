@@ -1,6 +1,5 @@
-:mod:`zope.security.adapter`
-============================
+=======================
+ zope.security.adapter
+=======================
 
 .. automodule:: zope.security.adapter
-   :members:
-   :member-order: bysource

@@ -263,6 +263,7 @@ intersphinx_mapping = {
     'https://zopeinterface.readthedocs.io/en/latest': None,
     'https://zopeproxy.readthedocs.io/en/latest': None,
     'https://zopeschema.readthedocs.io/en/latest': None,
+    'https://zopelocation.readthedocs.io/en/latest': None,
 }
 
 extlinks = {'issue': ('https://github.com/zopefoundation/zope.datetime/issues/%s',

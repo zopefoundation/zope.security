@@ -1,5 +1,5 @@
-=================================
- :mod:`zope.security.interfaces`
-=================================
+==========================
+ zope.security.interfaces
+==========================
 
 .. automodule:: zope.security.interfaces
