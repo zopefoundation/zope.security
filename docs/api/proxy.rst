@@ -4,6 +4,10 @@
 
 .. currentmodule:: zope.security.proxy
 
+An introduction to proxies and their uses can be found in :doc:`../proxy`.
+
+.. seealso:: :ref:`proxy-known-issues`
+
 .. testsetup::
 
    from zope.component.testing import setUp

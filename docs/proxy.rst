@@ -218,3 +218,100 @@ the interpreted program needs to be able to create simple data
 containers to hold information computed in the course of the program
 execution.  Several safe container types are provided for this
 purpose.
+
+.. _proxy-known-issues:
+
+Known Issues With Proxies
+=========================
+
+Security proxies (proxies in general) are not perfect in Python. There
+are some things that they cannot transparently proxy.
+
+issubclass and proxies
+----------------------
+
+Security proxies will proxy the return value of ``__class__``: it will
+be a proxy around the real class of the proxied value. This causes
+failures with ``issubclass``:
+
+.. doctest::
+
+    >>> from zope.security.proxy import ProxyFactory
+    >>> class Object(object):
+    ...     pass
+    >>> target = Object()
+    >>> target.__class__ is Object
+    True
+    >>> proxy = ProxyFactory(target, None)
+    >>> proxy.__class__
+    <class 'Object'>
+    >>> proxy.__class__ is Object
+    False
+    >>> issubclass(proxy.__class__, Object)
+    Traceback (most recent call last):
+    ...
+    TypeError: issubclass() arg 1 must be a class
+
+Although the above is a contrived example, using :class:`abstract base
+classes <abc.ABCMeta>` can cause it to arise quite
+unexpectedly:
+
+.. doctest::
+
+    >>> from collections import Mapping
+    >>> isinstance(proxy, Mapping)
+    Traceback (most recent call last):
+    ...
+    TypeError: issubclass() arg 1 must be a class
+
+logging
+~~~~~~~
+
+Starting with `Python 2.7.7 <https://bugs.python.org/issue21172>`_,
+the :class:`logging.LogRecord`  makes exactly the above ``isinstance``
+call:
+
+.. doctest::
+
+    >>> from logging import LogRecord
+    >>> LogRecord("name", 1, "/path/to/file", 1,
+    ...     "The message %s", (proxy,), None)
+    Traceback (most recent call last):
+    ...
+    TypeError: issubclass() arg 1 must be a class
+
+`Possible workarounds include <https://github.com/zopefoundation/zope.security/issues/26>`_:
+
+- Carefully removing security proxies of objects before passing them
+  to the logging system.
+- Monkey-patching the logging system to use
+  :func:`zope.security.proxy.isinstance` which does this
+  automatically::
+
+      import zope.security.proxy
+      import logging
+      logging.isinstance = zope.security.proxy.isinstance
+- Using :func:`logging.setLogRecordfactory` to set a custom
+  ``LogRecord`` subclass that unwraps any security proxies before they
+  are given to the super class. Note that this is only available on
+  Python 3. On Python 2, it might be possible to achieve a similar
+  result with a custom :func:`logger class <logging.setLoggerClass>`:
+
+.. doctest::
+
+    >>> from zope.security.proxy import removeSecurityProxy
+    >>> class UnwrappingLogRecord(LogRecord):
+    ...     def __init__(self, name, level, pathname, lineno,
+    ...                  msg, args, exc_info, *largs, **kwargs):
+    ...         args = [removeSecurityProxy(x) for x in args]
+    ...         LogRecord.__init__(self, name, level, pathname,
+    ...                            lineno, msg, args, exc_info, *largs, **kwargs)
+    ...     def __repr__(self):
+    ...         return '<UnwrappingLogRecord>'
+    >>> UnwrappingLogRecord("name", 1, "/path/to/file", 1,
+    ...                     "The message %s", (proxy,), None)
+    <UnwrappingLogRecord>
+
+
+Each specific application will have to determine what solution is
+correct for its security model.

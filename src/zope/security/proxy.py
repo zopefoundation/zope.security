@@ -11,7 +11,10 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Helper functions for Proxies.
+"""
+Helper functions for proxies.
+
+.. seealso:: :ref:`proxy-known-issues`
 """
 import functools
 import sys
