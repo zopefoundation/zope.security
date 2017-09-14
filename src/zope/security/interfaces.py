@@ -45,6 +45,9 @@ These can be categorized into a few different groups of related objects.
   - :class:`IMemberAwareGroup`
   - :class:`IPermission`
 
+Anywhere that an API is documented as accepting a permission, it
+means the name of the permission, or the special object
+:class:`zope.security.checker.CheckerPublic`.
 """
 
 from zope.interface import Interface, Attribute, implementer

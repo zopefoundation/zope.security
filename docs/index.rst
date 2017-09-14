@@ -1,6 +1,6 @@
-====================================
- ``zope.security`` Documentation
-====================================
+=============================
+ zope.security Documentation
+=============================
 
 Narrative Documentation
 =======================
@@ -9,6 +9,8 @@ Narrative Documentation
    :maxdepth: 2
 
    narr
+   example
+   proxy
    hacking
 
 API Reference
