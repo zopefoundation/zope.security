@@ -306,9 +306,12 @@ class IInteraction(Interface):
 
 
 class IParticipation(Interface):
+    """
+    A single participant in an interaction.
+    """
 
     interaction = Attribute("The interaction")
-    principal = Attribute("The authenticated principal")
+    principal = Attribute("The authenticated :class:`IPrincipal`")
 
 
 class NoInteraction(Exception):

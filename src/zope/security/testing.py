@@ -11,7 +11,8 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Testing support code
+"""
+Testing support code.
 
 This module provides some helper/stub objects for setting up interactions.
 """
@@ -38,6 +39,9 @@ output_checker = renormalizing.RENormalizing(rules)
 
 @interface.implementer(interfaces.IPrincipal)
 class Principal(object):
+    """
+    A trivial implementation of :class:`zope.security.interfaces.IPrincipal`.
+    """
 
     def __init__(self, id, title=None, description='', groups=None):
         self.id = id
@@ -50,14 +54,19 @@ class Principal(object):
 
 @interface.implementer(interfaces.IParticipation)
 class Participation(object):
-
+    """
+    A trivial implementation of :class:`zope.security.interfaces.IParticipation`.
+    """
     def __init__(self, principal):
         self.principal = principal
         self.interaction = None
 
 
 def addCheckerPublic():
-    """Add the CheckerPublic permission as 'zope.Public'"""
+    """
+    Add the CheckerPublic permission as :data:`zope.Public
+    <zope.security.interfaces.PUBLIC_PERMISSION_NAME>`.
+    """
 
     perm = Permission(
         PUBLIC_PERMISSION_NAME,
@@ -74,6 +83,12 @@ def addCheckerPublic():
     return perm
 
 def create_interaction(principal_id, **kw):
+    """
+    Create a new interaction for the given principal id, make it the
+    :func:`current interaction
+    <zope.security.management.newInteraction>`, and return the
+    :class:`Principal` object.
+    """
     principal = Principal(principal_id, **kw)
     participation = Participation(principal)
     zope.security.management.newInteraction(participation)
@@ -82,6 +97,10 @@ def create_interaction(principal_id, **kw):
 
 @contextlib.contextmanager
 def interaction(principal_id, **kw):
+    """
+    A context manager for running an interaction for the given
+    principal id.
+    """
     if zope.security.management.queryInteraction():
         # There already is an interaction. Great. Leave it alone.
         yield
