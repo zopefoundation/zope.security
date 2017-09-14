@@ -1,6 +1,5 @@
-:mod:`zope.security.protectclass`
-=================================
+============================
+ zope.security.protectclass
+============================
 
 .. automodule:: zope.security.protectclass
-   :members:
-   :member-order: bysource

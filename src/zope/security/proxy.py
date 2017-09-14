@@ -60,6 +60,16 @@ def _fmt_address(obj):
 
 
 class ProxyPy(PyProxyBase):
+    """
+    The pure-Python reference implementation of a security proxy.
+
+    This should normally not be created directly, instead use the
+    :func:`~.ProxyFactory`.
+
+    You can choose to use this implementation instead of the C implementation
+    by default by setting the ``PURE_PYTHON`` environment variable before
+    :mod:`zope.security` is imported.
+    """
     __slots__ = ('_wrapped', '_checker')
 
     def __new__(cls, value, checker):
@@ -394,7 +404,7 @@ def getTestProxyItems(proxy):
 
 
 def isinstance(object, cls):
-    """Test whether an object is an instance of a type.
+    """Test whether an *object* is an instance of a type.
 
     This works even if the object is security proxied.
     """
