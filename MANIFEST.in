@@ -1,5 +1,11 @@
 include *.rst
 include *.txt
+include *.py
+include .coveragerc
+include appveyor.yml
+include .travis.yml
+include tox.ini
+include buildout.cfg
 
 recursive-include docs *
 recursive-include src *
@@ -8,3 +14,5 @@ global-exclude *.dll
 global-exclude *.pyc
 global-exclude *.pyo
 global-exclude *.so
+
+prune docs/_build
