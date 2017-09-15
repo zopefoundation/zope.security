@@ -29,7 +29,7 @@
    >>> checkPermission(None, 'y')
    Traceback (most recent call last):
    ...
-   ValueError: ('Undefined permission id', 'y')
+   ValueError: ('Undefined permission ID', 'y')
 
 The :data:`zope.security.checker.CheckerPublic` permission always exists:
 

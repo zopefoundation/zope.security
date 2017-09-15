@@ -433,7 +433,7 @@ class IMemberAwareGroup(IMemberGetterGroup):
 
     def setMembers(value):
         """
-        Set members of group to the principal ids in the iterable
+        Set members of group to the principal IDs in the iterable
         *value*.
         """
 

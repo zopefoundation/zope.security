@@ -192,4 +192,4 @@ class IRequire(Interface):
 
     permission = Permission(
         title=u"Permission ID",
-        description=u"The id of the permission to require.")
+        description=u"The ID of the permission to require.")

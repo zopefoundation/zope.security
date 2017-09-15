@@ -48,11 +48,11 @@ def checkPermission(context, permission_id):
     if permission_id is CheckerPublic:
         return
     if not queryUtility(IPermission, permission_id, context=context):
-        raise ValueError("Undefined permission id", permission_id)
+        raise ValueError("Undefined permission ID", permission_id)
 
 def allPermissions(context=None):
     """
-    Get the ids of all defined permission object utilities.
+    Get the IDs of all defined permission object utilities.
     """
     for name, _permission in getUtilitiesFor(IPermission, context):
         if name != zope_Public:

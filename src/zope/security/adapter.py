@@ -113,7 +113,7 @@ class LocatingUntrustedAdapterFactory(object):
     other than :const:`zope.Public
     <zope.security.interfaces.PUBLIC_PERMISSION_NAME>` is required,
     untrusted adapters need a location in order that the local
-    authentication mechanism can be inovked correctly.
+    authentication mechanism can be invoked correctly.
 
     If the adapter does not provide
     :class:`zope.location.interfaces.ILocation`, we location proxy it

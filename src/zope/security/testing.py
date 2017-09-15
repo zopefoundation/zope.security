@@ -84,7 +84,7 @@ def addCheckerPublic():
 
 def create_interaction(principal_id, **kw):
     """
-    Create a new interaction for the given principal id, make it the
+    Create a new interaction for the given principal ID, make it the
     :func:`current interaction
     <zope.security.management.newInteraction>`, and return the
     :class:`Principal` object.
@@ -99,7 +99,7 @@ def create_interaction(principal_id, **kw):
 def interaction(principal_id, **kw):
     """
     A context manager for running an interaction for the given
-    principal id.
+    principal ID.
     """
     if zope.security.management.queryInteraction():
         # There already is an interaction. Great. Leave it alone.

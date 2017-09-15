@@ -201,7 +201,7 @@ class CheckerPy(object):
 
         A dictionary must be provided for computing permissions for
         names. The dictionary get will be called with attribute names
-        and must return a permission id, None, or the special marker,
+        and must return a permission ID, None, or the special marker,
         :const:`CheckerPublic`. If None is returned, then access to the name is
         forbidden. If :const:`CheckerPublic` is returned, then access will be
         granted without checking a permission.
@@ -357,7 +357,7 @@ def NamesChecker(names=(), permission_id=CheckerPublic, **__kw__):
 
     A sequence of names is given as the first argument. If a second
     argument, permission_id, is given, it is the permission required
-    to access the names.  Additional names and permission ids can be
+    to access the names.  Additional names and permission IDs can be
     supplied as keyword arguments.
     """
 
@@ -387,7 +387,7 @@ def MultiChecker(specs):
 
       o a sequence of names or an interface
 
-      o a permission id
+      o a permission ID
 
       All the names in the sequence of names or the interface are
       protected by the permission.
