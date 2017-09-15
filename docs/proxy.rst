@@ -227,6 +227,68 @@ Known Issues With Proxies
 Security proxies (proxies in general) are not perfect in Python. There
 are some things that they cannot transparently proxy.
 
+.. _isinstance-and-proxies:
+
+isinstance and proxies
+----------------------
+
+A proxied object cannot proxy its type (although it does proxy its ``__class__``):
+
+.. doctest::
+
+    >>> from zope.security.proxy import ProxyFactory
+    >>> class Object(object):
+    ...     pass
+    >>> target = Object()
+    >>> target.__class__
+    <class 'Object'>
+    >>> type(target)
+    <class 'Object'>
+    >>> proxy = ProxyFactory(target, None)
+    >>> proxy.__class__
+    <class 'Object'>
+    >>> type(proxy)
+    <... 'zope.security...Proxy...'>
+
+This means that the builtin :func:`isinstance` may return unexpected
+results:
+
+.. doctest::
+
+    >>> isinstance(target, Object)
+    True
+    >>> isinstance(proxy, Object)
+    False
+
+There are two workarounds. The safest is to use
+:func:`zope.security.proxy.isinstance`, which takes specifically this
+into account (in modules that will be dealing with a number of
+proxies, it is common to simply place ``from zope.security.proxy
+import isinstance`` at the top of the file to override the builtin
+:func:`isinstance`; we won't show that here for clarity):
+
+.. doctest::
+
+    >>> import zope.security.proxy
+    >>> zope.security.proxy.isinstance(target, Object)
+    True
+    >>> zope.security.proxy.isinstance(proxy, Object)
+    True
+
+Alternatively, you can manually remove the security proxy (or indeed,
+all proxies) with :func:`zope.security.proxy.removeSecurityProxy` or
+:func:`zope.proxy.removeAllProxies`, respectively, before calling
+:func:`isinstance`:
+
+.. doctest::
+
+    >>> from zope.security.proxy import removeSecurityProxy
+    >>> isinstance(removeSecurityProxy(target), Object)
+    True
+    >>> isinstance(removeSecurityProxy(proxy), Object)
+    True
+
+
 issubclass and proxies
 ----------------------
 
@@ -259,10 +321,34 @@ unexpectedly:
 .. doctest::
 
     >>> from collections import Mapping
+    >>> from abc import ABCMeta
+    >>> isinstance(Mapping, ABCMeta)
+    True
     >>> isinstance(proxy, Mapping)
     Traceback (most recent call last):
     ...
     TypeError: issubclass() arg 1 must be a class
+
+
+In this case, the workarounds described :ref:`above <isinstance-and-proxies>` also work:
+
+.. doctest::
+
+    >>> zope.security.proxy.isinstance(proxy, Mapping)
+    False
+    >>> isinstance(removeSecurityProxy(proxy), Mapping)
+    False
+
+.. We need to clean up the caching that ABC does on
+.. pure-python platforms to make sure that we get where
+.. we expect to be when we construct LogRecord; otherwise
+.. the ProxyMetaclass may be in the negative cache, bypassing
+.. the issubclass() calls we expect
+
+.. doctest::
+    :hide:
+
+    >>> ABCMeta._abc_invalidation_counter += 1
 
 logging
 ~~~~~~~
