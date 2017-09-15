@@ -1,14 +1,25 @@
-:mod:`zope.security.proxy`
-===============================
+=====================
+ zope.security.proxy
+=====================
+
+.. currentmodule:: zope.security.proxy
+
+An introduction to proxies and their uses can be found in :doc:`../proxy`.
+
+.. seealso:: :ref:`proxy-known-issues`
 
 .. testsetup::
 
    from zope.component.testing import setUp
    setUp()
 
-.. autofunction:: zope.security.proxy.getTestProxyItems
+.. autofunction:: getChecker
 
-.. autofunction:: zope.security.proxy.isinstance
+.. autofunction:: removeSecurityProxy
+
+.. autofunction:: getTestProxyItems
+
+.. autofunction:: isinstance
 
 .. doctest::
 
@@ -35,7 +46,9 @@
    >>> isinstance(ProxyFactory(c), C1)
    True
 
+.. autoclass:: Proxy
 
+.. autoclass:: ProxyPy
 
 .. testcleanup::
 

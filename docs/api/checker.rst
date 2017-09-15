@@ -1,17 +1,25 @@
-:mod:`zope.security.checker`
-============================
+=======================
+ zope.security.checker
+=======================
+
+.. currentmodule:: zope.security.checker
+
+
+Module API Documentation
+========================
 
 .. automodule:: zope.security.checker
-   :members:
-   :member-order: bysource
 
+
+API Doctests
+============
 
 Protections for Modules
 -----------------------
 
-The :func:`zope.secuirty.checker.moduleChecker` API can be used to
-determine whether a module has been protected: Initially, there's no checker
-defined for the module:
+The :func:`moduleChecker` API can be used to determine whether a
+module has been protected: Initially, there's no checker defined for
+the module:
 
 .. doctest::
 
@@ -20,7 +28,9 @@ defined for the module:
    >>> moduleChecker(test_zcml_functest) is None
    True
 
-We can add a checker using :func:`zope.security.metaconfigure.protectModule`:
+We can add a checker using
+:func:`zope.security.metaconfigure.protectModule` (although this is
+more commonly done using ZCML):
 
 .. doctest::
 
@@ -202,26 +212,26 @@ Protections for standard objects
    ...         return 'ForbiddenAttribute: %s' % e.args[0]
 
 Rocks
-#####
+~~~~~
 
-Rocks are immuatle, non-callable objects without interesting methods.  They
+Rocks are immutable, non-callable objects without interesting methods.  They
 *don't* get proxied.
 
 .. doctest::
 
-   >>> type(ProxyFactory(  object()  )) is object
+   >>> type(ProxyFactory(object())) is object
    True
-   >>> type(ProxyFactory(  1  )) is int
+   >>> type(ProxyFactory(1)) is int
    True
-   >>> type(ProxyFactory(  1.0  )) is float
+   >>> type(ProxyFactory(1.0)) is float
    True
-   >>> type(ProxyFactory(  1j  )) is complex
+   >>> type(ProxyFactory(1j)) is complex
    True
-   >>> type(ProxyFactory(  None  )) is type(None)
+   >>> type(ProxyFactory(None)) is type(None)
    True
-   >>> type(ProxyFactory(  'xxx'  )) is str
+   >>> type(ProxyFactory('xxx')) is str
    True
-   >>> type(ProxyFactory(  True  )) is type(True)
+   >>> type(ProxyFactory(True)) is type(True)
    True
 
 Datetime-reltatd instances are rocks, too:
@@ -249,7 +259,7 @@ Datetime-reltatd instances are rocks, too:
 
 
 dicts
-#####
+~~~~~
 
 We can do everything we expect to be able to do with proxied dicts.
 
@@ -301,7 +311,7 @@ not checking that under python > 2):
     True
 
 lists
-#####
+~~~~~
 
 We can do everything we expect to be able to do with proxied lists.
 
@@ -357,7 +367,7 @@ Always available:
    True
 
 tuples
-######
+~~~~~~
 
 We can do everything we expect to be able to do with proxied tuples.
 
@@ -404,7 +414,7 @@ Always available:
    True
 
 sets
-####
+~~~~
 
 we can do everything we expect to be able to do with proxied sets.
 
@@ -576,7 +586,7 @@ with any kind of proxy.
 
 
 frozensets
-##########
+~~~~~~~~~~
 
 we can do everything we expect to be able to do with proxied frozensets.
 
@@ -754,7 +764,7 @@ with any kind of proxy.
    True
 
 iterators
-#########
+~~~~~~~~~
 
 .. doctest::
 
@@ -823,7 +833,7 @@ We shouldn't be able to iterate if we don't have an assertion:
 
 
 New-style classes
-#################
+~~~~~~~~~~~~~~~~~
 
 .. doctest::
 
@@ -859,7 +869,7 @@ Always available:
    True
 
 New-style Instances
-###################
+~~~~~~~~~~~~~~~~~~~
 
 .. doctest::
 
@@ -891,7 +901,7 @@ Always available:
 
 
 Classic Classes
-###############
+~~~~~~~~~~~~~~~
 
 .. doctest::
 
@@ -925,7 +935,7 @@ Always available:
    True
 
 Classic Instances
-#################
+~~~~~~~~~~~~~~~~~
 
 .. doctest::
 
@@ -955,7 +965,7 @@ Always available:
    True
 
 Interfaces and declarations
-###########################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We can still use interfaces though proxies:
 
@@ -989,7 +999,7 @@ We can still use interfaces though proxies:
 
 
 abstract Base Classes
-#####################
+~~~~~~~~~~~~~~~~~~~~~
 
 We work with the ABCMeta meta class:
 

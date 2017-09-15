@@ -31,6 +31,9 @@ from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 @implementer(IPermission)
 class Permission(object):
+    """
+    Default implementation of :class:`zope.security.interfaces.IPermission`.
+    """
 
     def __init__(self, id, title="", description=""):
         self.id = id
@@ -38,22 +41,26 @@ class Permission(object):
         self.description = description
 
 def checkPermission(context, permission_id):
-    """Check whether a given permission exists in the provided context.
+    """
+    Check whether a given permission object exists in the provided
+    context as a utility.
     """
     if permission_id is CheckerPublic:
         return
     if not queryUtility(IPermission, permission_id, context=context):
-        raise ValueError("Undefined permission id", permission_id)
+        raise ValueError("Undefined permission ID", permission_id)
 
 def allPermissions(context=None):
-    """Get the ids of all defined permissions
+    """
+    Get the IDs of all defined permission object utilities.
     """
     for name, _permission in getUtilitiesFor(IPermission, context):
         if name != zope_Public:
             yield name
 
 def PermissionsVocabulary(context=None):
-    """A vocabulary of permission IDs.
+    """
+    A vocabulary of permission IDs.
 
     Term values are permissions, while term tokens are permission IDs.
     """
@@ -65,13 +72,18 @@ def PermissionsVocabulary(context=None):
 directlyProvides(PermissionsVocabulary, IVocabularyFactory)
 
 def PermissionIdsVocabulary(context=None):
-    """A vocabulary of permission IDs.
+    """
+    A vocabulary of permission IDs.
 
-    Term values are the permission ID strings except for 'zope.Public', which
-    is the global permission CheckerPublic.
+    Term values are the permission ID strings except for
+    :data:`zope.Public
+    <zope.security.interfaces.PUBLIC_PERMISSION_NAME>`, which is the
+    global permission :data:`zope.security.checker.CheckerPublic`.
 
-    Term titles are the permission ID strings except for 'zope.Public', which
-    is shortened to 'Public'.
+    Term titles are the permission ID strings except for
+    :data:`zope.Public
+    <zope.security.interfaces.PUBLIC_PERMISSION_NAME>`, which is
+    shortened to 'Public'.
 
     Terms are sorted by title except for 'Public', which always appears as
     the first term.

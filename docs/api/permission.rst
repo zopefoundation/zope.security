@@ -1,5 +1,8 @@
-:mod:`zope.security.permission`
-===============================
+==========================
+ zope.security.permission
+==========================
+
+.. currentmodule:: zope.security.permission
 
 .. testsetup::
 
@@ -26,7 +29,7 @@
    >>> checkPermission(None, 'y')
    Traceback (most recent call last):
    ...
-   ValueError: ('Undefined permission id', 'y')
+   ValueError: ('Undefined permission ID', 'y')
 
 The :data:`zope.security.checker.CheckerPublic` permission always exists:
 
@@ -105,7 +108,7 @@ The non-public permissions 'x' and 'y' are string values:
    >>> print(vocab.getTermByToken('y').value)
    y
 
-However, the public permission value is CheckerPublic:
+However, the public permission value is :data:`~.CheckerPublic`:
 
 .. doctest::
 

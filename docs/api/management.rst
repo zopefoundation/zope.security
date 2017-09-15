@@ -1,6 +1,5 @@
-:mod:`zope.security.management`
-===============================
+==========================
+ zope.security.management
+==========================
 
 .. automodule:: zope.security.management
-   :members:
-   :member-order: bysource

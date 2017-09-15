@@ -75,8 +75,8 @@ class IPermissionDirective(Interface):
     """Define a new security object."""
 
     id = Id(
-        title=u"Id",
-        description=u"Id as which this object will be known and used.",
+        title=u"ID",
+        description=u"ID as which this object will be known and used.",
         required=True)
 
     title = MessageID(
@@ -101,12 +101,12 @@ class IRedefinePermission(Interface):
 
     from_ = Permission(
         title=u"Original permission",
-        description=u"Original permission id to redefine.",
+        description=u"Original permission ID to redefine.",
         required=True)
 
     to = Permission(
         title=u"Substituted permission",
-        description=u"Substituted permission id.",
+        description=u"Substituted permission ID.",
         required=True)
 
 def redefinePermission(_context, from_, to):

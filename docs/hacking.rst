@@ -1,9 +1,10 @@
-Hacking on :mod:`zope.security`
-===============================
+=================================
+ Hacking on :mod:`zope.security`
+=================================
 
 
 Getting the Code
-################
+================
 
 The main repository for :mod:`zope.security` is in the Zope Foundation
 Github repository:
@@ -35,7 +36,7 @@ You can branch the trunk from there using Bazaar:
 
 
 Working in a ``virtualenv``
-###########################
+===========================
 
 Installing
 ----------
@@ -54,65 +55,55 @@ environment:
 
 .. code-block:: sh
 
-   $ /tmp/hack-zope.security/bin/python setup.py develop
+   $ /tmp/hack-zope.security/bin/pip install -e .[test]
 
 Running the tests
 -----------------
 
-Then, you canrun the tests using the build-in ``setuptools`` testrunner:
+Then, you can run the tests using the zope.testrunner (or a test
+runner of your choice):
 
 .. code-block:: sh
 
-   $ /tmp/hack-zope.security/bin/python setup.py test
-   ...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
-   ----------------------------------------------------------------------
-   Ran 643 tests in 0.000s
+   $ /tmp/hack-zope.security/bin/zope-testrunner --test-path=src
+   Running zope.testrunner.layer.UnitTests tests:
+     Set up zope.testrunner.layer.UnitTests in 0.000 seconds.
+     Running:
 
-   OK
+     Ran 742 tests with 0 failures, 0 errors, 36 skipped in 0.253 seconds.
+   Tearing down left over layers:
+     Tear down zope.testrunner.layer.UnitTests in 0.000 seconds.
 
-If you have the :mod:`nose` package installed in the virtualenv, you can
-use its testrunner too:
-
-.. code-block:: sh
-
-   $ /tmp/hack-zope.security/bin/easy_install nose
-   ...
-   $ /tmp/hack-zope.security/bin/nosetests
-   ...............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
-   ----------------------------------------------------------------------
-   Ran 655 tests in 0.000s
-
-   OK
-
-If you have the :mod:`coverage` pacakge installed in the virtualenv,
+If you have the :mod:`coverage` package installed in the virtualenv,
 you can see how well the tests cover the code:
 
 .. code-block:: sh
 
-   $ /tmp/hack-zope.security/bin/easy_install nose coverage
+   $ /tmp/hack-zope.security/bin/pip install coverage
    ...
-   $ /tmp/hack-zope.security/bin/nosetests --with coverage
-   ...............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+   $ coverage run -m zope.testrunner --test-path=src
+   ...
+   $ coverage report
    Name                              Stmts   Miss  Cover   Missing
    ---------------------------------------------------------------
-   zope/security.py                      4      0   100%   
-   zope/security/_compat.py              9      0   100%   
-   zope/security/_definitions.py        11      0   100%   
-   zope/security/adapter.py             45      0   100%   
-   zope/security/checker.py            333      0   100%   
-   zope/security/decorator.py           33      0   100%   
-   zope/security/i18n.py                 4      0   100%   
-   zope/security/interfaces.py          65      0   100%   
-   zope/security/management.py          62      0   100%   
-   zope/security/metaconfigure.py      108      0   100%   
-   zope/security/metadirectives.py      38      0   100%   
-   zope/security/permission.py          46      0   100%   
-   zope/security/protectclass.py        39      0   100%   
+   zope/security.py                      4      0   100%
+   zope/security/_compat.py              9      0   100%
+   zope/security/_definitions.py        11      0   100%
+   zope/security/adapter.py             45      0   100%
+   zope/security/checker.py            333      0   100%
+   zope/security/decorator.py           33      0   100%
+   zope/security/i18n.py                 4      0   100%
+   zope/security/interfaces.py          65      0   100%
+   zope/security/management.py          62      0   100%
+   zope/security/metaconfigure.py      108      0   100%
+   zope/security/metadirectives.py      38      0   100%
+   zope/security/permission.py          46      0   100%
+   zope/security/protectclass.py        39      0   100%
    zope/security/proxy.py              164     19    88%   55, 86, 97, 119-121, 127-129, 143-144, 153-154, 158-159, 163-164, 298, 330
-   zope/security/simplepolicies.py      32      0   100%   
-   zope/security/zcml.py                43      0   100%   
+   zope/security/simplepolicies.py      32      0   100%
+   zope/security/zcml.py                43      0   100%
    ---------------------------------------------------------------
-   TOTAL                              1036     19    98%   
+   TOTAL                              1036     19    98%
    ----------------------------------------------------------------------
    Ran 655 tests in 0.000s
 
@@ -128,7 +119,7 @@ tests, you can build the docs:
 
 .. code-block:: sh
 
-   $ /tmp/hack-zope.security/bin/easy_install Sphinx
+   $ /tmp/hack-zope.security/bin/pip install -e .[docs]
    ...
    $ cd docs
    $ PATH=/tmp/hack-zope.security/bin:$PATH make html
@@ -211,7 +202,7 @@ You can also test the code snippets in the documentation:
 
 
 Using :mod:`zc.buildout`
-########################
+========================
 
 Setting up the buildout
 -----------------------
@@ -245,7 +236,7 @@ You can now run the tests:
 
 
 Using :mod:`tox`
-################
+================
 
 Running Tests on Multiple Python Versions
 -----------------------------------------
@@ -255,38 +246,34 @@ tool designed to run tests against multiple Python versions.  It creates
 a ``virtualenv`` for each configured version, installs the current package
 and configured dependencies into each ``virtualenv``, and then runs the
 configured commands.
-   
+
 :mod:`zope.security` configures the following :mod:`tox` environments via
 its ``tox.ini`` file:
 
-- The ``py26``, ``py27``, ``py33``, ``py34``, and ``pypy`` environments
+- The ``py27``, ``py34``, ``py35``, ``pypy``, etc, environments
   builds a ``virtualenv`` with the appropriate interpreter,
-  installs :mod:`zope.security` and dependencies, and runs the tests
-  via ``python setup.py test -q``.
+  installs :mod:`zope.security` and dependencies, and runs the tests.
 
 - The ``py27-pure`` and ``py33-pure`` environments build a ``virtualenv``
   with the appropriate interpreter, installs :mod:`zope.security` and
   dependencies **without compiling C extensions**, and runs the tests
   via ``python setup.py test -q``.
 
-- The ``coverage`` environment builds a ``virtualenv`` with ``python2.6``,
-  installs :mod:`zope.security`, installs
-  :mod:`nose` and :mod:`coverage`, and runs ``nosetests`` with statement
-  coverage.
+- The ``coverage`` environment builds a ``virtualenv``, runs all the
+  tests under :mod:`coverage`, and prints a report to stdout.
 
-- The ``docs`` environment builds a virtualenv with ``python2.6``, installs
-  :mod:`zope.security`, installs ``Sphinx`` and
-  dependencies, and then builds the docs and exercises the doctest snippets.
+- The ``docs`` environment builds a virtualenv and then builds the
+  docs and exercises the doctest snippets.
 
-This example requires that you have a working ``python2.6`` on your path,
+This example requires that you have a working ``python2.7`` on your path,
 as well as installing ``tox``:
 
 .. code-block:: sh
 
-   $ tox -e py26
+   $ tox -e py27
    GLOB sdist-make: .../zope.security/setup.py
-   py26 sdist-reinst: .../zope.security/.tox/dist/zope.security-4.0.2dev.zip
-   py26 runtests: commands[0]
+   py27 sdist-reinst: .../zope.security/.tox/dist/zope.security-4.0.2dev.zip
+   py27 runtests: commands[0]
    ...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
    ----------------------------------------------------------------------
    Ran 643 tests in 0.000s
@@ -328,7 +315,7 @@ including building the docs and testing their snippets:
 
 
 Contributing to :mod:`zope.security`
-####################################
+====================================
 
 Submitting a Bug Report
 -----------------------
@@ -356,14 +343,3 @@ in your fork, and push it.  You can then submit a pull request from your
 branch:
 
   https://github.com/zopefoundation/zope.security/pulls
-
-If you branched the code from Launchpad using Bazaar, you have another
-option:  you can "push" your branch to Launchpad:
-
-.. code-block:: sh
-
-   $ bzr push lp:~jrandom/zope.security/cool_feature
-
-After pushing your branch, you can link it to a bug report on Github,
-or request that the maintainers merge your branch using the Launchpad
-"merge request" feature.
