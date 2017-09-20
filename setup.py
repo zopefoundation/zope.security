@@ -140,7 +140,7 @@ setup(name='zope.security',
           read('README.rst')
           + '\n\n' +
           read('CHANGES.rst')
-          ),
+      ),
       keywords="zope security policy principal permission",
       classifiers=[
           'Development Status :: 5 - Production/Stable',
@@ -161,7 +161,7 @@ setup(name='zope.security',
           'Topic :: Internet :: WWW/HTTP',
           'Framework :: Zope3',
       ],
-      url='http://pypi.python.org/pypi/zope.security',
+      url='http://github.com/zopefoundation/zope.security',
       license='ZPL 2.1',
       packages=find_packages('src'),
       package_dir={'': 'src'},
@@ -181,14 +181,23 @@ setup(name='zope.security',
           'zope.schema',
       ],
       tests_require=TESTS_REQUIRE,
-      extras_require=dict(
-          pytz=["pytz"],
-          untrustedpython=['zope.untrustedpython'] if not py3 else [],
-          zcml=['zope.configuration'],
-          test=TESTS_REQUIRE,
-          testing=TESTS_REQUIRE + ['nose', 'coverage'],
-          docs=['Sphinx', 'repoze.sphinx.autointerface'],
-      ),
+      extras_require={
+          'pytz': [
+              "pytz"
+          ],
+          'untrustedpython:python_version == "2.7"': [
+              'zope.untrustedpython',
+          ],
+          'untrustedpython:python_version >= "3.3"': [],
+          'zcml': [
+              'zope.configuration'
+          ],
+          'test': TESTS_REQUIRE,
+          'docs': [
+              'Sphinx',
+              'repoze.sphinx.autointerface',
+          ],
+      },
       include_package_data=True,
       zip_safe=False,
 )
