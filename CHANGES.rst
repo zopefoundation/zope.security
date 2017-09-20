@@ -2,7 +2,7 @@
  Changes
 =========
 
-4.2.0 (unreleased)
+4.2.0 (2017-09-20)
 ==================
 
 - Fix the extremely rare potential for a crash when the C extensions
