@@ -10,7 +10,7 @@
         :target: https://pypi.org/project/zope.security/
         :alt: Supported Python versions
 
-.. image:: https://travis-ci.org/zopefoundation/zope.security.png?branch=master
+.. image:: https://travis-ci.org/zopefoundation/zope.security.svg?branch=master
         :target: https://travis-ci.org/zopefoundation/zope.security
 
 .. image:: https://coveralls.io/repos/github/zopefoundation/zope.security/badge.svg?branch=master
