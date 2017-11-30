@@ -89,7 +89,7 @@ class IPermissionDirective(Interface):
         description=u"Provides a description for the object.",
         required=False)
 
-def permission(_context, id, title, description=''):
+def permission(_context, id, title, description=u''):
     from zope.security.interfaces import IPermission
     from zope.security.permission import Permission
     from zope.component.zcml import utility
