@@ -2,7 +2,7 @@
  Changes
 =========
 
-4.2.1 (unreleased)
+4.2.1 (2017-11-30)
 ==================
 
 - Fix the default values for ``Permission`` fields ``title`` and
