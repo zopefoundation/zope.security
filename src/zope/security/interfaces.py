@@ -52,7 +52,7 @@ means the name of the permission, or the special object
 
 from zope.interface import Interface, Attribute, implementer
 from zope.interface.common.interfaces import IException, IAttributeError
-from zope.schema import Text, TextLine
+from zope.schema import Text, TextLine, NativeStringLine
 from zope.security.i18n import ZopeMessageFactory as _
 
 #: The name (id) of the registered :class:`IPermission` utility that signifies
@@ -438,9 +438,14 @@ class IMemberAwareGroup(IMemberGetterGroup):
         """
 
 class IPermission(Interface):
-    """A permission object."""
+    """A permission object.
 
-    id = TextLine(
+    Note that the ZCML ``<permission>`` directive restricts the ``id`` to
+    be an identifier (a dotted name or a URI), but this interface allows
+    any native string.
+    """
+
+    id = NativeStringLine(
         title=_("Id"),
         description=_("Id as which this permission will be known and used."),
         readonly=True,

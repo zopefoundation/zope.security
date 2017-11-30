@@ -35,7 +35,7 @@ class Permission(object):
     Default implementation of :class:`zope.security.interfaces.IPermission`.
     """
 
-    def __init__(self, id, title="", description=""):
+    def __init__(self, id, title=u"", description=u""):
         self.id = id
         self.title = title
         self.description = description

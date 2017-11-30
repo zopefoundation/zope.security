@@ -35,19 +35,23 @@ class PermissionTests(unittest.TestCase):
     def test_instance_conforms_to_IPermission(self):
         from zope.interface.verify import verifyObject
         from zope.security.interfaces import IPermission
+        from zope.schema import getValidationErrors
         verifyObject(IPermission, self._makeOne('testing'))
+        self.assertEqual([],
+                         getValidationErrors(IPermission,
+                                             self._makeOne('testing')))
 
     def test_ctor_only_id(self):
         permission = self._makeOne('testing')
-        self.assertEqual(permission.id, 'testing')
-        self.assertEqual(permission.title, '')
-        self.assertEqual(permission.description, '')
+        self.assertEqual(permission.id, u'testing')
+        self.assertEqual(permission.title, u'')
+        self.assertEqual(permission.description, u'')
 
     def test_ctor_w_title_and_description(self):
-        permission = self._makeOne('testing', 'TITLE', 'DESCRIPTION')
+        permission = self._makeOne('testing', u'TITLE', u'DESCRIPTION')
         self.assertEqual(permission.id, 'testing')
-        self.assertEqual(permission.title, 'TITLE')
-        self.assertEqual(permission.description, 'DESCRIPTION')
+        self.assertEqual(permission.title, u'TITLE')
+        self.assertEqual(permission.description, u'DESCRIPTION')
 
 
 class Test_checkPermission(PlacelessSetup, unittest.TestCase):
@@ -132,6 +136,24 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
         self.assertEqual(sorted([x.token for x in vocabulary]),
                          ['testing', zope_Public])
 
+    def test_zcml_valid(self):
+        from zope.configuration import xmlconfig
+        import zope.security
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IPermission
+        from zope.schema import getValidationErrors
+
+
+        xmlconfig.file('configure.zcml', zope.security)
+        vocabulary = self._callFUT()
+        vocabulary = sorted(vocabulary, key=lambda term: term.token)
+        self.assertEqual(6, len(vocabulary))
+
+        for term in vocabulary:
+            p = term.value
+            __traceback_info__ = term.token, p
+            verifyObject(IPermission, p)
+            self.assertEqual([], getValidationErrors(IPermission, p))
 
 class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
 
