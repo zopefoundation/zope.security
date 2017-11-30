@@ -7,7 +7,7 @@
 
 - Fix the default values for ``Permission`` fields ``title`` and
   ``description`` under Python 2. See `issue 48
-  <https://github.com/zopefoundation/zope.security/issues/48>`.
+  <https://github.com/zopefoundation/zope.security/issues/48>`_.
 
 - Change the ``IPermission.id`` from ``Text`` (unicode) to a
   ``NativeStringLine``. This matches what ZCML creates and what is
