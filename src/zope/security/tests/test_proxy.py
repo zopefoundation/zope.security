@@ -1860,8 +1860,14 @@ class ProxyTests(unittest.TestCase):
     def testCallFail(self):
         self.shouldFail(self.p, None)
 
-    def testRichCompareOK(self):
+    def testRichCompareProxyWithObjectOK(self):
         self.assertTrue(self.p == self.x)
+
+    def testRichCompareObjectWithProxyOK(self):
+        self.assertTrue(self.x == self.p)
+
+    def testRichCompareWithProxyWithProxyOK(self):
+        self.assertTrue(self.p == self.p)
 
 ##     def testRichCompareFail(self):
 ##         self.shouldFail(lambda: self.p == self.x)
