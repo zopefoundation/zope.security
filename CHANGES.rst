@@ -2,7 +2,7 @@
  Changes
 =========
 
-4.2.2 (unreleased)
+4.2.2 (2018-01-11)
 ==================
 
 - Make the pure-Python proxy on Python 2 *not* check permissions for
