@@ -5,7 +5,13 @@
 4.2.2 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Make the pure-Python proxy on Python 2 *not* check permissions for
+  ``__unicode__`` just like the C implementation. Note that
+  ``__str__`` is checked for both implementations on both Python 2 and
+  3, but if there is no ``__unicode__`` method defined, Python 2's
+  automatic fallback to ``__str__`` is **not** checked when
+  ``unicode`` is called. See `issue 10
+  <https://github.com/zopefoundation/zope.security/issues/10>`_.
 
 
 4.2.1 (2017-11-30)

@@ -282,7 +282,7 @@ class ProxyPy(PyProxyBase):
 for name in ['__call__',
              #'__repr__',
              #'__str__',
-             '__unicode__',
+             #'__unicode__', # Unchecked in C proxy
              '__reduce__',
              '__reduce_ex__',
              #'__lt__',      # Unchecked in C proxy (rich coparison)
