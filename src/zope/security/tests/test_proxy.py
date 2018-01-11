@@ -186,7 +186,7 @@ class AbstractProxyTestBase(object):
                          '<security proxied %s.object '
                          'instance at %s>' % (_BUILTINS, address))
 
-    def test__str__fails_return(self):
+    def test___str___fails_return(self):
         from zope.security.interfaces import ForbiddenAttribute
         class CustomStr(object):
             def __str__(self):
@@ -218,7 +218,7 @@ class AbstractProxyTestBase(object):
                          '<security proxied %s.object '
                          'instance at %s>' % (_BUILTINS, address))
 
-    def test__str__falls_through_to_repr_when_both_allowed(self):
+    def test___str___falls_through_to_repr_when_both_allowed(self):
         from zope.security.interfaces import ForbiddenAttribute
         class CustomRepr(object):
             def __repr__(self):
@@ -231,7 +231,7 @@ class AbstractProxyTestBase(object):
         self.assertEqual(str(target), "<CustomRepr>")
         self.assertEqual(str(proxy), str(target))
 
-    def test__str__doesnot_fall_through_to_repr_when_str_not_allowed(self):
+    def test___str___doesnot_fall_through_to_repr_when_str_not_allowed(self):
         from zope.security.interfaces import ForbiddenAttribute
         class CustomRepr(object):
             def __repr__(self):
@@ -244,7 +244,7 @@ class AbstractProxyTestBase(object):
         self.assertEqual(str(target), "<CustomRepr>")
         self.assertIn("<security proxied zope.security", str(proxy))
 
-    def test__str__doesnot_fall_through_to_repr_when_repr_not_allowed(self):
+    def test___str___doesnot_fall_through_to_repr_when_repr_not_allowed(self):
         from zope.security.interfaces import ForbiddenAttribute
         class CustomRepr(object):
             def __repr__(self):
@@ -257,7 +257,7 @@ class AbstractProxyTestBase(object):
         self.assertEqual(str(proxy), str(target))
         self.assertIn("<security proxied zope.security", repr(proxy))
 
-    def test__str__falls_through_to_repr_but_repr_fails_return(self):
+    def test___str___falls_through_to_repr_but_repr_fails_return(self):
         from zope.security.interfaces import ForbiddenAttribute
         class CustomRepr(object):
             def __repr__(self):
@@ -1462,6 +1462,58 @@ class AbstractProxyTestBase(object):
                     else:
                         self.assertEqual(removeSecurityProxy(eval(expr)), z,
                                          "x=%r; y=%r; expr=%r" % (x, y, expr))
+
+
+    @_skip_if_not_Py2
+    def test___unicode___allowed_by_default(self):
+        # https://github.com/zopefoundation/zope.security/issues/10
+        class Foo(object):
+            def __unicode__(self):
+                return u'I am unicode'
+
+        checker = object() # checker not consulted
+        target = Foo()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(unicode(target), u'I am unicode')
+        self.assertEqual(unicode(target), unicode(proxy))
+
+    @_skip_if_not_Py2
+    def test___unicode___falls_through_to_str_by_default(self):
+        # https://github.com/zopefoundation/zope.security/issues/10
+        class Foo(object):
+            def __str__(self):
+                return 'I am str'
+
+        checker = object() # checker not consulted
+        target = Foo()
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(unicode(target), u'I am str')
+        self.assertIsInstance(unicode(target), unicode)
+        self.assertEqual(unicode(target), unicode(proxy))
+        self.assertIsInstance(unicode(proxy), unicode)
+
+    @_skip_if_not_Py2
+    def test___unicode___falls_through_to_str_even_if_str_not_allowed(self):
+        # https://github.com/zopefoundation/zope.security/issues/10
+        # Note that this is inconsistent with str() and probably not a good
+        # idea overall, so this test is strictly a regression test.
+        from zope.security.interfaces import ForbiddenAttribute
+        class Foo(object):
+            def __str__(self):
+                return 'I am str'
+
+        target = Foo()
+        checker = DummyChecker(ForbiddenAttribute)
+        proxy = self._makeOne(target, checker)
+        self.assertEqual(unicode(target), u'I am str')
+        self.assertIsInstance(unicode(target), unicode)
+
+        # Asking for the unicode of the proxy silently falls through
+        # to the str without any checks
+        self.assertEqual(unicode(target), unicode(proxy))
+
+        # And set str itself is checked and proxied
+        self.assertIn("<security proxied", str(proxy))
 
 
 @unittest.skipIf(PURE_PYTHON,
