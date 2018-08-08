@@ -343,12 +343,14 @@ In this case, the workarounds described :ref:`above <isinstance-and-proxies>` al
 .. pure-python platforms to make sure that we get where
 .. we expect to be when we construct LogRecord; otherwise
 .. the ProxyMetaclass may be in the negative cache, bypassing
-.. the issubclass() calls we expect
+.. the issubclass() calls we expect.
+.. Note that ABCMeta._abc_invalidation_counter is gone in Python 3.7
 
 .. doctest::
     :hide:
 
-    >>> ABCMeta._abc_invalidation_counter += 1
+    >>> if hasattr(ABCMeta, '_abc_invalidation_counter'):
+    ...     ABCMeta._abc_invalidation_counter += 1
 
 logging
 ~~~~~~~
