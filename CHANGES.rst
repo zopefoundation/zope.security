@@ -13,6 +13,8 @@
   ``unicode`` is called. See `issue 10
   <https://github.com/zopefoundation/zope.security/issues/10>`_.
 
+- Add support for Python 3.7.
+
 
 4.2.1 (2017-11-30)
 ==================
