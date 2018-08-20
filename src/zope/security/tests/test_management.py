@@ -170,7 +170,11 @@ class Test(unittest.TestCase):
         self.assertEqual(checkPermission(None, obj), True)
         self.assertEqual(checkPermission(CheckerPublic, obj), True)
 
+
     def test_system_user(self):
+        from zope.interface.verify import verifyObject
+        from zope.security.interfaces import IPrincipal
+        from zope.security.interfaces import ISystemPrincipal
         from zope.security.management import system_user
 
         self.assertEqual(system_user.id,
@@ -181,6 +185,10 @@ class Test(unittest.TestCase):
         for name in 'id', 'title', 'description':
             self.assertIsInstance(getattr(system_user, name),
                                   type(u''))
+
+        verifyObject(IPrincipal, system_user)
+        verifyObject(ISystemPrincipal, system_user)
+
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
