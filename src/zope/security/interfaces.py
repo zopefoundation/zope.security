@@ -38,6 +38,7 @@ These can be categorized into a few different groups of related objects.
   - :class:`IParticipation`
   - :class:`IInteractionManagement`
   - :class:`IPrincipal`
+  - :class:`ISystemPrincipal`
   - :class:`IGroupAwarePrincipal`
   - :class:`IGroupClosureAwarePrincipal`
   - :class:`IGroup`
@@ -392,6 +393,20 @@ class IPrincipal(Interface):
         title=_("Description"),
         description=_("A detailed description of the principal."),
         required=False)
+
+
+class ISystemPrincipal(IPrincipal):
+    """
+    A principal that represents the system (application) itself.
+
+    Typically a system principal is granted extra capabilities
+    or excluded from certain checks. End users should *not* be able
+    to act as the system principal.
+
+    Because speed is often a factor, a single instance of a system principal
+    is found at ``zope.security.management.system_user`` and can
+    be compared for by identity (e.g., ``if principal is system_user:``).
+    """
 
 
 class IGroupAwarePrincipal(IPrincipal):

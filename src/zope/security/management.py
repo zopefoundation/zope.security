@@ -26,8 +26,21 @@ from zope.security.interfaces import ISecurityManagement
 from zope.security.interfaces import NoInteraction
 from zope.security.simplepolicies import ParanoidSecurityPolicy
 from zope.security._definitions import thread_local
-from zope.security._definitions import system_user # API?
+from zope.security._definitions import system_user
 
+
+__all__ = [
+    'system_user',
+    'getSecurityPolicy',
+    'setSecurityPolicy',
+    'queryInteraction',
+    'getInteraction',
+    'ExistingInteraction',
+    'newInteraction',
+    'endInteraction',
+    'restoreInteraction',
+    'checkPermission',
+]
 
 _defaultPolicy = ParanoidSecurityPolicy
 

@@ -5,7 +5,10 @@
 4.2.4 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Add the interface ``ISystemPrincipal`` and make
+  ``zope.security.management.system_user`` a regular object that
+  implements this interface. This facilitates providing adapter
+  registrations specifically for the ``system_user``.
 
 
 4.2.3 (2018-08-09)
