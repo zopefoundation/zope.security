@@ -2,7 +2,7 @@
  Changes
 =========
 
-4.2.4 (unreleased)
+4.3.0 (2018-08-24)
 ==================
 
 - Add the interface ``ISystemPrincipal`` and make
