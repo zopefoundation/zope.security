@@ -32,6 +32,9 @@ class AbstractProxyTestBase(object):
 
     # pylint:disable=no-member,blacklisted-name
 
+    assertRaisesRegex = getattr(unittest.TestCase, 'assertRaisesRegex',
+                                unittest.TestCase.assertRaisesRegexp)
+
     # The names of attributes that are spelled different on Py2
     # vs Py3
     itruediv = '__itruediv__' if not PYTHON2 else '__idiv__'
@@ -97,7 +100,7 @@ class AbstractProxyTestBase(object):
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
 
-        with self.assertRaisesRegexp(AttributeError, "name"):
+        with self.assertRaisesRegex(AttributeError, "name"):
             getattr(proxy, 'name')
         self.assertEqual(1, target.count)
 
@@ -1320,8 +1323,8 @@ class AbstractProxyTestBase(object):
         target = Get()
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
-        with self.assertRaisesRegexp(Missing,
-                                     self.getslice):
+        with self.assertRaisesRegex(Missing,
+                                    self.getslice):
             proxy[1:2]
 
         self.assertEqual(checker._checked, self.getslice)
@@ -1336,8 +1339,8 @@ class AbstractProxyTestBase(object):
         target = Get()
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
-        with self.assertRaisesRegexp(Missing,
-                                     '__getitem__'):
+        with self.assertRaisesRegex(Missing,
+                                    '__getitem__'):
             proxy[1:2]
 
         self.assertEqual(checker._checked, self.getslice)
@@ -1382,8 +1385,8 @@ class AbstractProxyTestBase(object):
         target = Set()
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
-        with self.assertRaisesRegexp(Missing,
-                                     self.setslice):
+        with self.assertRaisesRegex(Missing,
+                                    self.setslice):
             proxy[1:2] = 1
 
         self.assertEqual(checker._checked, self.setslice)
@@ -1398,8 +1401,8 @@ class AbstractProxyTestBase(object):
         target = Set()
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
-        with self.assertRaisesRegexp(Missing,
-                                     '__setitem__'):
+        with self.assertRaisesRegex(Missing,
+                                    '__setitem__'):
             proxy[1:2] = 1
 
         self.assertEqual(checker._checked, self.setslice)
