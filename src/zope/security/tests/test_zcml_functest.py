@@ -187,7 +187,7 @@ class TestFactorySubdirective(unittest.TestCase):
     def testFactoryNoId(self):
         from zope.component import getUtility
         from zope.component.interfaces import IFactory
-        from zope.component.interfaces import ComponentLookupError
+        from zope.interface.interfaces import ComponentLookupError
         from zope.configuration.xmlconfig import xmlconfig
         self._meta()
         f = configfile("""
@@ -481,15 +481,14 @@ class TestRequireDirective(unittest.TestCase):
 
     def testCompositeNoPerm(self):
         # Establish rejection of declarations lacking a permission spec.
-        from zope.configuration.xmlconfig import ZopeXMLConfigurationError
+        from zope.configuration.exceptions import ConfigurationError
         declaration = ('''<class class="%s">
                             <require
                                 attributes="m1"/>
                           </class>'''
                        % (_pfx("test_class")))
-        self.assertRaises(ZopeXMLConfigurationError,
-                          self.assertDeclaration,
-                          declaration)
+        with self.assertRaises(ConfigurationError):
+            self.assertDeclaration(declaration)
 
 
     def testCompositeMethodsPluralElementPerm(self):
