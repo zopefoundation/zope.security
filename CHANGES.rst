@@ -2,7 +2,7 @@
  Changes
 =========
 
-4.3.1 (unreleased)
+4.3.1 (2019-01-03)
 ==================
 
 - Fix the decimal.Decimal checker, ``__truediv__`` was missing causing
