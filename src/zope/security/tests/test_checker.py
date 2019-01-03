@@ -389,6 +389,48 @@ class CheckerTestsBase(QuietWatchingChecker):
         finally:
             _clear()
 
+    def test_Decimal_operations(self):
+        from zope.security.proxy import Proxy
+        from zope.security.checker import _default_checkers
+        from decimal import Decimal
+        from decimal import DecimalTuple
+
+        checker = _default_checkers[Decimal]
+
+        value = Decimal('1.1')
+        proxy = Proxy(value, checker)
+
+        self.assertTrue(proxy)
+        self.assertTrue(proxy < Decimal('2'))
+        self.assertTrue(proxy == Decimal('1.1'))
+        self.assertTrue(proxy > Decimal('1'))
+        self.assertTrue(proxy != Decimal('1'))
+        self.assertEqual(-proxy, Decimal('-1.1'))
+        self.assertEqual(proxy + Decimal('1.1'), Decimal('2.2'))
+        self.assertEqual(Decimal('1.1') + proxy, Decimal('2.2'))
+        self.assertEqual(proxy - Decimal('1'), Decimal('0.1'))
+        self.assertEqual(Decimal('2.1') - proxy, Decimal('1'))
+        self.assertEqual(proxy * 1, Decimal('1.1'))
+        self.assertEqual(1 * proxy, Decimal('1.1'))
+        self.assertEqual(proxy * Decimal('1.1'), Decimal('1.21'))
+        self.assertEqual(Decimal('1.1') * proxy, Decimal('1.21'))
+        self.assertEqual(proxy / 1, Decimal('1.1'))
+        self.assertEqual(proxy / Decimal('1'), Decimal('1.1'))
+        self.assertEqual(proxy // 1, Decimal('1'))
+        self.assertEqual(proxy // Decimal('1'), Decimal('1'))
+        self.assertEqual(float(proxy), 1.1)
+        self.assertEqual(int(proxy), 1)
+        if PY2:
+            self.assertEqual(long(proxy), 1)
+        self.assertEqual(proxy ** 2, Decimal('1.21'))
+        self.assertEqual(1 ** proxy, Decimal('1'))
+        self.assertEqual(proxy.adjusted(), 0)
+        self.assertEqual(
+            proxy.as_tuple(), DecimalTuple(sign=0, digits=(1, 1), exponent=-1))
+        self.assertEqual(proxy.compare(Decimal('1.1')), Decimal('0'))
+        self.assertEqual(proxy.normalize(), Decimal('1.1'))
+        self.assertEqual(proxy.quantize(Decimal('1.10')), Decimal('1.10'))
+
     def _check_iteration_of_dict_like(self, dict_like):
         from zope.security.proxy import Proxy
         from zope.security.checker import _default_checkers
