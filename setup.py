@@ -132,7 +132,7 @@ TESTS_REQUIRE = [
 
 
 setup(name='zope.security',
-      version='4.3.2.dev0',
+      version='5.0.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -172,6 +172,7 @@ setup(name='zope.security',
           'build_ext': optional_build_ext,
       },
       features=features,
+      python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
       install_requires=[
           'setuptools',
           'zope.component',
@@ -195,7 +196,7 @@ setup(name='zope.security',
           ],
           'test': TESTS_REQUIRE,
           'docs': [
-              'Sphinx',
+              'Sphinx < 2',  # Version 2.0+ only supports Python 3.5+
               'repoze.sphinx.autointerface',
           ],
       },
