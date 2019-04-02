@@ -195,32 +195,32 @@ class ProxyPy(PyProxyBase):
     def __lt__(self, other):
         # no check
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return wrapped < other
+        return wrapped < getObjectPy(other)
 
     def __le__(self, other):
         # no check
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return wrapped <= other
+        return wrapped <= getObjectPy(other)
 
     def __eq__(self, other):
         # no check
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return wrapped == other
+        return wrapped == getObjectPy(other)
 
     def __ne__(self, other):
         # no check
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return wrapped != other
+        return wrapped != getObjectPy(other)
 
     def __ge__(self, other):
         # no check
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return wrapped >= other
+        return wrapped >= getObjectPy(other)
 
     def __gt__(self, other):
         # no check
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return wrapped > other
+        return wrapped > getObjectPy(other)
 
     def __hash__(self):
         # no check
