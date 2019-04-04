@@ -196,7 +196,7 @@ setup(name='zope.security',
           ],
           'test': TESTS_REQUIRE,
           'docs': [
-              'Sphinx < 2',  # Version 2.0+ only supports Python 3.5+
+              'Sphinx',
               'repoze.sphinx.autointerface',
           ],
       },
