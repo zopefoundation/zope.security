@@ -155,6 +155,7 @@ setup(name='zope.security',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
@@ -195,12 +196,9 @@ setup(name='zope.security',
               'zope.configuration'
           ],
           'test': TESTS_REQUIRE,
-          'docs:python_version == "2.7"': [
-              'Sphinx < 2',
-              'repoze.sphinx.autointerface',
-          ],
-          'docs:python_version >= "3.5"': [
-              'Sphinx',
+          'docs': [
+              'Sphinx < 2; python_version < "3"',
+              'Sphinx >= 2; python_version >= "3"',
               'repoze.sphinx.autointerface',
           ],
       },
