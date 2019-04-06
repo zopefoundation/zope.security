@@ -1,22 +1,22 @@
 language: python
-sudo: false
+dist: xenial
 matrix:
   include:
     - python: 2.7
-    - python: 3.4
     - python: 3.5
     - python: 3.6
     - python: 3.7
-      dist: xenial
-      sudo: true
-    - python: pypy
-    - python: pypy3
+    - python: 3.8-dev
+    - python: pypy2.7-6.0
+    - python: pypy3.5-6.0
     - python: 2.7
       env:
           - PURE_PYTHON=1
           - ZOPE_WATCH_CHECKERS=1
-    - python: 3.4
+    - python: 3.7
       env: ZOPE_WATCH_CHECKERS=1
+    - python: 3.7
+      env: PURE_PYTHON=1
 install:
     - pip install -U pip setuptools
     - pip install -U coveralls coverage
