@@ -180,7 +180,7 @@ setup(name='zope.security',
           'zope.interface',
           'zope.location',
           'zope.proxy >= 4.3.0',
-          'zope.schema',
+          'zope.schema >= 4.2.0',
       ],
       tests_require=TESTS_REQUIRE,
       extras_require={
