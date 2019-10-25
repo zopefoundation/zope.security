@@ -9,6 +9,9 @@
 
 - Add support for Python 3.8a3.
 
+- Properly declare dependency on zope.schema >= 4.2.0, introduced in
+  zope.security 4.2.1.
+
 
 4.3.1 (2019-01-03)
 ==================
