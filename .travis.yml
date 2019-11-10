@@ -74,6 +74,9 @@ before_install:
 install:
   - pip install -U pip setuptools
   - pip install -U coveralls coverage
+  # pip install zope.proxy here because because setup_requires will use
+  # easy_install, which fails on Python 3.5 on Mac OS
+  - pip install -U zope.proxy
   - pip install -U -e .[test,docs]
 
 script:
