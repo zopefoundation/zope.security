@@ -886,6 +886,10 @@ def _fixup_dictlike(dict_type):
             o_type = type(obj)
             if o_type not in _default_checkers:
                 _default_checkers[o_type] = _iteratorChecker
+            # PyPy3 has special types for iter({}.items()) etc.
+            iter_type = type(iter(obj))
+            if iter_type not in _default_checkers:
+                _default_checkers[iter_type] = _iteratorChecker
 
 def _fixup_odict():
     # OrderedDicts have three different implementations: Python 2 (pure
