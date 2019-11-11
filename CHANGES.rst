@@ -7,7 +7,7 @@
 
 - Drop support for Python 3.4.
 
-- Add support for Python 3.8a3.
+- Add support for Python 3.8.
 
 - Properly declare dependency on zope.schema >= 4.2.0, introduced in
   zope.security 4.2.1.
