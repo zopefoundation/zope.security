@@ -12,6 +12,8 @@
 - Properly declare dependency on zope.schema >= 4.2.0, introduced in
   zope.security 4.2.1.
 
+- Fix dict item view iteration on PyPy3 7.x.
+
 
 4.3.1 (2019-01-03)
 ==================
