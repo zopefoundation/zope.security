@@ -57,7 +57,7 @@ matrix:
     - name: Python 3.6 wheels for MacOS
       os: osx
       language: generic
-      env: TERRYFY_PYTHON='macpython 3.6.0'
+      env: TERRYFY_PYTHON='macpython 3.6.2'
     - name: Python 3.7 wheels for MacOS
       os: osx
       language: generic
