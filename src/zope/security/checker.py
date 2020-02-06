@@ -858,8 +858,14 @@ _default_checkers = {
     type(f()): _iteratorChecker,
     type(Interface): InterfaceChecker(
         IInterface,
-        __str__=CheckerPublic, _implied=CheckerPublic, subscribe=CheckerPublic,
-        ),
+        __str__=CheckerPublic,
+        _implied=CheckerPublic,
+        subscribe=CheckerPublic,
+        # To iterate, Python calls __len__ as a hint.
+        # Python 2 ignores AttributeErrors, but Python 3
+        # lets them pass.
+        __len__=CheckerPublic,
+    ),
     zope.interface.interface.Method: InterfaceChecker(
         zope.interface.interfaces.IMethod),
     zope.interface.declarations.ProvidesClass: _Declaration_checker,

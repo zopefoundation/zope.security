@@ -2,14 +2,16 @@
  Changes
 =========
 
-5.1 (unreleased)
-================
+5.1.0 (unreleased)
+==================
 
-- Nothing changed yet.
+- Let proxied interfaces be iterated on Python 3. This worked on
+  Python 2, but raised ``ForbiddenAttribute`` an Python 3. See
+  `zope.interface issue 141 <https://github.com/zopefoundation/zope.interface/issues/141>`_.
 
 
-5.0 (2019-11-11)
-================
+5.0.0 (2019-11-11)
+==================
 
 - Drop support for Python 3.4.
 

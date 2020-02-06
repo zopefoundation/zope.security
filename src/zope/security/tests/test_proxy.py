@@ -27,6 +27,7 @@ if not PYTHON2: # pragma: no cover (Python 3)
         raise NotImplementedError("Not on Python 3")
     cmp = coerce
     long = int
+    unicode = str
 
 class AbstractProxyTestBase(object):
 
@@ -1770,7 +1771,7 @@ class Something:
         return x == 42
 
 
-class ProxyTests(unittest.TestCase):
+class ProxyFactoryTests(unittest.TestCase):
 
     def setUp(self):
         from zope.security.proxy import ProxyFactory
@@ -1958,6 +1959,11 @@ class ProxyTests(unittest.TestCase):
     if PYTHON2:
         unops.append("long(x)")
 
+    def _make_eval(self, expr, locs):
+        def _eval(*args):
+            eval(expr, globals(), locs)
+        return _eval
+
     def test_unops(self):
         # We want the starting value of the expressions to be a proxy,
         # but we don't want to create new proxies as a result of
@@ -1968,6 +1974,7 @@ class ProxyTests(unittest.TestCase):
         self.c.unproxied_types = {str, int, float}
         if PYTHON2:
             self.c.unproxied_types.add(long)
+
         for expr in self.unops:
             x = 1
             y = eval(expr)
@@ -1976,7 +1983,7 @@ class ProxyTests(unittest.TestCase):
             z = eval(expr)
             self.assertEqual(removeSecurityProxy(z), y,
                              "x=%r; expr=%r" % (x, expr))
-            self.shouldFail(lambda x: eval(expr), x)
+            self.shouldFail(self._make_eval(expr, locals()), x)
 
     @_skip_if_not_Py2
     def test_odd_unops(self):
@@ -2007,7 +2014,7 @@ class ProxyTests(unittest.TestCase):
                     else:
                         self.assertEqual(removeSecurityProxy(eval(expr)), z,
                                          "x=%r; y=%r; expr=%r" % (x, y, expr))
-                        self.shouldFail(lambda x, y: eval(expr), x, y)
+                        self.shouldFail(self._make_eval(expr, locals()), x, y)
 
     def test_inplace(self):
         # TODO: should test all inplace operators...
@@ -2100,6 +2107,20 @@ class ProxyTests(unittest.TestCase):
         a, b = coerce(x, y)
         self.assertIs(type(removeSecurityProxy(a)), float)
         self.assertIs(b, y)
+
+    def test_iterate_interface(self):
+        # This used to work on Python 2, but fail on Python 3.
+        # See https://github.com/zopefoundation/zope.interface/issues/141
+        from zope.interface import Interface
+        from zope.security.proxy import ProxyFactory
+
+        class IFoo(Interface):
+            def x():
+                """A method"""
+
+        proxy = ProxyFactory(IFoo)
+        self.assertEqual(list(IFoo), ['x'])
+        self.assertEqual(list(proxy), list(IFoo))
 
 
 def test_using_mapping_slots_hack():
