@@ -9,6 +9,8 @@
   Python 2, but raised ``ForbiddenAttribute`` an Python 3. See
   `zope.interface issue 141 <https://github.com/zopefoundation/zope.interface/issues/141>`_.
 
+- Allow to use a common Sphinx version for Python 2 and 3.
+
 
 5.0.0 (2019-11-11)
 ==================
