@@ -32,7 +32,6 @@ from setuptools import Extension
 from setuptools.command.build_ext import build_ext
 from setuptools import find_packages
 from setuptools import setup
-from setuptools import Feature
 
 class optional_build_ext(build_ext):
     """This class subclasses build_ext and allows
@@ -87,22 +86,19 @@ class ModuleHeaderDir(object):
 
 include = [ModuleHeaderDir('zope.proxy')]
 
-codeoptimization = Feature(
-    "Optional code optimizations",
-    standard=True,
-    ext_modules=[
-        Extension(
-            "zope.security._proxy",
-            [os.path.join('src', 'zope', 'security', "_proxy.c")],
-            include_dirs=include,
-        ),
-        Extension(
-            "zope.security._zope_security_checker",
-            [os.path.join('src', 'zope', 'security',
-                          "_zope_security_checker.c")]
-        ),
-    ]
-)
+codeoptimization = [
+    Extension(
+        "zope.security._proxy",
+        [os.path.join('src', 'zope', 'security', "_proxy.c")],
+        include_dirs=include,
+    ),
+    Extension(
+        "zope.security._zope_security_checker",
+        [os.path.join('src', 'zope', 'security',
+                      "_zope_security_checker.c")]
+    ),
+]
+
 
 # Jython cannot build the C optimizations, while on PyPy they are
 # anti-optimizations (the C extension compatibility layer is known-slow,
@@ -114,12 +110,11 @@ is_jython = 'java' in sys.platform
 
 if is_pypy or is_jython:
     setup_requires = []
-    features = {}
+    ext_modules = []
 else:
     setup_requires = ['zope.proxy >= 4.3.0']
-    features = {
-        'codeoptimization': codeoptimization,
-    }
+    ext_modules = codeoptimization
+
 
 TESTS_REQUIRE = [
     'BTrees',
@@ -171,7 +166,7 @@ setup(name='zope.security',
       cmdclass={
           'build_ext': optional_build_ext,
       },
-      features=features,
+      ext_modules=ext_modules,
       python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
       install_requires=[
           'setuptools',
