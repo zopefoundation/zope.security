@@ -2,7 +2,7 @@
  Changes
 =========
 
-5.1.0 (unreleased)
+5.1.0 (2020-02-14)
 ==================
 
 - Let proxied interfaces be iterated on Python 3. This worked on
