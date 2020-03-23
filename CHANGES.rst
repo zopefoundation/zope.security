@@ -2,7 +2,7 @@
  Changes
 =========
 
-5.1.1 (unreleased)
+5.1.1 (2020-03-23)
 ==================
 
 - Ensure all objects have consistent interface resolution orders (if
