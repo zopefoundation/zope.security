@@ -5,6 +5,7 @@ env:
     TWINE_USERNAME: zope.wheelbuilder
     TWINE_PASSWORD:
       secure: "U6CeZtNEPDN3qKXfrLcvHFLrowqNWxmapXLWygZRxKgfR+ypowe1Y0a4kCBEBZKtysbY26MmIkrMV07tEMxny1yUWVCvRvUaQw0Ic3t5CM0R019zjVh9fQUTdWGCwri86Qj/OaeuPeMR0LCr6d9nMSun0GWSWhjOUhkTCdchfQw="
+    ZOPE_INTERFACE_STRICT_IRO: 1
 
 python:
   - 2.7

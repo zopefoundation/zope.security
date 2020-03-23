@@ -82,6 +82,7 @@ from zope.security._definitions import thread_local
 from zope.security._compat import CLASS_TYPES
 from zope.security._compat import PYTHON2
 from zope.security._compat import PURE_PYTHON
+from zope.security._compat import implementer_if_needed
 from zope.security.proxy import Proxy
 from zope.security.proxy import getChecker
 
@@ -503,7 +504,7 @@ if _c_available:
 
 _getChecker = _checkers.get
 
-@implementer(IChecker)
+@implementer_if_needed(IChecker)
 class CombinedChecker(Checker):
     """A checker that combines two other checkers in a logical-or fashion.
 
