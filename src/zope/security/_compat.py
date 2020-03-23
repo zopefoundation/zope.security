@@ -39,4 +39,25 @@ else: # pragma: no cover
     PYTHON2 = False
 
 
-_BLANK = u''
+class implementer_if_needed(object):
+    # Helper to make sure we don't redundantly implement interfaces
+    # already inherited. Doing so tends to produce problems with the
+    # C3 order. Even though here we could easily statically determine
+    # if we need the interface or not, this is used for clarity, to
+    # reduce the testing load, and to insulate against changes in
+    # super classes.
+    def __init__(self, *ifaces):
+        self._ifaces = ifaces
+
+    def __call__(self, cls):
+        from zope.interface import implementedBy
+        from zope.interface import implementer
+
+        ifaces_needed = []
+        implemented = implementedBy(cls)
+        ifaces_needed = [
+            iface
+            for iface in self._ifaces
+            if not implemented.isOrExtends(iface)
+        ]
+        return implementer(*ifaces_needed)(cls)

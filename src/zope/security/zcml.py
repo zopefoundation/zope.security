@@ -18,21 +18,22 @@ __docformat__ = 'restructuredtext'
 from zope.configuration.fields import GlobalObject
 from zope.configuration.fields import MessageID
 from zope.interface import Interface
-from zope.interface import implementer
 from zope.schema import Id
 from zope.schema.interfaces import IFromUnicode
 
+from zope.security._compat import implementer_if_needed
 from zope.security.permission import checkPermission
 from zope.security.management import setSecurityPolicy
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
-@implementer(IFromUnicode)
+
+@implementer_if_needed(IFromUnicode)
 class Permission(Id):
     r"""This field describes a permission.
     """
 
-    def fromUnicode(self, u):
-        u = super(Permission, self).fromUnicode(u)
+    def fromUnicode(self, value):
+        u = super(Permission, self).fromUnicode(value)
 
         map = getattr(self.context, 'permission_mapping', {})
         return map.get(u, u)

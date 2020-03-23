@@ -2,10 +2,12 @@
  Changes
 =========
 
-5.2.0 (unreleased)
+5.1.1 (unreleased)
 ==================
 
-- Nothing changed yet.
+- Ensure all objects have consistent interface resolution orders (if
+  all dependencies are up-to-date). See `issue 71
+  <https://github.com/zopefoundation/zope.security/issues/71>`_.
 
 
 5.1.0 (2020-02-14)
