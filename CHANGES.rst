@@ -2,10 +2,11 @@
  Changes
 =========
 
-5.1.2 (unreleased)
+5.2.0 (unreleased)
 ==================
 
-- Nothing changed yet.
+- The extra ``untrustedpython`` now for Python 3, too, installs
+  ``zope.untrustedpython``.
 
 
 5.1.1 (2020-03-23)

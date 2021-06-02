@@ -127,7 +127,7 @@ TESTS_REQUIRE = [
 
 
 setup(name='zope.security',
-      version='5.1.2.dev0',
+      version='5.2.0.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -182,10 +182,9 @@ setup(name='zope.security',
           'pytz': [
               "pytz"
           ],
-          'untrustedpython:python_version == "2.7"': [
-              'zope.untrustedpython',
+          'untrustedpython': [
+              'zope.untrustedpython >= 5.0.dev0',
           ],
-          'untrustedpython:python_version >= "3.3"': [],
           'zcml': [
               'zope.configuration'
           ],
