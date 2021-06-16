@@ -1,8 +1,11 @@
+# Currently the builds use @mgedmin's Appveyor account.  The PyPI token belongs
+# to zope.wheelbuilder, which is managed by @mgedmin and @dataflake.
+
 environment:
   global:
-    TWINE_USERNAME: zope.wheelbuilder
+    TWINE_USERNAME: __token__
     TWINE_PASSWORD:
-      secure: UcdTh6W78cRLVGfKRFoa5A==
+      secure: aoZC/+rvJKg8B5GMGIxd1YDPcIbo2kSsckCbQ6o8fhIRqSyuhX1iLm21hgDEkq2ePuyQ7+cWnNvXGactxjzA4iUS5GCOuF/E6YTvS3nGcuoQuH607wn2hngzz1p4Z+5ClFPx27vZiRAFgBoTbIo8XODHC9qFYluZ68eiwxFOiCuXK9ONEjMn8LjoaNSPJYyJO3Wr8W5oLeYG+wGcNGuYVXEk5/LSDg5n17ujpL7qsVTdVNjTwgmtnv191n2ip1Sgh1O5Xm9eG7VDZSxr/xNMpw==
 
   matrix:
     - python: 27
