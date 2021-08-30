@@ -40,16 +40,18 @@ def dottedName(klass):
         return 'None'
     return klass.__module__ + '.' + klass.__name__
 
+
 class ProtectionDeclarationException(Exception):
     """Security-protection-specific exceptions."""
     pass
 
+
 class ClassDirective(object):
 
     def __init__(self, _context, class_):
-        self.__id = dottedName(class_) # this would barf on a module, anyway
+        self.__id = dottedName(class_)  # this would barf on a module, anyway
         self.__class = class_
-        if isinstance(self.__class, ModuleType): #pragma NO COVER
+        if isinstance(self.__class, ModuleType):  # pragma: no cover
             raise ConfigurationError('Content class attribute must be a class')
         self.__context = _context
 
@@ -198,12 +200,12 @@ def protectModule(module, name, permission):
 def _names(attributes, interfaces):
     seen = {}
     for name in attributes:
-        if not name in seen:
+        if name not in seen:
             seen[name] = 1
             yield name
     for interface in interfaces:
         for name in interface:
-            if not name in seen:
+            if name not in seen:
                 seen[name] = 1
                 yield name
 

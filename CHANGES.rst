@@ -2,10 +2,10 @@
  Changes
 =========
 
-5.1.2 (unreleased)
-==================
+5.2 (unreleased)
+================
 
-- Nothing changed yet.
+- Add support for Python 3.9.
 
 
 5.1.1 (2020-03-23)

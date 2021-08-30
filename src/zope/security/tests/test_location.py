@@ -26,6 +26,7 @@ class LocationSecurityProxyTests(QuietWatchingChecker,
         from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
         from zope.security.proxy import ProxyFactory
+
         class Unlocated(object):
             a = 'a'
         unlocated = Unlocated()

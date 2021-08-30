@@ -22,10 +22,11 @@ import sys
 from zope.proxy import PyProxyBase
 from zope.security._compat import PURE_PYTHON
 from zope.security._compat import _BUILTINS
-from zope.security.interfaces import ForbiddenAttribute
+
 
 def _check_name(meth, wrap_result=True):
     name = meth.__name__
+
     def _wrapper(self, *args, **kw):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
@@ -36,8 +37,10 @@ def _check_name(meth, wrap_result=True):
         return checker.proxy(res)
     return functools.update_wrapper(_wrapper, meth)
 
+
 def _check_name_inplace(meth):
     name = meth.__name__
+
     def _wrapper(self, *args, **kw):
         wrapped = super(PyProxyBase, self).__getattribute__('_wrapped')
         checker = super(PyProxyBase, self).__getattribute__('_checker')
@@ -47,9 +50,10 @@ def _check_name_inplace(meth):
             # The proxy object cannot change; we are modifying in place.
             self._wrapped = w_meth(*args, **kw)
             return self
-        x_name = '__%s__' %  name[3:-2]
+        x_name = '__%s__' % name[3:-2]
         return ProxyPy(getattr(wrapped, x_name)(*args, **kw), checker)
     return functools.update_wrapper(_wrapper, meth)
+
 
 def _fmt_address(obj):
     # Try to replicate PyString_FromString("%p", obj), which actually uses
@@ -57,9 +61,9 @@ def _fmt_address(obj):
     # directly (and ctypes seems like overkill).
     if sys.platform != 'win32':
         return '0x%0x' % id(obj)
-    if sys.maxsize < 2**32: # pragma: no cover
+    if sys.maxsize < 2**32:  # pragma: no cover
         return '0x%08X' % id(obj)
-    return '0x%016X' % id(obj) # pragma: no cover
+    return '0x%016X' % id(obj)  # pragma: no cover
 
 
 class ProxyPy(PyProxyBase):
@@ -114,15 +118,16 @@ class ProxyPy(PyProxyBase):
             # of this object just like the Python language spec states, letting
             # them have precedence over things found in the instance. This
             # normally makes us a better proxy implementation. However, the
-            # C version of this code in _proxy doesn't take that same care and instead
-            # uses the generic object attribute access methods directly on
-            # the wrapped object. This is a behaviour difference; so far, it's
-            # only been noticed for the __module__ attribute, which checker:Global
-            # wants to override but couldn't because this object's type's __module__ would
-            # get in the way. That broke pickling, and checker:Global can't return
-            # anything more sophisticated than a str (a tuple) because it gets proxied
-            # and breaks pickling again. Our solution is to match the C version for this
-            # one attribute.
+            # C version of this code in _proxy doesn't take that same care and
+            # instead uses the generic object attribute access methods directly
+            # on the wrapped object. This is a behaviour difference; so far,
+            # it's only been noticed for the __module__ attribute, which
+            # checker:Global wants to override but couldn't because this
+            # object's type's __module__ would get in the way. That broke
+            # pickling, and checker:Global can't return anything more
+            # sophisticated than a str (a tuple) because it gets proxied and
+            # breaks pickling again. Our solution is to match the C version for
+            # this one attribute.
             val = getattr(wrapped, name)
         else:
             val = super(ProxyPy, self).__getattribute__(name)
@@ -146,8 +151,8 @@ class ProxyPy(PyProxyBase):
         # explicitly do the same. The consequence is that we lose a
         # good stack trace if the object implemented its own methods
         # but we're consistent. We would provide a better error
-        # message or even subclass of AttributeError, but that's liable to break
-        # (doc)tests.
+        # message or even subclass of AttributeError, but that's liable to
+        # break (doc)tests.
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         checker = super(ProxyPy, self).__getattribute__('_checker')
         checker.check_getattr(wrapped, name)
@@ -170,7 +175,7 @@ class ProxyPy(PyProxyBase):
         delattr(wrapped, name)
 
     @_check_name
-    def __getslice__(self, start, end):
+    def __getslice__(self, start, end):  # pragma: no cover PY2
         wrapped = object.__getattribute__(self, '_wrapped')
         try:
             getslice = wrapped.__getslice__
@@ -179,7 +184,7 @@ class ProxyPy(PyProxyBase):
         return getslice(start, end)
 
     @_check_name
-    def __setslice__(self, start, end, value):
+    def __setslice__(self, start, end, value):  # pragma: no cover PY2
         wrapped = object.__getattribute__(self, '_wrapped')
         try:
             setslice = wrapped.__setslice__
@@ -187,10 +192,10 @@ class ProxyPy(PyProxyBase):
             return wrapped.__setitem__(slice(start, end), value)
         return setslice(start, end, value)
 
-    def __cmp__(self, other):
+    def __cmp__(self, other):  # pragma: no cover PY2
         # no check
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return cmp(wrapped, other)
+        return cmp(wrapped, other)  # noqa: F821 undefined name 'cmp'
 
     def __lt__(self, other):
         # no check
@@ -243,7 +248,7 @@ class ProxyPy(PyProxyBase):
         else:
             return hint()
 
-    def __coerce__(self, other):
+    def __coerce__(self, other):  # pragma: no cover PY2
         # For some reason _check_name does not work for coerce()
         wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
         checker = super(ProxyPy, self).__getattribute__('_checker')
@@ -258,10 +263,10 @@ class ProxyPy(PyProxyBase):
         # the wrong type of object.
         except TypeError:
             raise
-        except:
+        except:  # noqa: E722 do not use bare 'except'
             # The C implementation catches all exceptions.
             wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-            return '<security proxied %s.%s instance at %s>' %(
+            return '<security proxied %s.%s instance at %s>' % (
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
                 _fmt_address(wrapped))
 
@@ -273,28 +278,29 @@ class ProxyPy(PyProxyBase):
         # the wrong type of object.
         except TypeError:
             raise
-        except:
+        except:  # noqa: E722 do not use bare 'except'
             wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-            return '<security proxied %s.%s instance at %s>' %(
+            return '<security proxied %s.%s instance at %s>' % (
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
                 _fmt_address(wrapped))
 
+
 for name in ['__call__',
-             #'__repr__',
-             #'__str__',
-             #'__unicode__', # Unchecked in C proxy
+             # '__repr__',
+             # '__str__',
+             # '__unicode__', # Unchecked in C proxy
              '__reduce__',
              '__reduce_ex__',
-             #'__lt__',      # Unchecked in C proxy (rich coparison)
-             #'__le__',      # Unchecked in C proxy (rich coparison)
-             #'__eq__',      # Unchecked in C proxy (rich coparison)
-             #'__ne__',      # Unchecked in C proxy (rich coparison)
-             #'__ge__',      # Unchecked in C proxy (rich coparison)
-             #'__gt__',      # Unchecked in C proxy (rich coparison)
-             #'__nonzero__', # Unchecked in C proxy (rich coparison)
-             #'__bool__',    # Unchecked in C proxy (rich coparison)
-             #'__hash__',    # Unchecked in C proxy (rich coparison)
-             #'__cmp__',     # Unchecked in C proxy
+             # '__lt__',      # Unchecked in C proxy (rich coparison)
+             # '__le__',      # Unchecked in C proxy (rich coparison)
+             # '__eq__',      # Unchecked in C proxy (rich coparison)
+             # '__ne__',      # Unchecked in C proxy (rich coparison)
+             # '__ge__',      # Unchecked in C proxy (rich coparison)
+             # '__gt__',      # Unchecked in C proxy (rich coparison)
+             # '__nonzero__', # Unchecked in C proxy (rich coparison)
+             # '__bool__',    # Unchecked in C proxy (rich coparison)
+             # '__hash__',    # Unchecked in C proxy (rich coparison)
+             # '__cmp__',     # Unchecked in C proxy
              '__getitem__',
              '__setitem__',
              '__delitem__',
@@ -341,7 +347,7 @@ for name in ['__call__',
              '__rand__',
              '__rxor__',
              '__ror__',
-            ]:
+             ]:
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name(meth))
 
@@ -364,15 +370,17 @@ for name in ['__iadd__',
              '__ixor__',
              '__ior__',
              '__ipow__',
-            ]:
+             ]:
     meth = getattr(PyProxyBase, name)
     setattr(ProxyPy, name, _check_name_inplace(meth))
+
 
 def getCheckerPy(proxy):
     return super(ProxyPy, proxy).__getattribute__('_checker')
 
 
 _builtin_isinstance = sys.modules[_BUILTINS].isinstance
+
 
 def getObjectPy(proxy):
     if not _builtin_isinstance(proxy, ProxyPy):
@@ -381,10 +389,10 @@ def getObjectPy(proxy):
 
 
 _c_available = not PURE_PYTHON
-if _c_available:
+if _c_available:  # pragma: no cover
     try:
         from zope.security._proxy import _Proxy
-    except (ImportError, AttributeError): # pragma: no cover PyPy / PURE_PYTHON
+    except (ImportError, AttributeError):
         _c_available = False
 
 
@@ -392,12 +400,13 @@ getChecker = getCheckerPy
 getObject = getObjectPy
 Proxy = ProxyPy
 
-if _c_available:
+if _c_available:  # pragma: no cover
     from zope.security._proxy import getChecker
     from zope.security._proxy import getObject
     Proxy = _Proxy
 
 removeSecurityProxy = getObject
+
 
 def getTestProxyItems(proxy):
     """Return a sorted sequence of checker names and permissions for testing

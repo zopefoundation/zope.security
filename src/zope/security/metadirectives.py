@@ -26,13 +26,15 @@ import zope.security.zcml
 from zope.security.i18n import ZopeMessageFactory as _
 from zope.security.zcml import Permission
 
+
 class IClassDirective(zope.interface.Interface):
     """Make statements about a class"""
 
     class_ = zope.configuration.fields.GlobalObject(
         title=_("Class"),
         required=True
-        )
+    )
+
 
 class IImplementsSubdirective(zope.interface.Interface):
     """Declare that the class given by the content directive's class
@@ -43,7 +45,8 @@ class IImplementsSubdirective(zope.interface.Interface):
         title=_("One or more interfaces"),
         required=True,
         value_type=zope.configuration.fields.GlobalInterface()
-        )
+    )
+
 
 class IRequireSubdirective(zope.interface.Interface):
     """Indicate that the a specified list of names or the names in a
@@ -56,7 +59,7 @@ class IRequireSubdirective(zope.interface.Interface):
         Specifies the permission by id that will be required to
         access or mutate the attributes and methods specified."""),
         required=False,
-        )
+    )
 
     attributes = zope.configuration.fields.Tokens(
         title=_("Attributes and methods"),
@@ -64,7 +67,7 @@ class IRequireSubdirective(zope.interface.Interface):
                       " that can be accessed."),
         required=False,
         value_type=zope.configuration.fields.PythonIdentifier(),
-        )
+    )
 
     set_attributes = zope.configuration.fields.Tokens(
         title=_("Attributes that can be set"),
@@ -72,7 +75,7 @@ class IRequireSubdirective(zope.interface.Interface):
                       " modified/mutated."),
         required=False,
         value_type=zope.configuration.fields.PythonIdentifier(),
-        )
+    )
 
     interface = zope.configuration.fields.Tokens(
         title=_("Interfaces"),
@@ -80,7 +83,7 @@ class IRequireSubdirective(zope.interface.Interface):
                       " can be accessed."),
         required=False,
         value_type=zope.configuration.fields.GlobalInterface(),
-        )
+    )
 
     set_schema = zope.configuration.fields.Tokens(
         title=_("The attributes specified by the schema can be set"),
@@ -88,7 +91,7 @@ class IRequireSubdirective(zope.interface.Interface):
                       " modified/mutated."),
         required=False,
         value_type=zope.configuration.fields.GlobalInterface(),
-        )
+    )
 
     like_class = zope.configuration.fields.GlobalObject(
         title=_("Configure like this class"),
@@ -97,7 +100,8 @@ class IRequireSubdirective(zope.interface.Interface):
         same way the specified class' security is. If this argument is
         specified, no other argument can be used."""),
         required=False,
-        )
+    )
+
 
 class IAllowSubdirective(zope.interface.Interface):
     """
@@ -110,13 +114,14 @@ class IAllowSubdirective(zope.interface.Interface):
         title=_("Attributes"),
         required=False,
         value_type=zope.configuration.fields.PythonIdentifier(),
-        )
+    )
 
     interface = zope.configuration.fields.Tokens(
         title=_("Interface"),
         required=False,
         value_type=zope.configuration.fields.GlobalInterface(),
-        )
+    )
+
 
 class IFactorySubdirective(zope.interface.Interface):
     """Specify the factory used to create this content object"""
@@ -128,21 +133,22 @@ class IFactorySubdirective(zope.interface.Interface):
         identification scheme.  If not given, defaults to the literal
         string given as the content directive's 'class' attribute."""),
         required=False,
-        )
+    )
 
     title = zope.configuration.fields.MessageID(
         title=_("Title"),
         description=_("Text suitable for use in the 'add content' menu"
                       " of a management interface"),
         required=False,
-        )
+    )
 
     description = zope.configuration.fields.MessageID(
         title=_("Description"),
         description=_("Longer narrative description of what this"
                       " factory does"),
         required=False,
-        )
+    )
+
 
 class IModule(Interface):
     """Group security declarations about a module"""

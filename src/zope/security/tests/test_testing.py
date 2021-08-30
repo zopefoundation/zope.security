@@ -18,6 +18,7 @@ from zope.testing.cleanup import CleanUp
 from zope.security import testing
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
+
 class TestTestingFunctions(CleanUp,
                            unittest.TestCase):
 
@@ -50,6 +51,7 @@ class TestTestingFunctions(CleanUp,
 
     def test_contextmanager_ends_interaction_on_exception(self):
         from zope.security.management import queryInteraction
+
         class MyError(Exception):
             pass
 
@@ -59,7 +61,6 @@ class TestTestingFunctions(CleanUp,
 
         self.assertFalse(queryInteraction())
 
-
     def test_addCheckerPublic(self):
         from zope import component
         from zope.security.interfaces import IPermission
@@ -67,8 +68,6 @@ class TestTestingFunctions(CleanUp,
         perm = testing.addCheckerPublic()
         utility = component.getUtility(IPermission, name=zope_Public)
         self.assertIs(perm, utility)
-
-
 
 
 def test_suite():

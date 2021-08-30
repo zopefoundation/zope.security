@@ -33,10 +33,12 @@ from setuptools.command.build_ext import build_ext
 from setuptools import find_packages
 from setuptools import setup
 
+
 class optional_build_ext(build_ext):
     """This class subclasses build_ext and allows
        the building of C extensions to fail.
     """
+
     def run(self):
         try:
             build_ext.run(self)
@@ -59,14 +61,17 @@ class optional_build_ext(build_ext):
         print('*' * 80)
 
 
-
 here = os.path.abspath(os.path.dirname(__file__))
+
+
 def read(*rnames):
     with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
         return f.read()
 
 # Include directories for C extensions
 # Sniff the location of the headers in the package distribution
+
+
 class ModuleHeaderDir(object):
 
     def __init__(self, require_spec, where='../..'):
@@ -83,6 +88,7 @@ class ModuleHeaderDir(object):
         require(self._require_spec)
         path = resource_filename(self._require_spec, self._where)
         return os.path.abspath(path)
+
 
 include = [ModuleHeaderDir('zope.proxy')]
 
@@ -127,7 +133,7 @@ TESTS_REQUIRE = [
 
 
 setup(name='zope.security',
-      version='5.1.2.dev0',
+      version='5.2.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -150,6 +156,7 @@ setup(name='zope.security',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
@@ -197,4 +204,4 @@ setup(name='zope.security',
       },
       include_package_data=True,
       zip_safe=False,
-)
+      )

@@ -62,12 +62,14 @@ from zope.security.i18n import ZopeMessageFactory as _
 #: .. versionadded:: 4.2.0
 PUBLIC_PERMISSION_NAME = 'zope.Public'
 
+
 class IUnauthorized(IException):
     """
     The action is not authorized.
 
     Implemented in :class:`Unauthorized`.
     """
+
 
 @implementer(IUnauthorized)
 class Unauthorized(Exception):
@@ -77,12 +79,14 @@ class Unauthorized(Exception):
     Default implementation of :class:`IUnauthorized`.
     """
 
+
 class IForbidden(IException):
     """
     A resource cannot be accessed under any circumstances
 
     Implemented in :class:`Forbidden`.
     """
+
 
 @implementer(IForbidden)
 class Forbidden(Exception):
@@ -92,12 +96,14 @@ class Forbidden(Exception):
     Default implementation if :class:`IForbidden`.
     """
 
+
 class IForbiddenAttribute(IForbidden, IAttributeError):
     """
     An attribute is unavailable because it is forbidden (private).
 
     Implemented in :class:`ForbiddenAttribute`.
     """
+
 
 @implementer(IForbiddenAttribute)
 class ForbiddenAttribute(Forbidden, AttributeError):
@@ -137,9 +143,9 @@ class ISecurityChecking(Interface):
 
         :param str permission: The permission name.
         :param object: The object being accessed according to the permission.
-        :keyword interaction: An :class:`IInteraction`, providing access to information
-            such as authenticated principals.  If it is None, the current
-            interaction is used.
+        :keyword interaction: An :class:`IInteraction`, providing access to
+            information such as authenticated principals.  If it is None, the
+            current interaction is used.
         """
 
 
@@ -257,7 +263,8 @@ class INameBasedChecker(IChecker):
         """
         Return the permission used to check attribute access on *name*.
 
-        This permission is used by both :meth:`check` and :meth:`check_getattr`.
+        This permission is used by both :meth:`check` and
+        :meth:`check_getattr`.
         """
 
     def setattr_permission_id(name):
@@ -322,6 +329,7 @@ class NoInteraction(Exception):
     """No interaction started
     """
 
+
 class IInteractionManagement(Interface):
     """
     Interaction management API.
@@ -361,6 +369,7 @@ class IInteractionManagement(Interface):
 
         Does nothing if there is no interaction.
         """
+
 
 class IPrincipal(Interface):
     """
@@ -417,7 +426,9 @@ class IGroupAwarePrincipal(IPrincipal):
     """
 
     groups = Attribute(
-        'An iterable of :class:`IGroup` objects to which the principal directly belongs')
+        'An iterable of :class:`IGroup` objects to which the principal'
+        ' directly belongs')
+
 
 class IGroupClosureAwarePrincipal(IGroupAwarePrincipal):
     """
@@ -428,10 +439,12 @@ class IGroupClosureAwarePrincipal(IGroupAwarePrincipal):
     allGroups = Attribute(
         "An iterable of the full closure of the principal's groups.")
 
+
 class IGroup(IPrincipal):
     """
     Group of principals
     """
+
 
 class IMemberGetterGroup(IGroup):
     """
@@ -440,6 +453,7 @@ class IMemberGetterGroup(IGroup):
 
     def getMembers():
         """Return an iterable of the members of the group"""
+
 
 class IMemberAwareGroup(IMemberGetterGroup):
     """
@@ -451,6 +465,7 @@ class IMemberAwareGroup(IMemberGetterGroup):
         Set members of group to the principal IDs in the iterable
         *value*.
         """
+
 
 class IPermission(Interface):
     """A permission object.

@@ -17,6 +17,7 @@ import unittest
 from zope.component.testing import PlacelessSetup
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
+
 class PermissionTests(unittest.TestCase):
 
     def _getTargetClass(self):
@@ -62,7 +63,7 @@ class Test_checkPermission(PlacelessSetup, unittest.TestCase):
 
     def test_w_CheckerPublic(self):
         from zope.security.checker import CheckerPublic
-        self._callFUT(None, CheckerPublic) # no raise
+        self._callFUT(None, CheckerPublic)  # no raise
 
     def test_miss(self):
         self.assertRaises(ValueError, self._callFUT, None, 'nonesuch')
@@ -72,7 +73,7 @@ class Test_checkPermission(PlacelessSetup, unittest.TestCase):
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
-        self._callFUT(None, 'testing') # no raise
+        self._callFUT(None, 'testing')  # no raise
 
 
 class Test_allPermissions(PlacelessSetup, unittest.TestCase):
@@ -143,7 +144,6 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
         from zope.security.interfaces import IPermission
         from zope.schema import getValidationErrors
 
-
         xmlconfig.file('configure.zcml', zope.security)
         vocabulary = self._callFUT()
         vocabulary = sorted(vocabulary, key=lambda term: term.token)
@@ -154,6 +154,7 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
             __traceback_info__ = term.token, p
             verifyObject(IPermission, p)
             self.assertEqual([], getValidationErrors(IPermission, p))
+
 
 class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
 

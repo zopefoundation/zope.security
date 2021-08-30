@@ -37,6 +37,7 @@ rules = [
 ]
 output_checker = renormalizing.RENormalizing(rules)
 
+
 @interface.implementer(interfaces.IPrincipal)
 class Principal(object):
     """
@@ -55,8 +56,10 @@ class Principal(object):
 @interface.implementer(interfaces.IParticipation)
 class Participation(object):
     """
-    A trivial implementation of :class:`zope.security.interfaces.IParticipation`.
+    A trivial implementation of
+    :class:`zope.security.interfaces.IParticipation`.
     """
+
     def __init__(self, principal):
         self.principal = principal
         self.interaction = None
@@ -81,6 +84,7 @@ def addCheckerPublic():
     gsm.registerUtility(perm, interfaces.IPermission, perm.id)
 
     return perm
+
 
 def create_interaction(principal_id, **kw):
     """

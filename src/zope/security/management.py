@@ -52,9 +52,11 @@ moduleProvides(
 #   ISecurityManagement implementation
 #
 
+
 def getSecurityPolicy():
     """Get the system default security policy."""
     return _defaultPolicy
+
 
 def setSecurityPolicy(aSecurityPolicy):
     """Set the system default security policy, and return the previous
@@ -78,6 +80,7 @@ def queryInteraction():
     """Return a current interaction, if there is one."""
     return getattr(thread_local, 'interaction', None)
 
+
 def getInteraction():
     """Get the current interaction."""
     try:
@@ -85,13 +88,15 @@ def getInteraction():
     except AttributeError:
         raise NoInteraction
 
+
 class ExistingInteraction(ValueError,
-                          AssertionError, #BBB
-                         ):
+                          AssertionError,  # BBB
+                          ):
     """
     The exception that :func:`newInteraction` will raise if called
     during an existing interaction.
     """
+
 
 def newInteraction(*participations):
     """Start a new interaction."""
@@ -99,6 +104,7 @@ def newInteraction(*participations):
         raise ExistingInteraction("newInteraction called"
                                   " while another interaction is active.")
     thread_local.interaction = getSecurityPolicy()(*participations)
+
 
 def endInteraction():
     """End the current interaction."""
@@ -116,6 +122,7 @@ def endInteraction():
     else:
         del thread_local.interaction
 
+
 def restoreInteraction():
     try:
         previous = thread_local.previous_interaction
@@ -126,6 +133,7 @@ def restoreInteraction():
             pass
     else:
         thread_local.interaction = previous
+
 
 def checkPermission(permission, object, interaction=None):
     """Return whether security policy allows permission on object.
@@ -155,9 +163,10 @@ def _clear():
     global _defaultPolicy
     _defaultPolicy = ParanoidSecurityPolicy
 
+
 try:
     from zope.testing.cleanup import addCleanUp
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     pass
 else:
     addCleanUp(_clear)
