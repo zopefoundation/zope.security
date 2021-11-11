@@ -617,25 +617,6 @@ class AbstractProxyTestBase(object):
         self.assertRaises(ForbiddenAttribute, lambda: pow(x, proxy))
         self.assertEqual(checker._checked, '__rpow__')
 
-    @unittest.expectedFailure
-    def test___pow___w_z_proxied_allowed2(self):
-        # There is no method `__3pow__` - is this test obsolete?
-        x, y, z = 3, 4, 7
-        checker = DummyChecker()
-        proxy = self._makeOne(z, checker)
-        self.assertEqual(pow(x, y, proxy), pow(x, y, z))
-        self.assertEqual(checker._checked, '__3pow__')  # pragma: no cover
-
-    @unittest.expectedFailure
-    def test___pow___w_z_proxied_forbidden2(self):
-        # There is no method `__3pow__` - is this test obsolete?
-        from zope.security.interfaces import ForbiddenAttribute
-        x, y, z = 3, 4, 7
-        checker = DummyChecker(ForbiddenAttribute)
-        proxy = self._makeOne(z, checker)
-        self.assertRaises(ForbiddenAttribute, lambda: pow(x, y, proxy))
-        self.assertEqual(checker._checked, '__3pow__')  # pragma: no cover
-
     def test___neg___w_checker_allows(self):
         target = 3
         checker = DummyChecker()
