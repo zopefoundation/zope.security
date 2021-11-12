@@ -200,6 +200,8 @@ setup(name='zope.security',
           'docs': [
               'Sphinx',
               'repoze.sphinx.autointerface',
+              'zope.configuration',
+              'zope.testing',
           ],
       },
       include_package_data=True,
