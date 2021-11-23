@@ -135,7 +135,7 @@ def ProxyFactory(object, checker=None):
 directlyProvides(ProxyFactory, ISecurityProxyFactory)
 
 # This import represents part of the API for the proxy module
-from . import proxy
+from . import proxy  # noqa: E402 module level import not at top
 proxy.ProxyFactory = ProxyFactory
 
 

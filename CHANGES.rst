@@ -5,7 +5,7 @@
 5.2 (unreleased)
 ================
 
-- Add support for Python 3.9.
+- Add support for Python 3.9 and 3.10.
 
 
 5.1.1 (2020-03-23)

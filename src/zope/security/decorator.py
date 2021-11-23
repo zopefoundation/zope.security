@@ -74,6 +74,6 @@ class DecoratorBase(SpecificationDecoratorBase, SecurityCheckerDecoratorBase):
 # location proxy from here.
 # This is the only sane place we found for doing it: it kicks in as soon
 # as someone starts using security proxies.
-import zope.location.location
+import zope.location.location  # noqa: E402 module level import not at top
 zope.location.location.LocationProxy.__Security_checker__ = (
     DecoratedSecurityCheckerDescriptor())
