@@ -346,11 +346,11 @@ static struct PyMethodDef Checker_methods[] = {
    "setattr_permission_id(name) -- Return the permission neded to set the name"
   },
   {"check_getattr", (PyCFunction)Checker_check, METH_VARARGS,
-   "check_getattr(object, name) -- Check whether a getattr is allowes"},
+   "check_getattr(object, name) -- Check whether a getattr is allowed"},
   {"check_setattr", (PyCFunction)Checker_check_setattr, METH_VARARGS,
-   "check_setattr(object, name) -- Check whether a setattr is allowes"},
+   "check_setattr(object, name) -- Check whether a setattr is allowed"},
   {"check", (PyCFunction)Checker_check, METH_VARARGS,
-   "check(object, opname) -- Check whether an operation is allowes"},
+   "check(object, opname) -- Check whether an operation is allowed"},
   {"proxy", (PyCFunction)Checker_proxy, METH_O,
    "proxy(object) -- Security-proxy an object"},
 
