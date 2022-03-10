@@ -143,7 +143,6 @@ jobs:
         run: |
           pip install -U pip
           pip install -U setuptools wheel twine cffi
-          pip install -U coveralls coverage
 
       - name: Build zope.security
         run: |
@@ -152,7 +151,6 @@ jobs:
           python setup.py build_ext -i
           python setup.py bdist_wheel
           # Also install it, so that we get dependencies in the (pip) cache.
-          pip install -U coverage
           pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
           pip install .[test]
 
@@ -169,7 +167,11 @@ jobs:
         # We cannot 'uses: pypa/gh-action-pypi-publish@v1.4.1' because
         # that's apparently a container action, and those don't run on
         # the Mac.
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && startsWith(runner.os, 'Mac') && !startsWith(matrix.python-version, 'pypy')
+        if: >
+          github.event_name == 'push'
+          && startsWith(github.ref, 'refs/tags')
+          && startsWith(runner.os, 'Mac')
+          && !startsWith(matrix.python-version, 'pypy')
         env:
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         run: |
@@ -234,7 +236,7 @@ jobs:
       - name: Install zope.security
         run: |
           pip install -U wheel setuptools
-          pip install -U coverage coverage-python-version
+          pip install -U coverage
           pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
           # Unzip into src/ so that testrunner can find the .so files
           # when we ask it to load tests from that directory. This
@@ -444,7 +446,9 @@ jobs:
         run: sudo chown -R $(whoami) ${{ steps.pip-cache.outputs.dir }}
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@v1.4.1
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        if: >
+          github.event_name == 'push'
+          && startsWith(github.ref, 'refs/tags')
         with:
           user: __token__
           password: ${{ secrets.TWINE_PASSWORD }}
