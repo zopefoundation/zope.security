@@ -30,6 +30,7 @@ from zope.security.proxy import getChecker
 class DecoratedSecurityCheckerDescriptor(object):
     """Descriptor for a Decorator that provides a decorated security checker.
     """
+
     def __get__(self, inst, cls=None):
         if inst is None:
             return self
@@ -58,7 +59,7 @@ class DecoratedSecurityCheckerDescriptor(object):
 
 
 class SecurityCheckerDecoratorBase(ProxyBase):
-    """Base class for a proxy that provides additional security declarations."""
+    """Base class for proxy that provides additional security declarations."""
 
     __Security_checker__ = DecoratedSecurityCheckerDescriptor()
 
@@ -73,6 +74,6 @@ class DecoratorBase(SpecificationDecoratorBase, SecurityCheckerDecoratorBase):
 # location proxy from here.
 # This is the only sane place we found for doing it: it kicks in as soon
 # as someone starts using security proxies.
-import zope.location.location
+import zope.location.location  # noqa: E402 module level import not at top
 zope.location.location.LocationProxy.__Security_checker__ = (
     DecoratedSecurityCheckerDescriptor())

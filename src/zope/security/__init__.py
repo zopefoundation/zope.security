@@ -21,4 +21,3 @@ from zope.security.checker import canWrite, canAccess
 # zope.location's LocationProxy as soon someone uses security proxies by
 # importing zope.security.proxy:
 import zope.security.decorator
-

@@ -83,7 +83,7 @@ class Test(unittest.TestCase):
         from zope.security.management import newInteraction
         from zope.security.management import queryInteraction
         newInteraction()
-        interaction = queryInteraction()
+        queryInteraction()
         endInteraction()
         self.assertEqual(queryInteraction(), None)
         endInteraction()
@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
         from zope.security.management import restoreInteraction
         newInteraction()
         self.assertTrue(queryInteraction() is not None)
-        restoreInteraction() # restore to no interaction
+        restoreInteraction()  # restore to no interaction
         self.assertTrue(queryInteraction() is None)
 
     def test_restoreInteraction_after_neither(self):
@@ -169,7 +169,6 @@ class Test(unittest.TestCase):
         self.assertEqual(checkPermission('zope.Test', obj), False)
         self.assertEqual(checkPermission(None, obj), True)
         self.assertEqual(checkPermission(CheckerPublic, obj), True)
-
 
     def test_system_user(self):
         from zope.interface.verify import verifyObject

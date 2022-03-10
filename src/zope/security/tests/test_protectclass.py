@@ -16,6 +16,7 @@
 import unittest
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
+
 class Test_protectName(unittest.TestCase):
 
     def setUp(self):

@@ -20,10 +20,12 @@ from zope.security import interfaces
 
 thread_local = threading.local()
 
+
 @zope.interface.implementer(interfaces.ISystemPrincipal)
 class SystemUser(object):
     id = u'zope.security.management.system_user'
     title = u'System'
     description = u''
+
 
 system_user = SystemUser()

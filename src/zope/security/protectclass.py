@@ -37,6 +37,7 @@ def protectName(class_, name, permission):
     protections = checker.get_permissions
     protections[name] = permission
 
+
 def protectSetAttribute(class_, name, permission):
     """Set a permission on a particular name."""
     checker = getCheckerForInstancesOf(class_)
@@ -57,6 +58,7 @@ def protectSetAttribute(class_, name, permission):
     # checkers because they use a 'shared dummy dict'.
     protections = checker.set_permissions
     protections[name] = permission
+
 
 def protectLikeUnto(class_, like_unto):
     """Use the protections from like_unto for the given class."""

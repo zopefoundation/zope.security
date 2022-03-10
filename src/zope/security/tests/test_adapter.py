@@ -21,6 +21,7 @@ from zope.proxy import getProxiedObject
 
 # pylint:disable=attribute-defined-outside-init,protected-access
 
+
 class Test_assertLocation(unittest.TestCase):
 
     def _callFUT(self, adapter, parent):
@@ -49,6 +50,7 @@ class Test_assertLocation(unittest.TestCase):
 
     def test_w_ILocation_w_parent(self):
         parent = object()
+
         @implementer(ILocation)
         class _Adapter(object):
             __parent__ = parent
@@ -73,6 +75,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
             __name__ = 'testing'
             __module__ = 'zope.security.tests.test_adapter'
             _called_with = ()
+
             def __call__(self, *args):
                 self._called_with = args
                 return self
@@ -88,6 +91,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
     def test__call__w_non_ILocation_non_spacesuit(self):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -97,11 +101,12 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in returned.__dict__.items()
                  if k != '_called_with'}
         self.assertEqual(factory._called_with, (adapter,))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_non_ILocation_non_spacesuit_multiple_args(self):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -112,13 +117,14 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in returned.__dict__.items()
                  if k != '_called_with'}
         self.assertEqual(factory._called_with, (adapter, extra))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_existing_parent_non_spacesuit(self):
         factory = self._makeFactory()
         parent = factory.__parent__ = object()
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -131,6 +137,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory.__parent__ = None
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -143,6 +150,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -157,13 +165,14 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with',)}
         self.assertEqual(factory._called_with, (adapter,))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_non_ILocation_w_spacesuit_multiple_args(self):
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -179,15 +188,17 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with',)}
         self.assertEqual(factory._called_with, (adapter, extra))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_non_ILocation_multiple_args_extra_spacesuit(self):
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
+
         class _Extra(object):
             pass
         adapter = _NotAdapter()
@@ -203,7 +214,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with',)}
         self.assertEqual(factory._called_with, (adapter, extra))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_spacesuit(self):
         from zope.security.proxy import getObject
@@ -213,6 +224,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory.__parent__ = factory.__name__ = None
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _Adapter(object):
             pass
         adapter = _Adapter()
@@ -229,7 +241,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
                  if k not in ('_called_with', '__parent__')}
         self.assertEqual(factory._called_with, (adapter,))
         self.assertIs(factory.__parent__, adapter)
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_spacesuit_w_existing_parent(self):
         from zope.security.proxy import getObject
@@ -240,6 +252,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory.__parent__ = parent = object()
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _Adapter(object):
             pass
         adapter = _Adapter()
@@ -255,7 +268,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with', '__parent__')}
         self.assertEqual(factory._called_with, (adapter,))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
 
 class TrustedAdapterFactoryTests(unittest.TestCase):
@@ -271,6 +284,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         class _Factory(object):
             __name__ = 'testing'
             __module__ = 'zope.security.tests.test_adapter'
+
             def __call__(self, *args):
                 self._called_with = args
                 return self
@@ -281,6 +295,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -294,13 +309,14 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with',)}
         self.assertEqual(factory._called_with, (adapter,))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_non_ILocation_w_spacesuit_multiple_args(self):
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -315,15 +331,17 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with',)}
         self.assertEqual(factory._called_with, (adapter, extra))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_non_ILocation_multiple_args_extra_spacesuit(self):
         from zope.security.proxy import ProxyFactory
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
+
         class _Extra(object):
             pass
         adapter = _NotAdapter()
@@ -338,7 +356,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with',)}
         self.assertEqual(factory._called_with, (adapter, extra))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_spacesuit(self):
         from zope.security.proxy import ProxyFactory
@@ -347,6 +365,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         factory.__parent__ = factory.__name__ = None
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _Adapter(object):
             pass
         adapter = _Adapter()
@@ -361,7 +380,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with', '__parent__')}
         self.assertEqual(factory._called_with, (adapter,))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_spacesuit_w_existing_parent(self):
         from zope.security.proxy import ProxyFactory
@@ -371,6 +390,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         factory.__parent__ = parent = object()
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _Adapter(object):
             pass
         adapter = _Adapter()
@@ -385,7 +405,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in unwrapped.__dict__.items()
                  if k not in ('_called_with', '__parent__')}
         self.assertEqual(factory._called_with, (adapter,))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
 
 class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
@@ -402,6 +422,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
             __name__ = 'testing'
             __module__ = 'zope.security.tests.test_adapter'
             _called_with = ()
+
             def __call__(self, *args):
                 self._called_with = args
                 return self
@@ -417,6 +438,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
     def test__call__w_non_ILocation(self):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -428,11 +450,12 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in returned.__dict__.items()
                  if k != '_called_with'}
         self.assertEqual(factory._called_with, (adapter,))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_non_ILocation_multiple_args(self):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -445,13 +468,14 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         after = {k: v for k, v in returned.__dict__.items()
                  if k != '_called_with'}
         self.assertEqual(factory._called_with, (adapter, extra))
-        self.assertEqual(after, before) # no added attrs
+        self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_existing_parent(self):
         factory = self._makeFactory()
         parent = factory.__parent__ = object()
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()
@@ -464,6 +488,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         factory.__parent__ = None
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
+
         class _NotAdapter(object):
             pass
         adapter = _NotAdapter()

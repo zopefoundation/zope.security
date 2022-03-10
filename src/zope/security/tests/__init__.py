@@ -9,7 +9,8 @@ class QuietWatchingChecker(object):
     def setUp(self):
         from zope.security import checker
         self.__old_file = checker.CheckerLoggingMixin._file
-        checker.CheckerLoggingMixin._file = io.StringIO() if bytes is not str else io.BytesIO()
+        checker.CheckerLoggingMixin._file = (
+            io.StringIO() if bytes is not str else io.BytesIO())
 
     def tearDown(self):
         from zope.security import checker

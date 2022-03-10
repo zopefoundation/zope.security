@@ -35,7 +35,7 @@ class ConformsToIInteraction(object):
 
 class ParanoidSecurityPolicyTests(unittest.TestCase,
                                   ConformsToIInteraction,
-                                 ):
+                                  ):
 
     def _getTargetClass(self):
         from zope.security.simplepolicies import ParanoidSecurityPolicy
@@ -87,6 +87,7 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
 
     def test_checkPermission_w_non_public_only_system_user(self):
         from zope.security._definitions import system_user
+
         class Participation(object):
             interaction = None
             principal = system_user
@@ -110,6 +111,7 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         policy = self._makeOne()
         self.assertTrue(policy.checkPermission(None, None))
         self.assertTrue(policy.checkPermission(self, self))
+
 
 class PermissiveSecurityPolicyTests(unittest.TestCase,
                                     ConformsToIInteraction):

@@ -65,12 +65,14 @@ class ISecurityPolicyDirective(Interface):
         description=u"Pointer to the object that will handle the security.",
         required=True)
 
+
 def securityPolicy(_context, component):
     _context.action(
         discriminator='defaultPolicy',
         callable=setSecurityPolicy,
         args=(component,)
     )
+
 
 class IPermissionDirective(Interface):
     """Define a new security object."""
@@ -90,12 +92,14 @@ class IPermissionDirective(Interface):
         description=u"Provides a description for the object.",
         required=False)
 
+
 def permission(_context, id, title, description=u''):
     from zope.security.interfaces import IPermission
     from zope.security.permission import Permission
     from zope.component.zcml import utility
     permission = Permission(id, title, description)
     utility(_context, IPermission, permission, name=id)
+
 
 class IRedefinePermission(Interface):
     """Define a permission to replace another permission."""
@@ -109,6 +113,7 @@ class IRedefinePermission(Interface):
         title=u"Substituted permission",
         description=u"Substituted permission ID.",
         required=True)
+
 
 def redefinePermission(_context, from_, to):
     _context = _context.context

@@ -1,0 +1,62 @@
+# Generated from:
+# https://github.com/zopefoundation/meta/tree/master/config/c-code
+[meta]
+template = "c-code"
+commit-id = "15807bd13de45b79c7da560a377fe3f22cbc4338"
+
+[python]
+with-appveyor = true
+with-windows = false
+with-pypy = true
+with-future-python = false
+with-legacy-python = true
+with-docs = true
+with-sphinx-doctests = true
+
+[tox]
+use-flake8 = true
+additional-envlist = [
+    "py27-watch, py37-watch",
+    ]
+testenv-setenv = [
+    "ZOPE_INTERFACE_STRICT_IRO=1",
+    "watch: ZOPE_WATCH_CHECKERS = 1",
+    ]
+
+[coverage]
+fail-under = 99.5
+
+[manifest]
+additional-rules = [
+    "include *.sh",
+    "recursive-include docs *.bat",
+    "recursive-include src *.zcml",
+    ]
+
+[check-manifest]
+additional-ignores = [
+    "docs/_build/html/_sources/api/*",
+    ]
+
+[flake8]
+additional-config = [
+    "# F401 imported but unused",
+    "per-file-ignores =",
+    "    src/zope/security/__init__.py: F401",
+    ]
+
+[github-actions]
+additional-config = [
+    "- [\"2.7\",   \"py27-watch\"]",
+    "- [\"3.7\",   \"py37-watch\"]",
+    ]
+
+[appveyor]
+global-env-vars = [
+    "# Currently the builds use @mgedmin's Appveyor account.  The PyPI token belongs",
+    "# to zope.wheelbuilder, which is managed by @mgedmin and @dataflake.",
+    "TWINE_USERNAME: __token__",
+    "TWINE_PASSWORD:",
+    "  secure: aoZC/+rvJKg8B5GMGIxd1YDPcIbo2kSsckCbQ6o8fhIRqSyuhX1iLm21hgDEkq2ePuyQ7+cWnNvXGactxjzA4iUS5GCOuF/E6YTvS3nGcuoQuH607wn2hngzz1p4Z+5ClFPx27vZiRAFgBoTbIo8XODHC9qFYluZ68eiwxFOiCuXK9ONEjMn8LjoaNSPJYyJO3Wr8W5oLeYG+wGcNGuYVXEk5/LSDg5n17ujpL7qsVTdVNjTwgmtnv191n2ip1Sgh1O5Xm9eG7VDZSxr/xNMpw==",
+    "ZOPE_INTERFACE_STRICT_IRO: 1",
+    ]

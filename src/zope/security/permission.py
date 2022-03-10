@@ -29,6 +29,7 @@ from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IPermission
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
+
 @implementer(IPermission)
 class Permission(object):
     """
@@ -40,6 +41,7 @@ class Permission(object):
         self.title = title
         self.description = description
 
+
 def checkPermission(context, permission_id):
     """
     Check whether a given permission object exists in the provided
@@ -50,6 +52,7 @@ def checkPermission(context, permission_id):
     if not queryUtility(IPermission, permission_id, context=context):
         raise ValueError("Undefined permission ID", permission_id)
 
+
 def allPermissions(context=None):
     """
     Get the IDs of all defined permission object utilities.
@@ -57,6 +60,7 @@ def allPermissions(context=None):
     for name, _permission in getUtilitiesFor(IPermission, context):
         if name != zope_Public:
             yield name
+
 
 def PermissionsVocabulary(context=None):
     """
@@ -69,7 +73,9 @@ def PermissionsVocabulary(context=None):
         terms.append(SimpleTerm(permission, name))
     return SimpleVocabulary(terms)
 
+
 directlyProvides(PermissionsVocabulary, IVocabularyFactory)
+
 
 def PermissionIdsVocabulary(context=None):
     """
@@ -99,5 +105,6 @@ def PermissionIdsVocabulary(context=None):
     if has_public:
         terms.insert(0, SimpleTerm(CheckerPublic, zope_Public, u'Public'))
     return SimpleVocabulary(terms)
+
 
 directlyProvides(PermissionIdsVocabulary, IVocabularyFactory)
