@@ -882,6 +882,8 @@ _default_checkers = {
     types.MethodType: _callableChecker,
     types.BuiltinFunctionType: _callableChecker,
     types.BuiltinMethodType: _callableChecker,
+    # method-wrapper
+    type(().__repr__): _callableChecker,
     type: _typeChecker,
     types.ModuleType: lambda module: _checkers.get(module, _namedChecker),
     type(iter([])): _iteratorChecker,  # Same types in Python 2.2.1,
@@ -912,7 +914,6 @@ if PYTHON2:  # pragma: no cover
     _default_checkers[types.ClassType] = _typeChecker
     _default_checkers[types.InstanceType] = _instanceChecker
     # slot description
-    _default_checkers[type(().__getslice__)] = _callableChecker
     _default_checkers[type({}.iteritems())] = _iteratorChecker
     _default_checkers[type({}.iterkeys())] = _iteratorChecker
     _default_checkers[type({}.itervalues())] = _iteratorChecker

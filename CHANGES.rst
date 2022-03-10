@@ -5,7 +5,10 @@
 5.3 (unreleased)
 ================
 
-- Nothing changed yet.
+- Allow calling bound methods of some built-in objects such as ``().__repr__``
+  and ``{}.__repr__`` by default. This worked on Python 2, but raised
+  ``ForbiddenAttribute`` on Python 3. See `issue 75
+  <https://github.com/zopefoundation/zope.security/issues/75>`_.
 
 
 5.2 (2022-03-10)
