@@ -2171,6 +2171,11 @@ class ProxyFactoryTests(unittest.TestCase):
         self.assertEqual(list(IFoo), ['x'])
         self.assertEqual(list(proxy), list(IFoo))
 
+    def test_method_wrapper(self):
+        from zope.security.proxy import ProxyFactory
+
+        self.assertEqual(ProxyFactory({}).__repr__(), '{}')
+
 
 def test_using_mapping_slots_hack():
     """The security proxy will use mapping slots, on the checker to go faster
