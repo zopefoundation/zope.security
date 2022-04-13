@@ -193,8 +193,8 @@ class DummyZCMLContext(object):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(PermissionTests),
-        unittest.makeSuite(Test_securityPolicy),
-        unittest.makeSuite(Test_permission),
-        unittest.makeSuite(Test_redefinePermission),
+        unittest.defaultTestLoader.loadTestsFromTestCase(PermissionTests),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_securityPolicy),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_permission),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_redefinePermission),
     ))
