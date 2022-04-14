@@ -141,7 +141,7 @@ class Bar(Foo):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(Test_protectName),
-        unittest.makeSuite(Test_protectSetAttribute),
-        unittest.makeSuite(Test_protectLikeUnto),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_protectName),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_protectSetAttribute),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_protectLikeUnto),
     ))

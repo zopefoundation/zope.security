@@ -10,6 +10,10 @@
   ``ForbiddenAttribute`` on Python 3. See `issue 75
   <https://github.com/zopefoundation/zope.security/issues/75>`_.
 
+- Remove usage of ``unittest.makeSuite`` as it is deprecated in Python 3.11+.
+  See `issue 83
+  <https://github.com/zopefoundation/zope.security/issues/83>`_.
+
 
 5.2 (2022-03-10)
 ================
