@@ -14,6 +14,8 @@
   See `issue 83
   <https://github.com/zopefoundation/zope.security/issues/83>`_.
 
+- Add support for Python 3.11 (as of 3.11.0a7).
+
 
 5.2 (2022-03-10)
 ================
