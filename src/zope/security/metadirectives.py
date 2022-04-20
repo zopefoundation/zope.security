@@ -16,10 +16,12 @@
 __docformat__ = 'restructuredtext'
 
 import zope.configuration.fields
-from zope.configuration.fields import GlobalObject, GlobalInterface
-from zope.configuration.fields import Tokens, PythonIdentifier
 import zope.interface
 import zope.schema
+from zope.configuration.fields import GlobalInterface
+from zope.configuration.fields import GlobalObject
+from zope.configuration.fields import PythonIdentifier
+from zope.configuration.fields import Tokens
 from zope.interface import Interface
 
 import zope.security.zcml

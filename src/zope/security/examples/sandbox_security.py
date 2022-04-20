@@ -27,9 +27,12 @@ secure mode. There are several steps that are taken to set up the security
   5. proxy wrap as necessary
 """
 import sandbox
-from zope.security.interfaces import IParticipation
-from zope.security import checker, management, simplepolicies
 from zope.interface import implementer
+
+from zope.security import checker
+from zope.security import management
+from zope.security import simplepolicies
+from zope.security.interfaces import IParticipation
 
 
 # Define all permissions that will be available

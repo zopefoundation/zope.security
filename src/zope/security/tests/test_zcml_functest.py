@@ -13,8 +13,8 @@
 ##############################################################################
 """Directives Tests
 """
-import unittest
 import io
+import unittest
 
 
 def configfile(s):
@@ -49,6 +49,7 @@ class TestClassDirective(unittest.TestCase):
 
     def _meta(self):
         from zope.configuration.xmlconfig import XMLConfig
+
         import zope.security
         XMLConfig('meta.zcml', zope.security)()
 
@@ -64,6 +65,7 @@ class TestClassDirective(unittest.TestCase):
     def testImplements(self):
         from zope.component.interface import queryInterface
         from zope.configuration.xmlconfig import xmlconfig
+
         from zope.security.tests.exampleclass import ExampleClass
         from zope.security.tests.exampleclass import IExample
         self._meta()
@@ -84,6 +86,7 @@ class TestClassDirective(unittest.TestCase):
     def testMulImplements(self):
         from zope.component.interface import queryInterface
         from zope.configuration.xmlconfig import xmlconfig
+
         from zope.security.tests.exampleclass import ExampleClass
         from zope.security.tests.exampleclass import IExample
         from zope.security.tests.exampleclass import IExample2
@@ -156,6 +159,7 @@ class TestFactorySubdirective(unittest.TestCase):
 
     def _meta(self):
         from zope.configuration.xmlconfig import XMLConfig
+
         import zope.security
         XMLConfig('meta.zcml', zope.security)()
 
@@ -183,8 +187,8 @@ class TestFactorySubdirective(unittest.TestCase):
     def testFactoryNoId(self):
         from zope.component import getUtility
         from zope.component.interfaces import IFactory
-        from zope.interface.interfaces import ComponentLookupError
         from zope.configuration.xmlconfig import xmlconfig
+        from zope.interface.interfaces import ComponentLookupError
         self._meta()
         f = configfile("""
 <permission id="zope.Foo" title="Zope Foo Permission" />
@@ -242,13 +246,15 @@ class TestFactoryDirective(unittest.TestCase):
         tearDown()
 
     def meta(self):
-        import zope.security
         from zope.configuration.xmlconfig import XMLConfig
+
+        import zope.security
         XMLConfig('meta.zcml', zope.security)()
 
     def testFactory(self):
         from zope.component import createObject
         from zope.configuration.xmlconfig import xmlconfig
+
         from zope.security import proxy
         from zope.security.tests import exampleclass
         self.meta()
@@ -274,6 +280,7 @@ def _pfx(name):
 def defineDirectives():
     from zope.configuration.xmlconfig import XMLConfig
     from zope.configuration.xmlconfig import xmlconfig
+
     import zope.security
     XMLConfig('meta.zcml', zope.security)()
     xmlconfig(io.StringIO(u"""<configure
@@ -293,9 +300,10 @@ P2 = "zope.Paltry"
 class TestRequireDirective(unittest.TestCase):
 
     def setUp(self):
-        from zope.interface import implementer
-        from zope.security.tests import module
         from zope.component.testing import setUp
+        from zope.interface import implementer
+
+        from zope.security.tests import module
         setUp()
         defineDirectives()
 
@@ -344,6 +352,7 @@ class TestRequireDirective(unittest.TestCase):
 
     def test_wo_any_attributes(self):
         from zope.configuration.exceptions import ConfigurationError
+
         from zope.security.tests import module
         declaration = ('''<class class="%s">
                             <require
@@ -383,6 +392,7 @@ class TestRequireDirective(unittest.TestCase):
 
     def test_set_schema(self):
         from zope.component.interface import queryInterface
+
         from zope.security.checker import selectChecker
         from zope.security.tests import module
         self.assertEqual(queryInterface(_pfx("S")), None)
@@ -407,6 +417,7 @@ class TestRequireDirective(unittest.TestCase):
 
     def test_multiple_set_schema(self):
         from zope.component.interface import queryInterface
+
         from zope.security.checker import selectChecker
         from zope.security.tests import module
         self.assertEqual(queryInterface(_pfx("S")), None)
@@ -435,6 +446,7 @@ class TestRequireDirective(unittest.TestCase):
 
     def testSimpleInterface(self):
         from zope.component.interface import queryInterface
+
         from zope.security.tests import module
         self.assertEqual(queryInterface(_pfx("I")), None)
 
@@ -452,6 +464,7 @@ class TestRequireDirective(unittest.TestCase):
 
     def testMultipleInterface(self):
         from zope.component.interface import queryInterface
+
         from zope.security.tests import module
         self.assertEqual(queryInterface(_pfx("I3")), None)
         self.assertEqual(queryInterface(_pfx("I4")), None)
@@ -559,6 +572,7 @@ def apply_declaration(declaration):
 
 def make_dummy():
     from zope.interface import Interface
+
     import zope.security.zcml
     global IDummy
 
@@ -587,6 +601,7 @@ class DirectivesTest(unittest.TestCase):
 
     def testRedefinePermission(self):
         from zope.configuration import xmlconfig
+
         from zope.security import tests
         make_dummy()
         xmlconfig.file("redefineperms.zcml", tests)

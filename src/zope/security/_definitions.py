@@ -14,9 +14,11 @@
 """Common definitions to avoid circular imports
 """
 import threading
+
 import zope.interface
 
 from zope.security import interfaces
+
 
 thread_local = threading.local()
 

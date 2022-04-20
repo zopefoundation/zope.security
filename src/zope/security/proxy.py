@@ -20,8 +20,9 @@ import functools
 import sys
 
 from zope.proxy import PyProxyBase
-from zope.security._compat import PURE_PYTHON
+
 from zope.security._compat import _BUILTINS
+from zope.security._compat import PURE_PYTHON
 
 
 def _check_name(meth, wrap_result=True):

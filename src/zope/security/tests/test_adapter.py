@@ -19,6 +19,7 @@ from zope.location import ILocation
 from zope.location import LocationProxy
 from zope.proxy import getProxiedObject
 
+
 # pylint:disable=attribute-defined-outside-init,protected-access
 
 
@@ -217,8 +218,8 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_spacesuit(self):
-        from zope.security.proxy import getObject
         from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import getObject
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         factory.__parent__ = factory.__name__ = None
@@ -244,8 +245,8 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         self.assertEqual(after, before)  # no added attrs
 
     def test__call__w_ILocation_w_spacesuit_w_existing_parent(self):
-        from zope.security.proxy import getObject
         from zope.security.proxy import ProxyFactory
+        from zope.security.proxy import getObject
         from zope.security.proxy import removeSecurityProxy
         factory = self._makeFactory()
         factory.__name__ = None

@@ -14,6 +14,7 @@
 """Test zope.security.decorator
 """
 import unittest
+
 from zope.security.tests import QuietWatchingChecker
 
 
@@ -39,6 +40,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_neither_wrapper_nor_object_has_checker(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
@@ -57,6 +59,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_both_wrapper_and_object_have_checkers_not_security_proxied(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import CombinedChecker
         from zope.security.checker import NamesChecker
         from zope.security.checker import defineChecker
@@ -88,6 +91,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_only_wrapper_has_checker(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NamesChecker
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
@@ -107,6 +111,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_only_object_has_checker(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NamesChecker
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
@@ -126,6 +131,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_both_wrapper_and_object_have_checkers_security_proxied(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import CombinedChecker
         from zope.security.checker import NamesChecker
         from zope.security.checker import defineChecker
@@ -152,6 +158,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_cannot_overwrite(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 

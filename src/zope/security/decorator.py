@@ -17,8 +17,8 @@ Decorators are proxies that are mostly transparent but that may provide
 additional features.
 """
 
-from zope.proxy import getProxiedObject
 from zope.proxy import ProxyBase
+from zope.proxy import getProxiedObject
 from zope.proxy.decorator import SpecificationDecoratorBase
 
 from zope.security.checker import CombinedChecker
@@ -75,5 +75,7 @@ class DecoratorBase(SpecificationDecoratorBase, SecurityCheckerDecoratorBase):
 # This is the only sane place we found for doing it: it kicks in as soon
 # as someone starts using security proxies.
 import zope.location.location  # noqa: E402 module level import not at top
+
+
 zope.location.location.LocationProxy.__Security_checker__ = (
     DecoratedSecurityCheckerDescriptor())

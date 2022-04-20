@@ -22,9 +22,9 @@ from zope.schema import Id
 from zope.schema.interfaces import IFromUnicode
 
 from zope.security._compat import implementer_if_needed
-from zope.security.permission import checkPermission
-from zope.security.management import setSecurityPolicy
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
+from zope.security.management import setSecurityPolicy
+from zope.security.permission import checkPermission
 
 
 @implementer_if_needed(IFromUnicode)
@@ -94,9 +94,10 @@ class IPermissionDirective(Interface):
 
 
 def permission(_context, id, title, description=u''):
+    from zope.component.zcml import utility
+
     from zope.security.interfaces import IPermission
     from zope.security.permission import Permission
-    from zope.component.zcml import utility
     permission = Permission(id, title, description)
     utility(_context, IPermission, permission, name=id)
 

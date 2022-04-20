@@ -58,35 +58,36 @@ API
 .. autofunction:: selectChecker
 """
 import abc
+import datetime
+import decimal
 import os
 import sys
 import types
-import datetime
-import decimal
 import weakref
 
-from zope.i18nmessageid import Message
+import zope.interface.declarations
 import zope.interface.interface
 import zope.interface.interfaces
-import zope.interface.declarations
+from zope.i18nmessageid import Message
 from zope.interface import Interface
 from zope.interface import directlyProvides
 from zope.interface import implementer
 from zope.interface.interfaces import IDeclaration
 from zope.interface.interfaces import IInterface
 
+from zope.security._compat import CLASS_TYPES
+from zope.security._compat import PURE_PYTHON
+from zope.security._compat import PYTHON2
+from zope.security._compat import implementer_if_needed
+from zope.security._definitions import thread_local
+from zope.security.interfaces import ForbiddenAttribute
 from zope.security.interfaces import IChecker
 from zope.security.interfaces import INameBasedChecker
 from zope.security.interfaces import ISecurityProxyFactory
-from zope.security.interfaces import ForbiddenAttribute
 from zope.security.interfaces import Unauthorized
-from zope.security._definitions import thread_local
-from zope.security._compat import CLASS_TYPES
-from zope.security._compat import PYTHON2
-from zope.security._compat import PURE_PYTHON
-from zope.security._compat import implementer_if_needed
 from zope.security.proxy import Proxy
 from zope.security.proxy import getChecker
+
 
 try:
     from zope.exceptions import DuplicationError
@@ -136,6 +137,8 @@ directlyProvides(ProxyFactory, ISecurityProxyFactory)
 
 # This import represents part of the API for the proxy module
 from . import proxy  # noqa: E402 module level import not at top
+
+
 proxy.ProxyFactory = ProxyFactory
 
 
@@ -514,10 +517,12 @@ if _c_available:  # pragma: no cover
         _c_available = False
 
 if _c_available:  # pragma: no cover
-    from zope.security._zope_security_checker import _checkers, selectChecker
-    from zope.security._zope_security_checker import NoProxy, Checker
-    from zope.security._zope_security_checker import _defaultChecker
+    from zope.security._zope_security_checker import Checker
+    from zope.security._zope_security_checker import NoProxy
     from zope.security._zope_security_checker import _available_by_default
+    from zope.security._zope_security_checker import _checkers
+    from zope.security._zope_security_checker import _defaultChecker
+    from zope.security._zope_security_checker import selectChecker
     zope.interface.classImplements(Checker, INameBasedChecker)
 
 
@@ -940,6 +945,7 @@ def _fixup_odict():
     # uses view classes) and CPython 3.5+ (implemented in C). These should
     # all be iterable.
     from collections import OrderedDict
+
     # The `_fixup_dictlike` is detected as undefined because it is deleted
     # later on but this function is called beforehand:
     _fixup_dictlike(OrderedDict)  # noqa: F821 undefined name '_fixup_dictlike'
@@ -992,8 +998,8 @@ def _fixup_zope_interface():
     # checking process at all, much like BTrees, so NoProxy is necessary for
     # compatibility. On Python 3, prior to this, iteration was simply not
     # allowed.
-    from zope.interface import providedBy
     from zope.interface import alsoProvides
+    from zope.interface import providedBy
 
     class I1(Interface):
         pass

@@ -14,7 +14,9 @@
 """Test permissions
 """
 import unittest
+
 from zope.component.testing import PlacelessSetup
+
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 
@@ -30,13 +32,15 @@ class PermissionTests(unittest.TestCase):
 
     def test_class_conforms_to_IPermission(self):
         from zope.interface.verify import verifyClass
+
         from zope.security.interfaces import IPermission
         verifyClass(IPermission, self._getTargetClass())
 
     def test_instance_conforms_to_IPermission(self):
         from zope.interface.verify import verifyObject
-        from zope.security.interfaces import IPermission
         from zope.schema import getValidationErrors
+
+        from zope.security.interfaces import IPermission
         verifyObject(IPermission, self._makeOne('testing'))
         self.assertEqual([],
                          getValidationErrors(IPermission,
@@ -70,6 +74,7 @@ class Test_checkPermission(PlacelessSetup, unittest.TestCase):
 
     def test_hit(self):
         from zope.component import provideUtility
+
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
@@ -88,6 +93,7 @@ class Test_allPermissions(PlacelessSetup, unittest.TestCase):
     def test_w_registration(self):
         self.assertEqual(list(self._callFUT()), [])
         from zope.component import provideUtility
+
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
@@ -96,6 +102,7 @@ class Test_allPermissions(PlacelessSetup, unittest.TestCase):
     def test_skips_zope_Public(self):
         self.assertEqual(list(self._callFUT()), [])
         from zope.component import provideUtility
+
         from zope.security.checker import CheckerPublic
         from zope.security.interfaces import IPermission
         permission = object()
@@ -119,6 +126,7 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
     def test_w_registration(self):
         self.assertEqual(list(self._callFUT()), [])
         from zope.component import provideUtility
+
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
@@ -128,6 +136,7 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
     def test_includes_zope_Public(self):
         self.assertEqual(list(self._callFUT()), [])
         from zope.component import provideUtility
+
         from zope.security.checker import CheckerPublic
         from zope.security.interfaces import IPermission
         permission = object()
@@ -139,10 +148,11 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
 
     def test_zcml_valid(self):
         from zope.configuration import xmlconfig
-        import zope.security
         from zope.interface.verify import verifyObject
-        from zope.security.interfaces import IPermission
         from zope.schema import getValidationErrors
+
+        import zope.security
+        from zope.security.interfaces import IPermission
 
         xmlconfig.file('configure.zcml', zope.security)
         vocabulary = self._callFUT()
@@ -171,6 +181,7 @@ class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
     def test_w_registration(self):
         self.assertEqual(list(self._callFUT()), [])
         from zope.component import provideUtility
+
         from zope.security.interfaces import IPermission
         permission = object()
         provideUtility(permission, IPermission, 'testing')
@@ -181,6 +192,7 @@ class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
     def test_includes_zope_Public(self):
         self.assertEqual(list(self._callFUT()), [])
         from zope.component import provideUtility
+
         from zope.security.checker import CheckerPublic
         from zope.security.interfaces import IPermission
         permission = object()

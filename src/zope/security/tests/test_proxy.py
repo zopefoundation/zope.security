@@ -15,7 +15,8 @@
 """
 import unittest
 
-from zope.security._compat import PYTHON2, PURE_PYTHON
+from zope.security._compat import PURE_PYTHON
+from zope.security._compat import PYTHON2
 
 
 def _skip_if_not_Py2(testfunc):
@@ -189,8 +190,8 @@ class AbstractProxyTestBase(object):
         self.assertEqual(str(proxy), str(target))
 
     def test___str___checker_forbids_str(self):
-        from zope.security.interfaces import ForbiddenAttribute
         from zope.security._compat import _BUILTINS
+        from zope.security.interfaces import ForbiddenAttribute
         from zope.security.proxy import _fmt_address
         target = object()
         checker = DummyChecker(ForbiddenAttribute)
@@ -222,8 +223,8 @@ class AbstractProxyTestBase(object):
         self.assertEqual(repr(proxy), repr(target))
 
     def test___repr___checker_forbids_str(self):
-        from zope.security.interfaces import ForbiddenAttribute
         from zope.security._compat import _BUILTINS
+        from zope.security.interfaces import ForbiddenAttribute
         from zope.security.proxy import _fmt_address
         target = object()
         checker = DummyChecker(ForbiddenAttribute)
@@ -1583,7 +1584,9 @@ class ProxyPyTests(AbstractProxyTestBase,
         self.assertIs(checker, sub.get_checker())
 
     def test_ctor_w_checker(self):
-        from zope.security.proxy import getObjectPy, getCheckerPy
+        from zope.security.proxy import getCheckerPy
+        from zope.security.proxy import getObjectPy
+
         # Can't access '_wrapped' / '_checker' in C version
         target = object()
         checker = object()
@@ -2161,6 +2164,7 @@ class ProxyFactoryTests(unittest.TestCase):
         # This used to work on Python 2, but fail on Python 3.
         # See https://github.com/zopefoundation/zope.interface/issues/141
         from zope.interface import Interface
+
         from zope.security.proxy import ProxyFactory
 
         class IFoo(Interface):
@@ -2253,7 +2257,9 @@ class LocationProxySecurityCheckerTests(unittest.TestCase):
         # Regression test for a problem introduced in 3.8.1 and fixed in
         # 3.8.3. For details see change log.
         import sys
+
         from zope.location.location import LocationProxy
+
         import zope.security
         try:
             from importlib import reload as _reload

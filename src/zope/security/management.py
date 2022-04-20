@@ -20,13 +20,13 @@ Note that this module itself provides those interfaces.
 
 from zope.interface import moduleProvides
 
+from zope.security._definitions import system_user
+from zope.security._definitions import thread_local
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IInteractionManagement
 from zope.security.interfaces import ISecurityManagement
 from zope.security.interfaces import NoInteraction
 from zope.security.simplepolicies import ParanoidSecurityPolicy
-from zope.security._definitions import thread_local
-from zope.security._definitions import system_user
 
 
 __all__ = [
