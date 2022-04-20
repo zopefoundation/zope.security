@@ -27,6 +27,7 @@ class TestInteraction(unittest.TestCase):
 
     def test(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IInteraction
         from zope.security.simplepolicies import ParanoidSecurityPolicy
         interaction = ParanoidSecurityPolicy()
@@ -61,6 +62,7 @@ class TestInteraction(unittest.TestCase):
 
     def testCreateInteraction(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IInteraction
         from zope.security.simplepolicies import ParanoidSecurityPolicy
         i1 = ParanoidSecurityPolicy()

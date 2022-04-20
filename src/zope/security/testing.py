@@ -19,15 +19,16 @@ This module provides some helper/stub objects for setting up interactions.
 import contextlib
 import re
 
-from zope import interface, component
+from zope.testing import renormalizing
 
-from zope.security import interfaces
-from zope.security.permission import Permission
 import zope.security.management
+from zope import component
+from zope import interface
+from zope.security import interfaces
 from zope.security._compat import PYTHON2 as PY2
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME
+from zope.security.permission import Permission
 
-from zope.testing import renormalizing
 
 _str_prefix = 'b' if PY2 else 'u'
 

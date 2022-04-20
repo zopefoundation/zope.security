@@ -13,10 +13,11 @@
 ##############################################################################
 """A small sandbox application.
 """
-import time
 import random
+import time
 
-from zope.interface import Interface, implementer
+from zope.interface import Interface
+from zope.interface import implementer
 
 
 class IAgent(Interface):

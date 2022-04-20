@@ -13,10 +13,11 @@
 ##############################################################################
 """ Python 2 / 3 compatibility
 """
-import platform
 import os
+import platform
 import sys
 import types
+
 
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 PYPY = py_impl() == 'PyPy'

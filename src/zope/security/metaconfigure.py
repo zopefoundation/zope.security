@@ -17,22 +17,22 @@ __docformat__ = 'restructuredtext'
 
 from types import ModuleType
 
-from zope.component.interfaces import IFactory
 from zope.component.factory import Factory
 from zope.component.interface import provideInterface
+from zope.component.interfaces import IFactory
 from zope.component.zcml import utility
+from zope.configuration.exceptions import ConfigurationError
 from zope.interface import classImplements
 from zope.schema.interfaces import IField
-from zope.configuration.exceptions import ConfigurationError
 
 from zope.security.checker import Checker
 from zope.security.checker import CheckerPublic
 from zope.security.checker import defineChecker
 from zope.security.checker import moduleChecker
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as PublicPermission
 from zope.security.protectclass import protectLikeUnto
 from zope.security.protectclass import protectName
 from zope.security.protectclass import protectSetAttribute
-from zope.security.interfaces import PUBLIC_PERMISSION_NAME as PublicPermission
 
 
 def dottedName(klass):

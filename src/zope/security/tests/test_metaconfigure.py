@@ -14,6 +14,7 @@
 """Test ZCML directives
 """
 import unittest
+
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 
@@ -132,6 +133,7 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
 
         class IFoo(Interface):
@@ -158,6 +160,7 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
 
         class IFoo(Interface):
@@ -221,8 +224,9 @@ class ClassDirectiveTests(unittest.TestCase):
 
     def test_require_w_set_schema_normal_fields(self):
         from zope.component.interface import provideInterface
-        from zope.schema import Field
         from zope.interface import Interface
+        from zope.schema import Field
+
         from zope.security.protectclass import protectSetAttribute
 
         class IFoo(Interface):
@@ -263,8 +267,8 @@ class ClassDirectiveTests(unittest.TestCase):
 
     def test_require_w_set_schema_ignores_readonly_fields(self):
         from zope.component.interface import provideInterface
-        from zope.schema import Field
         from zope.interface import Interface
+        from zope.schema import Field
 
         class IFoo(Interface):
             bar = Field(u"Bar", readonly=True)
@@ -287,6 +291,7 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
 
         class IFoo(Interface):
@@ -315,6 +320,7 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
 
         class IFoo(Interface):
@@ -368,8 +374,8 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(directive(), ())
 
     def test_factory_wo_explicit_id(self):
-        from zope.component.interfaces import IFactory
         from zope.component.interface import provideInterface
+        from zope.component.interfaces import IFactory
         from zope.component.zcml import handler
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -394,8 +400,8 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(context._actions[1]['args'], ('', IFactory))
 
     def test_factory_w_explicit_id(self):
-        from zope.component.interfaces import IFactory
         from zope.component.interface import provideInterface
+        from zope.component.interfaces import IFactory
         from zope.component.zcml import handler
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -503,6 +509,7 @@ class Test_allow(unittest.TestCase):
     def test_w_interface(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
 
         class IFoo(Interface):
@@ -521,6 +528,7 @@ class Test_allow(unittest.TestCase):
     def test_w_both(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
 
         class IFoo(Interface):
@@ -602,6 +610,7 @@ class Test_requre(unittest.TestCase):
     def test_w_interface(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
 
         class IFoo(Interface):
@@ -621,6 +630,7 @@ class Test_requre(unittest.TestCase):
     def test_w_both(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
 
         class IFoo(Interface):

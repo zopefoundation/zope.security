@@ -21,10 +21,10 @@ that the classes themselves are implementations of
 """
 import zope.interface
 
+from zope.security._definitions import system_user
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IInteraction
 from zope.security.interfaces import ISecurityPolicy
-from zope.security._definitions import system_user
 
 
 @zope.interface.implementer(IInteraction)

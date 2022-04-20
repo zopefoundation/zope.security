@@ -26,8 +26,8 @@ from zope.schema.vocabulary import SimpleTerm
 from zope.schema.vocabulary import SimpleVocabulary
 
 from zope.security.checker import CheckerPublic
-from zope.security.interfaces import IPermission
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
+from zope.security.interfaces import IPermission
 
 
 @implementer(IPermission)

@@ -12,6 +12,7 @@
 #
 ##############################################################################
 import unittest
+
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 
@@ -100,6 +101,7 @@ class Test_permission(unittest.TestCase):
     def test_wo_description(self):
         from zope.component.interface import provideInterface
         from zope.component.zcml import handler
+
         from zope.security.interfaces import IPermission
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -121,6 +123,7 @@ class Test_permission(unittest.TestCase):
     def test_w_description(self):
         from zope.component.interface import provideInterface
         from zope.component.zcml import handler
+
         from zope.security.interfaces import IPermission
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -196,5 +199,6 @@ def test_suite():
         unittest.defaultTestLoader.loadTestsFromTestCase(PermissionTests),
         unittest.defaultTestLoader.loadTestsFromTestCase(Test_securityPolicy),
         unittest.defaultTestLoader.loadTestsFromTestCase(Test_permission),
-        unittest.defaultTestLoader.loadTestsFromTestCase(Test_redefinePermission),
+        unittest.defaultTestLoader.loadTestsFromTestCase(
+            Test_redefinePermission),
     ))

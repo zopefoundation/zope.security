@@ -51,10 +51,17 @@ means the name of the permission, or the special object
 :class:`zope.security.checker.CheckerPublic`.
 """
 
-from zope.interface import Interface, Attribute, implementer
-from zope.interface.common.interfaces import IException, IAttributeError
-from zope.schema import Text, TextLine, NativeStringLine
+from zope.interface import Attribute
+from zope.interface import Interface
+from zope.interface import implementer
+from zope.interface.common.interfaces import IAttributeError
+from zope.interface.common.interfaces import IException
+from zope.schema import NativeStringLine
+from zope.schema import Text
+from zope.schema import TextLine
+
 from zope.security.i18n import ZopeMessageFactory as _
+
 
 #: The name (id) of the registered :class:`IPermission` utility that signifies
 #: that the protected attribute is public.

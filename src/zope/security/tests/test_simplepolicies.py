@@ -24,11 +24,13 @@ class ConformsToIInteraction(object):
 
     def test_class_conforms_to_IInteraction(self):
         from zope.interface.verify import verifyClass
+
         from zope.security.interfaces import IInteraction
         verifyClass(IInteraction, self._getTargetClass())
 
     def test_instance_conforms_to_IInteraction(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IInteraction
         verifyObject(IInteraction, self._makeOne())
 
