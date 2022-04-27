@@ -2,7 +2,7 @@
  Changes
 =========
 
-5.3 (unreleased)
+5.3 (2022-04-27)
 ================
 
 - Allow calling bound methods of some built-in objects such as ``().__repr__``
