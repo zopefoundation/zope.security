@@ -2,7 +2,7 @@
 # https://github.com/zopefoundation/meta/tree/master/config/c-code
 [meta]
 template = "c-code"
-commit-id = "dbaca5f3c7785b7bca563dabc5f440544069a8f9"
+commit-id = "5f8f4eb428494f5cc349f91f7c312095e7ad7422"
 
 [python]
 with-appveyor = true
@@ -20,7 +20,7 @@ additional-envlist = [
     ]
 testenv-setenv = [
     "ZOPE_INTERFACE_STRICT_IRO=1",
-    "watch: ZOPE_WATCH_CHECKERS = 1",
+    "watch: ZOPE_WATCH_CHECKERS=1",
     ]
 
 [coverage]
