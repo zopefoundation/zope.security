@@ -143,7 +143,7 @@ jobs:
       - name: Install Build Dependencies
         run: |
           pip install -U pip
-          pip install -U "setuptools < 62.4" wheel twine cffi
+          pip install -U wheel twine cffi "setuptools < 62.4"
 
       - name: Build zope.security
         run: |
