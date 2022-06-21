@@ -149,8 +149,10 @@ jobs:
         run: |
           # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
           # output (pip install uses a random temporary directory, making this difficult).
-          rm -rf /Users/runner/work/zope.security/zope.security/.eggs
+          echo ">>> python setup.py build_ext -i"
           python setup.py build_ext -i
+          echo ">>> rm -rf /Users/runner/work/zope.security/zope.security/.eggs"
+          rm -rf /Users/runner/work/zope.security/zope.security/.eggs
           python setup.py bdist_wheel
           # Also install it, so that we get dependencies in the (pip) cache.
           pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
