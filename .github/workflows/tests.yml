@@ -150,13 +150,11 @@ jobs:
           # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
           # output (pip install uses a random temporary directory, making this difficult).
           echo ">>> python setup.py build_ext -i"
-          python setup.py build_ext -i
-          echo ">>> rm -rf /Users/runner/work/zope.security/zope.security/.eggs"
-          rm -rf /Users/runner/work/zope.security/zope.security/.eggs
-          python setup.py bdist_wheel
+          _PYTHON_HOST_PLATFORM="macosx-11-x86_64" python setup.py build_ext -i
+          _PYTHON_HOST_PLATFORM="macosx-11-x86_64" python setup.py bdist_wheel
           # Also install it, so that we get dependencies in the (pip) cache.
           pip install -U 'faulthandler; python_version == "2.7" and platform_python_implementation == "CPython"'
-          pip install --pre .[test]
+          _PYTHON_HOST_PLATFORM="macosx-11-x86_64" pip install --pre .[test]
 
       - name: Check zope.security build
         run: |
