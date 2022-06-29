@@ -145,6 +145,11 @@ jobs:
           pip install -U pip
           pip install -U setuptools wheel twine cffi
 
+      - name: Fix environment (mac)
+        if: startsWith(runner.os, 'Mac')
+        run: |
+          sudo xcode-select -switch /Library/Developer/CommandLineTools
+
       - name: Build zope.security
         run: |
           # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
