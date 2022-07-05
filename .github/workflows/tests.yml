@@ -140,11 +140,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install Build Dependencies
+      - name: Install Build Dependencies (PyPy2)
+        if: >
+          startsWith(matrix.python-version, 'pypy-2.7')
         run: |
-          pip install -U setuptools
           pip install -U pip
-          pip install -U wheel twine cffi
+          pip install -U setuptools wheel twine "cffi != 1.15.1"
+
+      - name: Install Build Dependencies (other Python versions)
+        if: >
+          startsWith(matrix.python-version, 'pypy-2.7')
+        run: |
+          pip install -U pip
+          pip install -U setuptools wheel twine cffi
 
       - name: Build zope.security (Python 3.10 on MacOS)
         if: >
