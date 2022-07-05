@@ -142,8 +142,9 @@ jobs:
 
       - name: Install Build Dependencies
         run: |
+          pip install -U setuptools
           pip install -U pip
-          pip install -U setuptools wheel twine cffi
+          pip install -U wheel twine cffi
 
       - name: Build zope.security (Python 3.10 on MacOS)
         if: >
