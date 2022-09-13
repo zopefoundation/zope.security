@@ -5,7 +5,8 @@
 5.4 (unreleased)
 ================
 
-- Nothing changed yet.
+- Disable unsafe math optimizations in C code.  See `pull request 89
+  <https://github.com/zopefoundation/zope.security/pull/89>`_.
 
 
 5.3 (2022-04-27)
