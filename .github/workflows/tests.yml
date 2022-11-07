@@ -159,8 +159,8 @@ jobs:
           startsWith(runner.os, 'Mac')
           && startsWith(matrix.python-version, '3.1')
         env:
-          MACOSX_DEPLOYMENT_TARGET: 11.0
-          _PYTHON_HOST_PLATFORM: macosx-11.0-universal2
+          MACOSX_DEPLOYMENT_TARGET: 10.9
+          _PYTHON_HOST_PLATFORM: macosx-10.9-universal2
           ARCHFLAGS: -arch arm64 -arch x86_64
         run: |
           # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
