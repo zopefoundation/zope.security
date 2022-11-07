@@ -154,12 +154,13 @@ jobs:
           pip install -U pip
           pip install -U setuptools wheel twine cffi
 
-      - name: Build zope.security (Python 3.10 on MacOS)
+      - name: Build zope.security (Python 3.10+ on MacOS)
         if: >
           startsWith(runner.os, 'Mac')
-          && startsWith(matrix.python-version, '3.10')
+          && startsWith(matrix.python-version, '3.1')
         env:
-          _PYTHON_HOST_PLATFORM: macosx-11-x86_64
+          _PYTHON_HOST_PLATFORM: macosx-10.9-universal2
+          ARCHFLAGS: -arch arm64 -arch x86_64
         run: |
           # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
           # output (pip install uses a random temporary directory, making this difficult).
@@ -172,7 +173,7 @@ jobs:
       - name: Build zope.security (all other versions)
         if: >
           !startsWith(runner.os, 'Mac')
-          || !startsWith(matrix.python-version, '3.10')
+          || !startsWith(matrix.python-version, '3.1')
         run: |
           # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
           # output (pip install uses a random temporary directory, making this difficult).
