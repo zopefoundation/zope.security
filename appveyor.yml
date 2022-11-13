@@ -9,21 +9,13 @@ environment:
   ZOPE_INTERFACE_STRICT_IRO: 1
 
   matrix:
-    - python: 27
     - python: 27-x64
-    - python: 35
     - python: 35-x64
-    - python: 36
     - python: 36-x64
-    - python: 37
     - python: 37-x64
-    - python: 38
     - python: 38-x64
-    - python: 39
     - python: 39-x64
-    - python: 310
     - python: 310-x64
-    - python: 311
     - python: 311-x64
 
 install:
