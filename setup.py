@@ -130,7 +130,7 @@ TESTS_REQUIRE = [
 
 
 setup(name='zope.security',
-      version='5.6',
+      version='5.7.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
