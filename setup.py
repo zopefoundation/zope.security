@@ -130,7 +130,7 @@ TESTS_REQUIRE = [
 
 
 setup(name='zope.security',
-      version='5.6.dev0',
+      version='5.6',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -164,6 +164,12 @@ setup(name='zope.security',
           'Framework :: Zope :: 3',
       ],
       url='http://github.com/zopefoundation/zope.security',
+      project_urls={
+        'Documentation': 'https://zopesecurity.readthedocs.io',
+        'Issue Tracker': ('https://github.com/zopefoundation'
+                          '/zope.security/issues'),
+        'Sources': 'https://github.com/zopefoundation/zope.security',
+      },
       license='ZPL 2.1',
       packages=find_packages('src'),
       package_dir={'': 'src'},
