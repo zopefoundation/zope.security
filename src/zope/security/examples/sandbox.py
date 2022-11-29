@@ -13,13 +13,16 @@
 ##############################################################################
 """A small sandbox application.
 """
-import time, random
+import random
+import time
 
-from zope.interface import Interface, implementer
+from zope.interface import Interface
+from zope.interface import implementer
+
 
 class IAgent(Interface):
     """A player/agent in the world.
-    
+
     The agent represents an autonomous unit, that lives in various
     homes/sandboxes and accesses services present at the sandboxes. Agents are
     imbued with a sense of wanderlust and attempt to find new homes after a
@@ -40,7 +43,7 @@ class IAgent(Interface):
 
 class IService(Interface):
     """Marker to designate some form of functionality.
-    
+
     Services are available from sandboxes, examples include time service,
     agent discovery, and sandbox discovery.
     """
@@ -63,20 +66,21 @@ class ISandbox(Interface):
 
 
 class SandboxError(Exception):
-    """A sandbox error is thrown, if any action could not be performed.""" 
+    """A sandbox error is thrown, if any action could not be performed."""
     pass
 
 
 class Identity(object):
     """Mixin for pretty printing and identity method"""
+
     def __init__(self, id, *args, **kw):
         self.id = id
 
     def getId(self):
         return self.id
 
-    def __str__ (self):
-        return "<%s> %s"%(str(self.__class__.__name__), str(self.id))
+    def __str__(self):
+        return "<%s> %s" % (str(self.__class__.__name__), str(self.id))
 
     __repr__ = __str__
 
@@ -124,91 +128,108 @@ class Sandbox(Identity):
 
     def getAgentIds(self):
         return self._agents.keys()
+
     def getAgents(self):
         return self._agents.values()
+
     def getServiceIds(self):
         return self._services.keys()
+
     def getService(self, sid):
         return self._services.get(sid)
+
     def getHome(self):
         return self
 
-
     def addAgent(self, agent):
-        if not self._agents.has_key(agent.getId()) \
-           and IAgent.providedBy(agent):
-            self._agents[agent.getId()]=agent
+        if agent.getId() not in self._agents \
+                and IAgent.providedBy(agent):
+            self._agents[agent.getId()] = agent
             agent.setHome(self)
         else:
-            raise SandboxError("couldn't add agent %s"%agent)
+            raise SandboxError("couldn't add agent %s" % agent)
 
     def addService(self, service):
 
-        if not self._services.has_key(service.getId()) \
-           and IService.providedBy(service):
-            self._services[service.getId()]=service
+        if not service.getId() in self._services \
+                and IService.providedBy(service):
+            self._services[service.getId()] = service
             service.setHome(self)
         else:
-            raise SandboxError("couldn't add service %s"%service)
+            raise SandboxError("couldn't add service %s" % service)
 
     def transportAgent(self, agent, destination):
-        if self._agents.has_key(agent.getId()) \
-            and destination is not self \
-            and ISandbox.providedBy(destination):
+        if agent.getId() in self._agents \
+                and destination is not self \
+                and ISandbox.providedBy(destination):
             destination.addAgent(agent)
             del self._agents[agent.getId()]
         else:
-            raise SandboxError("couldn't transport agent %s to %s"%(
+            raise SandboxError("couldn't transport agent %s to %s" % (
                 agent, destination)
-                               )
+            )
+
 
 @implementer(IService)
 class Service(object):
     def getId(self):
         return self.__class__.__name__
+
     def setHome(self, home):
         self._home = home
+
     def getHome(self):
         return getattr(self, '_home')
+
 
 class HomeDiscoveryService(Service):
     """
     returns the ids of available agent homes
     """
+
     def getAvailableHomes(self):
         return _homes.keys()
+
 
 class AgentDiscoveryService(Service):
     """
     returns the agents available at a given home
     """
+
     def getLocalAgents(self, home):
         return home.getAgents()
+
 
 class TimeService(Service):
     """
     returns the local time
     """
+
     def getTime(self):
         return time.time()
+
 
 default_service_factories = (
     HomeDiscoveryService,
     AgentDiscoveryService,
     TimeService
-    )
+)
+
 
 def action_find_homes(agent, home):
     home_service = home.getService('HomeDiscoveryService')
     return home_service.getAvailableHomes()
 
+
 def action_find_neighbors(agent, home):
     agent_service = home.getService('AgentDiscoveryService')
     return agent_service.getLocalAgents(home)
 
+
 def action_find_time(agent, home):
     time_service = home.getService('TimeService')
     return time_service.getTime()
+
 
 class TimeGenerator(object):
     """Represents the passage of time in the agent simulation.
@@ -238,7 +259,7 @@ class TimeGenerator(object):
                 except Exception as e:
                     print('-- Exception --')
                     print('"%s" in "%s" not allow to "%s"'
-                            % (a, h, a._action.__name__))
+                          % (a, h, a._action.__name__))
                     print(e)
                     print()
                 self.teardownAgent(a)
@@ -253,7 +274,8 @@ class TimeGenerator(object):
                     home.transportAgent(a, new_home)
                 except Exception as e:
                     print('-- Exception --')
-                    print('moving "%s" from "%s" to "%s"' %(a, h, repr(new_home)))
+                    print('moving "%s" from "%s" to "%s"' %
+                          (a, h, repr(new_home)))
                     print(e)
                     print()
                 self.teardownAgent(a)
@@ -263,6 +285,7 @@ def WanderLust(agent):
     """ is agent ready to move """
     if int(random.random()*100) <= 30:
         return 1
+
 
 def GreenerPastures(agent):
     """ where do they want to go today """
@@ -286,7 +309,7 @@ all_homes = (
 origin = all_homes[1]
 
 for h in all_homes:
-    _homes[h.getId()]=h
+    _homes[h.getId()] = h
 
 
 agents = [
@@ -296,7 +319,7 @@ agents = [
     Agent('thucydides', None, 'greek men', action_find_time),
     Agent('archimedes', None, 'greek men', action_find_neighbors),
     Agent('prometheus', None, 'greek men', action_find_homes),
-    ]
+]
 
 for a in agents:
     origin.addAgent(a)
@@ -311,6 +334,7 @@ def main():
 
     for h in _homes.values():
         print(h.getId(), h.getAgentIds())
+
 
 if __name__ == '__main__':
     main()

@@ -13,6 +13,11 @@ Narrative Documentation
    proxy
    hacking
 
+.. toctree::
+   :maxdepth: 1
+
+   changes
+
 API Reference
 =============
 

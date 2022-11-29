@@ -14,11 +14,10 @@
 """Base security system
 
 """
-from zope.security.management import checkPermission
-from zope.security.checker import canWrite, canAccess
-
 # We need the injection of DecoratedSecurityCheckerDescriptor into
 # zope.location's LocationProxy as soon someone uses security proxies by
 # importing zope.security.proxy:
 import zope.security.decorator
-
+from zope.security.checker import canAccess
+from zope.security.checker import canWrite
+from zope.security.management import checkPermission

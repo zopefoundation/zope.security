@@ -65,7 +65,7 @@ name and permission:
     'baz': 'zope.security.metaconfigure.test',
     'foo': 'zope.security.metaconfigure.test'}
 
-The allow directive creates actions for each named defined
+The allow directive creates actions for each name defined
 directly, or via interface:
 
 .. doctest::
@@ -125,7 +125,7 @@ directly, or via interface:
                        'testmodule',
                        'y')}]
 
-The provide directive creates actions for each named defined
+The provide directive creates actions for each name defined
 directly, or via interface:
 
 .. doctest::
@@ -234,7 +234,7 @@ Rocks are immutable, non-callable objects without interesting methods.  They
    >>> type(ProxyFactory(True)) is type(True)
    True
 
-Datetime-reltatd instances are rocks, too:
+Datetime-related instances are rocks, too:
 
 .. doctest::
 
@@ -573,7 +573,7 @@ we can do everything we expect to be able to do with proxied sets.
    False
 
 Note that you can't compare proxied sets with other proxied sets
-due a limitaion in the set comparison functions which won't work
+due to a limitation in the set comparison functions which won't work
 with any kind of proxy.
 
 .. doctest::
@@ -753,7 +753,7 @@ we can do everything we expect to be able to do with proxied frozensets.
    False
 
 Note that you can't compare proxied sets with other proxied sets
-due a limitaion in the frozenset comparison functions which won't work
+due to a limitation in the frozenset comparison functions which won't work
 with any kind of proxy.
 
 .. doctest::
@@ -998,7 +998,7 @@ We can still use interfaces though proxies:
    True
 
 
-abstract Base Classes
+Abstract Base Classes
 ~~~~~~~~~~~~~~~~~~~~~
 
 We work with the ABCMeta meta class:

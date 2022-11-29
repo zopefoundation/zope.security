@@ -13,16 +13,17 @@
 ##############################################################################
 """ Python 2 / 3 compatibility
 """
-import platform
 import os
+import platform
 import sys
 import types
+
 
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 PYPY = py_impl() == 'PyPy'
 PURE_PYTHON = os.environ.get('PURE_PYTHON', PYPY)
 
-if sys.version_info[0] < 3: # pragma: no cover
+if sys.version_info[0] < 3:  # pragma: no cover
 
     CLASS_TYPES = (type, types.ClassType)
     _BUILTINS = '__builtin__'
@@ -30,7 +31,7 @@ if sys.version_info[0] < 3: # pragma: no cover
     PYTHON3 = False
     PYTHON2 = True
 
-else: # pragma: no cover
+else:  # pragma: no cover
 
     CLASS_TYPES = (type,)
     _BUILTINS = 'builtins'

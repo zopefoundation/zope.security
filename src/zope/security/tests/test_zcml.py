@@ -12,7 +12,9 @@
 #
 ##############################################################################
 import unittest
+
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
+
 
 class ConformsToIFromUnicode(object):
 
@@ -29,7 +31,7 @@ class ConformsToIFromUnicode(object):
 
 class PermissionTests(unittest.TestCase,
                       ConformsToIFromUnicode,
-                     ):
+                      ):
 
     def _getTargetClass(self):
         from zope.security.zcml import Permission
@@ -99,6 +101,7 @@ class Test_permission(unittest.TestCase):
     def test_wo_description(self):
         from zope.component.interface import provideInterface
         from zope.component.zcml import handler
+
         from zope.security.interfaces import IPermission
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -120,6 +123,7 @@ class Test_permission(unittest.TestCase):
     def test_w_description(self):
         from zope.component.interface import provideInterface
         from zope.component.zcml import handler
+
         from zope.security.interfaces import IPermission
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -147,38 +151,38 @@ class Test_redefinePermission(unittest.TestCase):
 
     def test_wo_existing_mapping(self):
         z_context = DummyZCMLContext()
+
         class Context(object):
             pass
         context = z_context.context = Context()
         after = object()
         self._callFUT(z_context, 'before.permission', after)
-        self.assertTrue(context.permission_mapping['before.permission']
-                            is after)
+        self.assertIs(context.permission_mapping['before.permission'], after)
 
     def test_w_existing_mapping_wo_existing_key(self):
         z_context = DummyZCMLContext()
+
         class Context(object):
             pass
         context = z_context.context = Context()
         mapping = context.permission_mapping = {}
         after = object()
         self._callFUT(z_context, 'before.permission', after)
-        self.assertTrue(context.permission_mapping is mapping)
-        self.assertTrue(context.permission_mapping['before.permission']
-                            is after)
+        self.assertIs(context.permission_mapping, mapping)
+        self.assertIs(context.permission_mapping['before.permission'], after)
 
     def test_w_existing_mapping_w_existing_key(self):
         z_context = DummyZCMLContext()
+
         class Context(object):
             pass
         context = z_context.context = Context()
         mapping = context.permission_mapping = {}
-        before = mapping['before.permission'] = object()
+        mapping['before.permission'] = object()
         after = object()
         self._callFUT(z_context, 'before.permission', after)
-        self.assertTrue(context.permission_mapping is mapping)
-        self.assertTrue(context.permission_mapping['before.permission']
-                            is after)
+        self.assertIs(context.permission_mapping, mapping)
+        self.assertIs(context.permission_mapping['before.permission'], after)
 
 
 class DummyZCMLContext(object):
@@ -192,8 +196,9 @@ class DummyZCMLContext(object):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(PermissionTests),
-        unittest.makeSuite(Test_securityPolicy),
-        unittest.makeSuite(Test_permission),
-        unittest.makeSuite(Test_redefinePermission),
+        unittest.defaultTestLoader.loadTestsFromTestCase(PermissionTests),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_securityPolicy),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_permission),
+        unittest.defaultTestLoader.loadTestsFromTestCase(
+            Test_redefinePermission),
     ))

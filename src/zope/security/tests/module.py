@@ -21,29 +21,35 @@ modules, themselves.
 from zope.interface import Interface
 from zope.schema import Text
 
-class I(Interface):
+
+class I(Interface):  # noqa: E742 ambiguous class definition 'I'
     def m1():
-        "m1"
+        """m1"""
+
     def m2():
-        "m2"
+        """m2"""
+
 
 class I2(I):
     def m4():
-        "m4"
+        """m4"""
+
 
 class I3(Interface):
     def m3():
-        "m3"
+        """m3"""
+
 
 class I4(Interface):
     def m2():
-        "m2"
+        """m2"""
 
 
 class S(Interface):
     foo = Text()
     bar = Text()
     baro = Text(readonly=True)
+
 
 class S2(Interface):
     foo2 = Text()

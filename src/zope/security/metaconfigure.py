@@ -17,22 +17,22 @@ __docformat__ = 'restructuredtext'
 
 from types import ModuleType
 
-from zope.component.interfaces import IFactory
 from zope.component.factory import Factory
 from zope.component.interface import provideInterface
+from zope.component.interfaces import IFactory
 from zope.component.zcml import utility
+from zope.configuration.exceptions import ConfigurationError
 from zope.interface import classImplements
 from zope.schema.interfaces import IField
-from zope.configuration.exceptions import ConfigurationError
 
 from zope.security.checker import Checker
 from zope.security.checker import CheckerPublic
 from zope.security.checker import defineChecker
 from zope.security.checker import moduleChecker
+from zope.security.interfaces import PUBLIC_PERMISSION_NAME as PublicPermission
 from zope.security.protectclass import protectLikeUnto
 from zope.security.protectclass import protectName
 from zope.security.protectclass import protectSetAttribute
-from zope.security.interfaces import PUBLIC_PERMISSION_NAME as PublicPermission
 
 
 def dottedName(klass):
@@ -40,16 +40,18 @@ def dottedName(klass):
         return 'None'
     return klass.__module__ + '.' + klass.__name__
 
+
 class ProtectionDeclarationException(Exception):
     """Security-protection-specific exceptions."""
     pass
 
+
 class ClassDirective(object):
 
     def __init__(self, _context, class_):
-        self.__id = dottedName(class_) # this would barf on a module, anyway
+        self.__id = dottedName(class_)  # this would barf on a module, anyway
         self.__class = class_
-        if isinstance(self.__class, ModuleType): #pragma NO COVER
+        if isinstance(self.__class, ModuleType):  # pragma: no cover
             raise ConfigurationError('Content class attribute must be a class')
         self.__context = _context
 
@@ -198,12 +200,12 @@ def protectModule(module, name, permission):
 def _names(attributes, interfaces):
     seen = {}
     for name in attributes:
-        if not name in seen:
+        if name not in seen:
             seen[name] = 1
             yield name
     for interface in interfaces:
         for name in interface:
-            if not name in seen:
+            if name not in seen:
                 seen[name] = 1
                 yield name
 

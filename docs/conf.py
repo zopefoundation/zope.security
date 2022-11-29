@@ -259,16 +259,16 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'https://docs.python.org/': None,
+    'https://docs.python.org/3/': None,
     'https://zopeinterface.readthedocs.io/en/latest': None,
     'https://zopeproxy.readthedocs.io/en/latest': None,
     'https://zopeschema.readthedocs.io/en/latest': None,
     'https://zopelocation.readthedocs.io/en/latest': None,
 }
 
-extlinks = {'issue': ('https://github.com/zopefoundation/zope.datetime/issues/%s',
+extlinks = {'issue': ('https://github.com/zopefoundation/zope.security/issues/%s',
                       'issue #'),
-            'pr': ('https://github.com/zopefoundation/zope.datetime/pull/%s',
+            'pr': ('https://github.com/zopefoundation/zope.security/pull/%s',
                    'pull request #')}
 
 autodoc_default_flags = [

@@ -14,9 +14,12 @@
 """Support for taking security into account in adaptation
 """
 
+from zope.location import ILocation
+from zope.location import LocationProxy
+
 from zope.security.checker import ProxyFactory
 from zope.security.proxy import removeSecurityProxy
-from zope.location import ILocation, LocationProxy
+
 
 def assertLocation(adapter, parent):
     """
@@ -59,6 +62,7 @@ class LocatingTrustedAdapterFactory(object):
     ``__parent__`` is None, we set the ``__parent__`` to the adapter's
     context.
     """
+
     def __init__(self, factory):
         self.factory = factory
         self.__name__ = factory.__name__

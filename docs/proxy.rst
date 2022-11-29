@@ -320,7 +320,10 @@ unexpectedly:
 
 .. doctest::
 
-    >>> from collections import Mapping
+    >>> try:
+    ...     from collections.abc import Mapping
+    ... except ImportError:  # PY2
+    ...     from collections import Mapping
     >>> from abc import ABCMeta
     >>> isinstance(Mapping, ABCMeta)
     True
