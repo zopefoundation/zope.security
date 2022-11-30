@@ -194,10 +194,9 @@ setup(name='zope.security',
           'pytz': [
               "pytz"
           ],
-          'untrustedpython:python_version == "2.7"': [
-              'zope.untrustedpython',
+          'untrustedpython': [
+              'zope.untrustedpython >= 5.0.dev0',
           ],
-          'untrustedpython:python_version >= "3.3"': [],
           'zcml': [
               'zope.configuration'
           ],

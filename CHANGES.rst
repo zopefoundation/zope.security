@@ -5,6 +5,9 @@
 5.8 (unreleased)
 ================
 
+- The extra ``untrustedpython`` now for Python 3, too, installs
+  ``zope.untrustedpython``.
+
 
 5.7 (2022-11-17)
 ================
