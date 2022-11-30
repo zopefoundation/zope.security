@@ -106,7 +106,6 @@ codeoptimization = [
 # Jython cannot build the C optimizations, while on PyPy they are
 # anti-optimizations (the C extension compatibility layer is known-slow,
 # and defeats JIT opportunities).
-py3 = sys.version_info[0] >= 3
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 is_pypy = py_impl() == 'PyPy'
 is_jython = 'java' in sys.platform
