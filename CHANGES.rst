@@ -2,7 +2,7 @@
  Changes
 =========
 
-5.8 (unreleased)
+5.8 (2022-11-30)
 ================
 
 - The extra ``untrustedpython`` now for Python 3, too, installs
