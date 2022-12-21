@@ -30,7 +30,7 @@ class Test_assertLocation(unittest.TestCase):
         return assertLocation(adapter, parent)
 
     def test_w_non_ILocation(self):
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         parent = object()
@@ -41,7 +41,7 @@ class Test_assertLocation(unittest.TestCase):
 
     def test_w_ILocation_no_parent(self):
         @implementer(ILocation)
-        class _Adapter(object):
+        class _Adapter:
             __parent__ = None
         adapter = _Adapter()
         parent = object()
@@ -53,7 +53,7 @@ class Test_assertLocation(unittest.TestCase):
         parent = object()
 
         @implementer(ILocation)
-        class _Adapter(object):
+        class _Adapter:
             __parent__ = parent
         adapter = _Adapter()
         new_parent = object()
@@ -72,7 +72,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         return self._getTargetClass()(factory)
 
     def _makeFactory(self):
-        class _Factory(object):
+        class _Factory:
             __name__ = 'testing'
             __module__ = 'zope.security.tests.test_adapter'
             _called_with = ()
@@ -93,7 +93,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         before = factory.__dict__.copy()
@@ -108,7 +108,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         extra = object()
@@ -126,7 +126,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         returned = ltaf(adapter)
@@ -139,7 +139,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         returned = ltaf(adapter)
@@ -152,7 +152,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         proxy = ProxyFactory(adapter)
@@ -174,7 +174,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         extra = object()
@@ -197,10 +197,10 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
 
-        class _Extra(object):
+        class _Extra:
             pass
         adapter = _NotAdapter()
         extra = _Extra()
@@ -226,7 +226,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _Adapter(object):
+        class _Adapter:
             pass
         adapter = _Adapter()
         proxy = ProxyFactory(adapter)
@@ -254,7 +254,7 @@ class LocatingTrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _Adapter(object):
+        class _Adapter:
             pass
         adapter = _Adapter()
         proxy = ProxyFactory(adapter)
@@ -282,7 +282,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         return self._getTargetClass()(factory)
 
     def _makeFactory(self):
-        class _Factory(object):
+        class _Factory:
             __name__ = 'testing'
             __module__ = 'zope.security.tests.test_adapter'
 
@@ -297,7 +297,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         proxy = ProxyFactory(adapter)
@@ -318,7 +318,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         extra = object()
@@ -340,10 +340,10 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
 
-        class _Extra(object):
+        class _Extra:
             pass
         adapter = _NotAdapter()
         extra = _Extra()
@@ -367,7 +367,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _Adapter(object):
+        class _Adapter:
             pass
         adapter = _Adapter()
         proxy = ProxyFactory(adapter)
@@ -392,7 +392,7 @@ class TrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _Adapter(object):
+        class _Adapter:
             pass
         adapter = _Adapter()
         proxy = ProxyFactory(adapter)
@@ -419,7 +419,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         return self._getTargetClass()(factory)
 
     def _makeFactory(self):
-        class _Factory(object):
+        class _Factory:
             __name__ = 'testing'
             __module__ = 'zope.security.tests.test_adapter'
             _called_with = ()
@@ -440,7 +440,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         before = factory.__dict__.copy()
@@ -457,7 +457,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         factory = self._makeFactory()
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         extra = object()
@@ -477,7 +477,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         returned = ltaf(adapter)
@@ -490,7 +490,7 @@ class LocatingUntrustedAdapterFactoryTests(unittest.TestCase):
         directlyProvides(factory, ILocation)
         ltaf = self._makeOne(factory)
 
-        class _NotAdapter(object):
+        class _NotAdapter:
             pass
         adapter = _NotAdapter()
         returned = ltaf(adapter)

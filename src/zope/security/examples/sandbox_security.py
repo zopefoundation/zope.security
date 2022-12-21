@@ -52,7 +52,7 @@ ALL = 'All'
 def NoSetAttr(name): return NotAllowed
 
 
-class SimulationSecurityDatabase(object):
+class SimulationSecurityDatabase:
     """Security Database
 
     In the database, locations are mapped to authentication tokens to
@@ -106,7 +106,7 @@ class SimulationSecurityPolicy(simplepolicies.ParanoidSecurityPolicy):
 
 
 @implementer(IParticipation)
-class AgentParticipation(object):
+class AgentParticipation:
     """Agent Participation during the Simulation.
 
     A very simple participation that is specific to the simulations.

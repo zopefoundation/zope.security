@@ -19,53 +19,29 @@ Security Proxy Implementation
 
 static PyObject *__class__str = 0, *__name__str = 0, *__module__str = 0;
 
-// Compatibility with Python 2
-#if PY_MAJOR_VERSION < 3
-  #define IS_STRING PyString_Check
+#define PyInt_FromLong PyLong_FromLong
 
-  #define MAKE_STRING(name) PyString_AS_STRING(name)
+#define IS_STRING PyUnicode_Check
 
-  #define FROM_STRING PyString_FromString
+#define MAKE_STRING(name) PyBytes_AS_STRING( \
+        PyUnicode_AsUTF8String(name))
 
-  #define FROM_STRING_FORMAT PyString_FromFormat
+#define FROM_STRING PyUnicode_FromString
 
-  #define INTERN PyString_InternFromString
+#define FROM_STRING_FORMAT PyUnicode_FromFormat
 
-  #define MOD_ERROR_VAL
+#define INTERN PyUnicode_InternFromString
 
-  #define MOD_SUCCESS_VAL(val)
+#define MOD_ERROR_VAL NULL
 
-  #define MOD_INIT(name) void init##name(void)
+#define MOD_SUCCESS_VAL(val) val
 
-  #define MOD_DEF(ob, name, doc, methods) \
-          ob = Py_InitModule3(name, methods, doc);
+#define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
 
-#else
-
-  #define PyInt_FromLong PyLong_FromLong
-
-  #define IS_STRING PyUnicode_Check
-
-  #define MAKE_STRING(name) PyBytes_AS_STRING( \
-          PyUnicode_AsUTF8String(name))
-
-  #define FROM_STRING PyUnicode_FromString
-
-  #define FROM_STRING_FORMAT PyUnicode_FromFormat
-
-  #define INTERN PyUnicode_InternFromString
-
-  #define MOD_ERROR_VAL NULL
-
-  #define MOD_SUCCESS_VAL(val) val
-
-  #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
-
-  #define MOD_DEF(ob, name, doc, methods) \
-          static struct PyModuleDef moduledef = { \
-            PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
-          ob = PyModule_Create(&moduledef);
-#endif
+#define MOD_DEF(ob, name, doc, methods) \
+        static struct PyModuleDef moduledef = { \
+          PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+        ob = PyModule_Create(&moduledef);
 
 #define DECLARE_STRING(N) static PyObject *str_##N
 
@@ -931,16 +907,9 @@ static PyTypeObject SecurityProxyType = {
     (getattrofunc)proxy_getattro,             /* tp_getattro */
     (setattrofunc)proxy_setattro,             /* tp_setattro */
     0,                                        /* tp_as_buffer */
-#if PY_MAJOR_VERSION < 3
     Py_TPFLAGS_DEFAULT |
-    Py_TPFLAGS_BASETYPE |
-    Py_TPFLAGS_CHECKTYPES |
-    Py_TPFLAGS_HAVE_GC,                       /* tp_flags */
-#else // Py_TPFLAGS_CHECKTYPES is always true in Python 3 and removed.
-        Py_TPFLAGS_DEFAULT |
-        Py_TPFLAGS_HAVE_GC |
-        Py_TPFLAGS_BASETYPE,                    /* tp_flags */
-#endif
+    Py_TPFLAGS_HAVE_GC |
+    Py_TPFLAGS_BASETYPE,                      /* tp_flags */
     proxy_doc,                                /* tp_doc */
     (traverseproc)proxy_traverse,             /* tp_traverse */
     0,                                        /* tp_clear */

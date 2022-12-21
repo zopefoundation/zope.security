@@ -132,7 +132,7 @@ class Test_protectLikeUnto(unittest.TestCase):
                          foo_checker.set_permissions)
 
 
-class Foo(object):
+class Foo:
     bar = 'Bar'
 
 

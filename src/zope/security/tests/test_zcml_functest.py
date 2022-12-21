@@ -18,7 +18,7 @@ import unittest
 
 
 def configfile(s):
-    return io.StringIO(u"""<configure
+    return io.StringIO("""<configure
       xmlns='http://namespaces.zope.org/zope'
       i18n_domain='zope'>
       %s
@@ -283,7 +283,7 @@ def defineDirectives():
 
     import zope.security
     XMLConfig('meta.zcml', zope.security)()
-    xmlconfig(io.StringIO(u"""<configure
+    xmlconfig(io.StringIO("""<configure
         xmlns='http://namespaces.zope.org/zope'
         i18n_domain='zope'>
        <permission id="zope.Extravagant" title="extravagant" />
@@ -307,7 +307,7 @@ class TestRequireDirective(unittest.TestCase):
         setUp()
         defineDirectives()
 
-        class B(object):
+        class B:
             def m1(self):
                 raise AssertionError("Never called")
 
@@ -528,34 +528,39 @@ class TestRequireDirective(unittest.TestCase):
         self.assertDeclaration(declaration, m1P=P1, m2P=P1)
 
     def testMimicOnly(self):
-        declaration = ('''<class class="%s">
+        declaration = ('''<class class="{}">
                             <require
-                                permission="%s"
+                                permission="{}"
                                 attributes="m1 m2"/>
                           </class>
-                          <class class="%s">
-                            <require like_class="%s" />
+                          <class class="{}">
+                            <require like_class="{}" />
                           </class>
-                          ''' % (_pfx("test_base"), P1,
-                                 _pfx("test_class"), _pfx("test_base")))
+                          '''.format(_pfx("test_base"), P1,
+                                     _pfx("test_class"), _pfx("test_base")))
         # m1 and m2 are in the interface, so should be set, and m3 should not:
         self.assertDeclaration(declaration,
                                m1P=P1, m2P=P1)
 
     def testMimicAsDefault(self):
-        declaration = ('''<class class="%s">
+        declaration = (
+            '''<class class="{}">
                             <require
-                                permission="%s"
+                                permission="{}"
                                 attributes="m1 m2"/>
                           </class>
-                          <class class="%s">
-                            <require like_class="%s" />
+                          <class class="{}">
+                            <require like_class="{}" />
                             <require
-                                permission="%s"
+                                permission="{}"
                                 attributes="m2 m3"/>
                           </class>
-                          ''' % (_pfx("test_base"), P1,
-                                 _pfx("test_class"), _pfx("test_base"), P2))
+                          '''.format(
+                                _pfx("test_base"),
+                                P1,
+                                _pfx("test_class"),
+                                _pfx("test_base"),
+                                P2))
 
         # m1 and m2 are in the interface, so should be set, and m3 should not:
         self.assertDeclaration(declaration,
@@ -565,8 +570,6 @@ class TestRequireDirective(unittest.TestCase):
 def apply_declaration(declaration):
     '''Apply the xmlconfig machinery.'''
     from zope.configuration.xmlconfig import xmlconfig
-    if isinstance(declaration, bytes):
-        declaration = declaration.decode("utf-8")  # pragma: no cover PY2
     return xmlconfig(io.StringIO(declaration))
 
 
@@ -577,7 +580,7 @@ def make_dummy():
     global IDummy
 
     class IDummy(Interface):
-        perm = zope.security.zcml.Permission(title=u'')
+        perm = zope.security.zcml.Permission(title='')
 
 
 perms = []

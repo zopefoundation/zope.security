@@ -75,9 +75,7 @@ from zope.interface import implementer
 from zope.interface.interfaces import IDeclaration
 from zope.interface.interfaces import IInterface
 
-from zope.security._compat import CLASS_TYPES
 from zope.security._compat import PURE_PYTHON
-from zope.security._compat import PYTHON2
 from zope.security._compat import implementer_if_needed
 from zope.security._definitions import thread_local
 from zope.security.interfaces import ForbiddenAttribute
@@ -109,7 +107,7 @@ def ProxyFactory(object, checker=None):
 
     The proxy checker is looked up if not provided.
     """
-    if type(object) is Proxy:
+    if isinstance(object, Proxy):
         if checker is None or checker is getChecker(object):
             return object
         else:
@@ -197,7 +195,7 @@ def canAccess(obj, name):
 
 
 @implementer(INameBasedChecker)
-class CheckerPy(object):
+class CheckerPy:
     """
     The Python reference implementation of
     :class:`zope.security.interfaces.INameBasedChecker`.
@@ -280,7 +278,7 @@ class CheckerPy(object):
 
     def proxy(self, value):
         'See IChecker'
-        if type(value) is Proxy:
+        if isinstance(value, Proxy):
             return value
         checker = getattr(value, '__Security_checker__', None)
         if checker is None:
@@ -295,7 +293,7 @@ Checker = CheckerPy  # in case no C optimizations
 
 
 # Helper class for __traceback_supplement__
-class TracebackSupplement(object):
+class TracebackSupplement:
 
     def __init__(self, obj):
         self.obj = obj
@@ -305,7 +303,7 @@ class TracebackSupplement(object):
         try:
             cls = self.obj.__class__
             if hasattr(cls, "__module__"):
-                s = "%s.%s" % (cls.__module__, cls.__name__)
+                s = "{}.{}".format(cls.__module__, cls.__name__)
             else:  # pragma: no cover XXX
                 s = str(cls.__name__)
             result.append("   - class: " + s)
@@ -314,7 +312,7 @@ class TracebackSupplement(object):
         try:
             cls = type(self.obj)
             if hasattr(cls, "__module__"):
-                s = "%s.%s" % (cls.__module__, cls.__name__)
+                s = "{}.{}".format(cls.__module__, cls.__name__)
             else:  # pragma: no cover XXX
                 s = str(cls.__name__)
             result.append("   - type: " + s)
@@ -323,7 +321,7 @@ class TracebackSupplement(object):
         return "\n".join(result)
 
 
-class Global(object):
+class Global:
     """A global object that behaves like a string.
 
     We want this to behave as a global, meaning it's pickled
@@ -342,8 +340,8 @@ class Global(object):
         return self.__name__
 
     def __repr__(self):
-        return "%s(%s,%s)" % (self.__class__.__name__,
-                              self.__name__, self.__module__)
+        return "{}({},{})".format(self.__class__.__name__,
+                                  self.__name__, self.__module__)
 
 
 CheckerPublic = Global('CheckerPublic')
@@ -412,7 +410,7 @@ def MultiChecker(specs):
     data = {}
 
     for spec in specs:
-        if type(spec) is tuple:
+        if isinstance(spec, tuple):
             names, permission_id = spec
             if IInterface.providedBy(names):
                 names = names.names(all=True)
@@ -470,7 +468,7 @@ def getCheckerForInstancesOf(class_):
     return _checkers.get(class_)
 
 
-DEFINABLE_TYPES = CLASS_TYPES + (types.ModuleType,)
+DEFINABLE_TYPES = (type, types.ModuleType)
 
 
 def defineChecker(type_, checker):
@@ -589,7 +587,7 @@ class CombinedChecker(Checker):
                 raise unauthorized_exception
 
 
-class CheckerLoggingMixin(object):
+class CheckerLoggingMixin:
     """
     Debugging mixin for checkers.
 
@@ -611,26 +609,26 @@ class CheckerLoggingMixin(object):
 
     def check(self, object, name):
         try:
-            super(CheckerLoggingMixin, self).check(object, name)
+            super().check(object, name)
             if self.verbosity > 1:
                 if name in _available_by_default:
                     self._log('[CHK] + Always available: %s on %r'
                               % (name, object), 2)
                 else:
                     self._log(
-                        '[CHK] + Granted: %s on %r' % (name, object), 2)
+                        '[CHK] + Granted: {} on {!r}'.format(name, object), 2)
         except Unauthorized:
             self._log(
-                '[CHK] - Unauthorized: %s on %r' % (name, object))
+                '[CHK] - Unauthorized: {} on {!r}'.format(name, object))
             raise
         except ForbiddenAttribute:
             self._log(
-                '[CHK] - Forbidden: %s on %r' % (name, object))
+                '[CHK] - Forbidden: {} on {!r}'.format(name, object))
             raise
 
     def check_getattr(self, object, name):
         try:
-            super(CheckerLoggingMixin, self).check(object, name)
+            super().check(object, name)
             if self.verbosity > 1:
                 if name in _available_by_default:
                     self._log(
@@ -642,28 +640,31 @@ class CheckerLoggingMixin(object):
                         % (name, object), 2)
         except Unauthorized:
             self._log(
-                '[CHK] - Unauthorized getattr: %s on %r' % (name, object))
+                '[CHK] - Unauthorized getattr: {} on {!r}'.format(name, object)
+            )
             raise
         except ForbiddenAttribute:
             self._log(
-                '[CHK] - Forbidden getattr: %s on %r' % (name, object))
+                '[CHK] - Forbidden getattr: {} on {!r}'.format(name, object))
             raise
 
     __setitem__ = check_getattr
 
     def check_setattr(self, object, name):
         try:
-            super(CheckerLoggingMixin, self).check_setattr(object, name)
+            super().check_setattr(object, name)
             if self.verbosity > 1:
                 self._log(
-                    '[CHK] + Granted setattr: %s on %r' % (name, object), 2)
+                    '[CHK] + Granted setattr: {} on {!r}'.format(
+                        name, object), 2)
         except Unauthorized:
             self._log(
-                '[CHK] - Unauthorized setattr: %s on %r' % (name, object))
+                '[CHK] - Unauthorized setattr: {} on {!r}'.format(
+                    name, object))
             raise
         except ForbiddenAttribute:
             self._log(
-                '[CHK] - Forbidden setattr: %s on %r' % (name, object))
+                '[CHK] - Forbidden setattr: {} on {!r}'.format(name, object))
             raise
 
 
@@ -784,14 +785,10 @@ _basic_types = {
     datetime.date: NoProxy,
     datetime.time: NoProxy,
     datetime.tzinfo: NoProxy,
+    type({}.values()): NoProxy,
+    type({}.keys()): NoProxy,
+    type({}.items()): NoProxy,
 }
-if PYTHON2:  # pragma: no cover
-    _basic_types[long] = NoProxy  # noqa: F821 undefined name 'long'
-    _basic_types[unicode] = NoProxy  # noqa: F821 undefined name 'unicode'
-else:
-    _basic_types[type({}.values())] = NoProxy
-    _basic_types[type({}.keys())] = NoProxy
-    _basic_types[type({}.items())] = NoProxy
 
 try:
     import pytz
@@ -819,12 +816,8 @@ BasicTypes_examples = {
     Message: Message('message', domain='hello')
 }
 
-if PYTHON2:  # pragma: no cover
-    BasicTypes_examples[unicode] = u'uabc'  # noqa: F821 undefined name
-    BasicTypes_examples[long] = long(65536)  # noqa: F821 undefined name
 
-
-class _Sequence(object):
+class _Sequence:
     def __len__(self):
         raise NotImplementedError()
 
@@ -891,8 +884,8 @@ _default_checkers = {
     type(().__repr__): _callableChecker,
     type: _typeChecker,
     types.ModuleType: lambda module: _checkers.get(module, _namedChecker),
-    type(iter([])): _iteratorChecker,  # Same types in Python 2.2.1,
-    type(iter(())): _iteratorChecker,  # different in Python 2.3.
+    type(iter([])): _iteratorChecker,
+    type(iter(())): _iteratorChecker,
     type(iter({})): _iteratorChecker,
     type(iter(set())): _iteratorChecker,
     type(iter(_Sequence())): _iteratorChecker,
@@ -903,8 +896,7 @@ _default_checkers = {
         _implied=CheckerPublic,
         subscribe=CheckerPublic,
         # To iterate, Python calls __len__ as a hint.
-        # Python 2 ignores AttributeErrors, but Python 3
-        # lets them pass.
+        # AttributeErrors are passed.
         __len__=CheckerPublic,
     ),
     zope.interface.interface.Method: InterfaceChecker(
@@ -915,13 +907,6 @@ _default_checkers = {
     zope.interface.declarations.Declaration: _Declaration_checker,
     abc.ABCMeta: _typeChecker,
 }
-if PYTHON2:  # pragma: no cover
-    _default_checkers[types.ClassType] = _typeChecker
-    _default_checkers[types.InstanceType] = _instanceChecker
-    # slot description
-    _default_checkers[type({}.iteritems())] = _iteratorChecker
-    _default_checkers[type({}.iterkeys())] = _iteratorChecker
-    _default_checkers[type({}.itervalues())] = _iteratorChecker
 
 
 def _fixup_dictlike(dict_type):
@@ -940,10 +925,6 @@ def _fixup_dictlike(dict_type):
 
 
 def _fixup_odict():
-    # OrderedDicts have three different implementations: Python 2 (pure
-    # python, returns generators and lists), Python <=3.4 (pure Python,
-    # uses view classes) and CPython 3.5+ (implemented in C). These should
-    # all be iterable.
     from collections import OrderedDict
 
     # The `_fixup_dictlike` is detected as undefined because it is deleted
@@ -1008,12 +989,12 @@ def _fixup_zope_interface():
         pass
 
     @implementer(I1)
-    class Obj(object):
+    class Obj:
         pass
 
     o = Obj()
 
-    # This will be athe zope.interface.implementedBy from the class
+    # This will be the zope.interface.implementedBy from the class
     # a zope.interface.declarations.Implements
     _default_checkers[type(providedBy(o))] = NoProxy
 
@@ -1028,7 +1009,7 @@ del _fixup_zope_interface
 
 def _fixup_itertools():
     # itertools.groupby is a built-in custom iterator type introduced
-    # in python2.4. It should have the same checker as other built-in
+    # in Python 2.4. It should have the same checker as other built-in
     # iterators.
 
     # Also, itertools._grouper also needs to be exposed as an
@@ -1053,40 +1034,24 @@ def _fixup_itertools():
         return x
     iterable = (1, 2, 3)
     pred_iterable = (pred, iterable)
-    missing_in_py3 = {'ifilter', 'ifilterfalse', 'imap',
-                      'izip', 'izip_longest'}
-    missing_in_py2 = {'zip_longest', 'accumulate', 'compress',
-                      'combinations', 'combinations_with_replacement'}
-    missing = missing_in_py3 if sys.version_info[0] >= 3 else missing_in_py2
     for func, args in (
             ('count', ()),
             ('cycle', ((),)),
             ('dropwhile', pred_iterable),
-            ('ifilter', pred_iterable),
-            ('ifilterfalse', pred_iterable),
-            ('imap', pred_iterable),
             ('islice', (iterable, 2)),
-            ('izip', (iterable,)),
-            ('izip_longest', (iterable,)),
             ('permutations', (iterable,)),
             ('product', (iterable,)),
             ('repeat', (1, 2)),
             ('starmap', pred_iterable),
             ('takewhile', pred_iterable),
             ('tee', (iterable,)),
-            # Python 3 additions
             ('zip_longest', (iterable,)),
             ('accumulate', (iterable,)),
             ('compress', (iterable, ())),
             ('combinations', (iterable, 1)),
             ('combinations_with_replacement', (iterable, 1)),
     ):
-        try:
-            func = getattr(itertools, func)
-        except AttributeError:
-            assert func in missing, "Expected %s but not found" % (func,)
-            # The following line is hit on PY2, but it doesn't always show:
-            continue  # pragma: no cover
+        func = getattr(itertools, func)
 
         result = func(*args)
         if func == itertools.tee:

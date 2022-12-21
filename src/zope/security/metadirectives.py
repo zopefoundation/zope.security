@@ -156,8 +156,8 @@ class IModule(Interface):
     """Group security declarations about a module"""
 
     module = GlobalObject(
-        title=u"Module",
-        description=u"Pointer to the module object.",
+        title="Module",
+        description="Pointer to the module object.",
         required=True)
 
 
@@ -170,16 +170,16 @@ class IAllow(Interface):
     """
 
     attributes = Tokens(
-        title=u"Attributes",
-        description=u"The attributes to provide access to.",
+        title="Attributes",
+        description="The attributes to provide access to.",
         value_type=PythonIdentifier(),
         required=False)
 
     interface = Tokens(
-        title=u"Interface",
-        description=(u"Interfaces whos names to provide access to. Access "
-                     u"will be provided to all of the names defined by the "
-                     u"interface(s). Multiple interfaces can be supplied."),
+        title="Interface",
+        description=("Interfaces whos names to provide access to. Access "
+                     "will be provided to all of the names defined by the "
+                     "interface(s). Multiple interfaces can be supplied."),
         value_type=GlobalInterface(),
         required=False)
 
@@ -193,11 +193,11 @@ class IRequire(Interface):
     """
 
     attributes = Tokens(
-        title=u"Attributes",
-        description=u"The attributes to require permission for.",
+        title="Attributes",
+        description="The attributes to require permission for.",
         value_type=PythonIdentifier(),
         required=False)
 
     permission = Permission(
-        title=u"Permission ID",
-        description=u"The ID of the permission to require.")
+        title="Permission ID",
+        description="The ID of the permission to require.")

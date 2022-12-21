@@ -16,7 +16,7 @@
 from zope.interface import Interface
 
 
-class ExampleClass(object):
+class ExampleClass:
     pass
 
 

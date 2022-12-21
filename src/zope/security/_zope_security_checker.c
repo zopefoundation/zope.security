@@ -17,55 +17,32 @@ static PyObject *_checkers, *_defaultChecker, *_available_by_default, *NoProxy;
 static PyObject *Proxy, *thread_local, *CheckerPublic;
 static PyObject *ForbiddenAttribute, *Unauthorized;
 
-// Compatibility with Python 2
-#if PY_MAJOR_VERSION < 3
-  #define IS_STRING PyString_Check
 
-  #define MAKE_STRING(name) PyString_AS_STRING(name)
+#define PyInt_FromLong PyLong_FromLong
 
-  #define FROM_STRING PyString_FromString
+#define IS_STRING PyUnicode_Check
 
-  #define FROM_STRING_FORMAT PyString_FromFormat
+#define MAKE_STRING(name) PyBytes_AS_STRING( \
+        PyUnicode_AsUTF8String(name))
 
-  #define INTERN PyString_InternFromString
+#define FROM_STRING PyUnicode_FromString
 
-  #define MOD_ERROR_VAL
+#define FROM_STRING_FORMAT PyUnicode_FromFormat
 
-  #define MOD_SUCCESS_VAL(val)
+#define INTERN PyUnicode_InternFromString
 
-  #define MOD_INIT(name) void init##name(void)
+#define MOD_ERROR_VAL NULL
 
-  #define MOD_DEF(ob, name, doc, methods) \
-          ob = Py_InitModule3(name, methods, doc);
+#define MOD_SUCCESS_VAL(val) val
 
-#else
+#define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
 
-  #define PyInt_FromLong PyLong_FromLong
+#define MOD_DEF(ob, name, doc, methods) \
+        static struct PyModuleDef moduledef = { \
+          PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+        ob = PyModule_Create(&moduledef);
 
-  #define IS_STRING PyUnicode_Check
-
-  #define MAKE_STRING(name) PyBytes_AS_STRING( \
-          PyUnicode_AsUTF8String(name))
-
-  #define FROM_STRING PyUnicode_FromString
-
-  #define FROM_STRING_FORMAT PyUnicode_FromFormat
-
-  #define INTERN PyUnicode_InternFromString
-
-  #define MOD_ERROR_VAL NULL
-
-  #define MOD_SUCCESS_VAL(val) val
-
-  #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
-
-  #define MOD_DEF(ob, name, doc, methods) \
-          static struct PyModuleDef moduledef = { \
-            PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
-          ob = PyModule_Create(&moduledef);
-
-  #define statichere static
-#endif
+#define statichere static
 
 #define DECLARE_STRING(N) static PyObject *str_##N
 

@@ -1,7 +1,7 @@
 import io
 
 
-class QuietWatchingChecker(object):
+class QuietWatchingChecker:
     # zope.testrunner does not support setUp/tearDownModule,
     # so we use a mixin class to make sure we don't flood stderr
     # with pointless printing when testing watching checkers

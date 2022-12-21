@@ -46,7 +46,7 @@ class ProtectionDeclarationException(Exception):
     pass
 
 
-class ClassDirective(object):
+class ClassDirective:
 
     def __init__(self, _context, class_):
         self.__id = dottedName(class_)  # this would barf on a module, anyway

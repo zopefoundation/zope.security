@@ -16,7 +16,7 @@ import unittest
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
 
 
-class ConformsToIFromUnicode(object):
+class ConformsToIFromUnicode:
 
     def test_class_conforms_to_IFromUnicode(self):
         from zope.interface.verify import verifyClass
@@ -152,7 +152,7 @@ class Test_redefinePermission(unittest.TestCase):
     def test_wo_existing_mapping(self):
         z_context = DummyZCMLContext()
 
-        class Context(object):
+        class Context:
             pass
         context = z_context.context = Context()
         after = object()
@@ -162,7 +162,7 @@ class Test_redefinePermission(unittest.TestCase):
     def test_w_existing_mapping_wo_existing_key(self):
         z_context = DummyZCMLContext()
 
-        class Context(object):
+        class Context:
             pass
         context = z_context.context = Context()
         mapping = context.permission_mapping = {}
@@ -174,7 +174,7 @@ class Test_redefinePermission(unittest.TestCase):
     def test_w_existing_mapping_w_existing_key(self):
         z_context = DummyZCMLContext()
 
-        class Context(object):
+        class Context:
             pass
         context = z_context.context = Context()
         mapping = context.permission_mapping = {}
@@ -185,7 +185,7 @@ class Test_redefinePermission(unittest.TestCase):
         self.assertIs(context.permission_mapping['before.permission'], after)
 
 
-class DummyZCMLContext(object):
+class DummyZCMLContext:
 
     def __init__(self):
         self._actions = []

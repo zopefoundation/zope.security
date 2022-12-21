@@ -69,7 +69,7 @@ def read(*rnames):
 # Sniff the location of the headers in the package distribution
 
 
-class ModuleHeaderDir(object):
+class ModuleHeaderDir:
 
     def __init__(self, require_spec, where='../..'):
         # By default, assume top-level pkg has the same name as the dist.
@@ -145,11 +145,7 @@ setup(name='zope.security',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: Zope Public License',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
           'Programming Language :: Python :: 3.9',
@@ -164,10 +160,10 @@ setup(name='zope.security',
       ],
       url='http://github.com/zopefoundation/zope.security',
       project_urls={
-        'Documentation': 'https://zopesecurity.readthedocs.io',
-        'Issue Tracker': ('https://github.com/zopefoundation'
-                          '/zope.security/issues'),
-        'Sources': 'https://github.com/zopefoundation/zope.security',
+          'Documentation': 'https://zopesecurity.readthedocs.io',
+          'Issue Tracker': ('https://github.com/zopefoundation'
+                            '/zope.security/issues'),
+          'Sources': 'https://github.com/zopefoundation/zope.security',
       },
       license='ZPL 2.1',
       packages=find_packages('src'),
@@ -178,7 +174,7 @@ setup(name='zope.security',
           'build_ext': optional_build_ext,
       },
       ext_modules=ext_modules,
-      python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
+      python_requires='>=3.7',
       install_requires=[
           'setuptools',
           'zope.component',
