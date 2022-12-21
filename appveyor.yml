@@ -9,9 +9,6 @@ environment:
   ZOPE_INTERFACE_STRICT_IRO: 1
 
   matrix:
-    - python: 27-x64
-    - python: 35-x64
-    - python: 36-x64
     - python: 37-x64
     - python: 38-x64
     - python: 39-x64
