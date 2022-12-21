@@ -5,7 +5,7 @@
 6.0 (unreleased)
 ================
 
-- Nothing changed yet.
+- Drop support for Python 2.7, 3.5, 3.6.
 
 
 5.8 (2022-11-30)
