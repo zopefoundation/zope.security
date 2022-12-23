@@ -104,7 +104,7 @@ class ClassDirectiveTests(unittest.TestCase):
     def test_require_only_like_class(self):
         from zope.security.protectclass import protectLikeUnto
 
-        class Bar(object):
+        class Bar:
             pass
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
@@ -230,8 +230,8 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.security.protectclass import protectSetAttribute
 
         class IFoo(Interface):
-            bar = Field(u"Bar")
-            baz = Field(u"Baz")
+            bar = Field("Bar")
+            baz = Field("Baz")
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
@@ -271,7 +271,7 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.schema import Field
 
         class IFoo(Interface):
-            bar = Field(u"Bar", readonly=True)
+            bar = Field("Bar", readonly=True)
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
@@ -423,7 +423,7 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(context._actions[1]['args'], ('', IFactory))
 
 
-class Foo(object):
+class Foo:
     pass
 
 
@@ -662,7 +662,7 @@ class Test_requre(unittest.TestCase):
                          ('testing', 'baz', perm))
 
 
-class DummyZCMLContext(object):
+class DummyZCMLContext:
 
     def __init__(self):
         self._actions = []

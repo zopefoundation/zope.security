@@ -70,7 +70,7 @@ class SandboxError(Exception):
     pass
 
 
-class Identity(object):
+class Identity:
     """Mixin for pretty printing and identity method"""
 
     def __init__(self, id, *args, **kw):
@@ -80,7 +80,7 @@ class Identity(object):
         return self.id
 
     def __str__(self):
-        return "<%s> %s" % (str(self.__class__.__name__), str(self.id))
+        return "<{}> {}".format(str(self.__class__.__name__), str(self.id))
 
     __repr__ = __str__
 
@@ -165,13 +165,13 @@ class Sandbox(Identity):
             destination.addAgent(agent)
             del self._agents[agent.getId()]
         else:
-            raise SandboxError("couldn't transport agent %s to %s" % (
+            raise SandboxError("couldn't transport agent {} to {}".format(
                 agent, destination)
             )
 
 
 @implementer(IService)
-class Service(object):
+class Service:
     def getId(self):
         return self.__class__.__name__
 
@@ -231,7 +231,7 @@ def action_find_time(agent, home):
     return time_service.getTime()
 
 
-class TimeGenerator(object):
+class TimeGenerator:
     """Represents the passage of time in the agent simulation.
 
     each turn represents some discrete unit of time, during
@@ -283,7 +283,7 @@ class TimeGenerator(object):
 
 def WanderLust(agent):
     """ is agent ready to move """
-    if int(random.random()*100) <= 30:
+    if int(random.random() * 100) <= 30:
         return 1
 
 

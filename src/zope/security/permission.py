@@ -31,12 +31,12 @@ from zope.security.interfaces import IPermission
 
 
 @implementer(IPermission)
-class Permission(object):
+class Permission:
     """
     Default implementation of :class:`zope.security.interfaces.IPermission`.
     """
 
-    def __init__(self, id, title=u"", description=u""):
+    def __init__(self, id, title="", description=""):
         self.id = id
         self.title = title
         self.description = description
@@ -103,7 +103,7 @@ def PermissionIdsVocabulary(context=None):
             terms.append(SimpleTerm(name, name, name))
     terms = sorted(terms, key=operator.attrgetter('title'))
     if has_public:
-        terms.insert(0, SimpleTerm(CheckerPublic, zope_Public, u'Public'))
+        terms.insert(0, SimpleTerm(CheckerPublic, zope_Public, 'Public'))
     return SimpleVocabulary(terms)
 
 

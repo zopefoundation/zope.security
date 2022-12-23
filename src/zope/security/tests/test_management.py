@@ -141,7 +141,7 @@ class Test(unittest.TestCase):
         permission = 'zope.Test'
         obj = object()
 
-        class PolicyStub(object):
+        class PolicyStub:
             def checkPermission(s, p, o,):
                 self.assertTrue(p is permission)
                 self.assertTrue(o is obj)
@@ -161,7 +161,7 @@ class Test(unittest.TestCase):
 
         obj = object()
 
-        class ForbiddenPolicyStub(object):
+        class ForbiddenPolicyStub:
             def checkPermission(s, p, o):
                 return False
 
@@ -179,13 +179,13 @@ class Test(unittest.TestCase):
         from zope.security.management import system_user
 
         self.assertEqual(system_user.id,
-                         u'zope.security.management.system_user')
+                         'zope.security.management.system_user')
 
-        self.assertEqual(system_user.title, u'System')
+        self.assertEqual(system_user.title, 'System')
 
         for name in 'id', 'title', 'description':
             self.assertIsInstance(getattr(system_user, name),
-                                  type(u''))
+                                  str)
 
         verifyObject(IPrincipal, system_user)
         verifyObject(ISystemPrincipal, system_user)

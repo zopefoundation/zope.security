@@ -16,7 +16,7 @@
 import unittest
 
 
-class RequestStub(object):
+class RequestStub:
 
     def __init__(self, principal=None):
         self.principal = principal

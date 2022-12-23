@@ -48,15 +48,15 @@ class PermissionTests(unittest.TestCase):
 
     def test_ctor_only_id(self):
         permission = self._makeOne('testing')
-        self.assertEqual(permission.id, u'testing')
-        self.assertEqual(permission.title, u'')
-        self.assertEqual(permission.description, u'')
+        self.assertEqual(permission.id, 'testing')
+        self.assertEqual(permission.title, '')
+        self.assertEqual(permission.description, '')
 
     def test_ctor_w_title_and_description(self):
-        permission = self._makeOne('testing', u'TITLE', u'DESCRIPTION')
+        permission = self._makeOne('testing', 'TITLE', 'DESCRIPTION')
         self.assertEqual(permission.id, 'testing')
-        self.assertEqual(permission.title, u'TITLE')
-        self.assertEqual(permission.description, u'DESCRIPTION')
+        self.assertEqual(permission.title, 'TITLE')
+        self.assertEqual(permission.description, 'DESCRIPTION')
 
 
 class Test_checkPermission(PlacelessSetup, unittest.TestCase):

@@ -21,7 +21,6 @@ import sys
 
 from zope.proxy import PyProxyBase
 
-from zope.security._compat import _BUILTINS
 from zope.security._compat import PURE_PYTHON
 
 
@@ -81,7 +80,7 @@ class ProxyPy(PyProxyBase):
     __slots__ = ('_wrapped', '_checker')
 
     def __new__(cls, value, checker):
-        inst = super(ProxyPy, cls).__new__(cls)
+        inst = super().__new__(cls)
         inst._wrapped = value
         inst._checker = checker
         return inst
@@ -98,10 +97,10 @@ class ProxyPy(PyProxyBase):
             # Only allow _wrapped and _checker to be accessed from inside.
             if sys._getframe(1).f_locals.get('self') is not self:
                 raise AttributeError(name)
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         if name == '_wrapped':
             return wrapped
-        checker = super(ProxyPy, self).__getattribute__('_checker')
+        checker = super().__getattribute__('_checker')
         if name == '_checker':
             return checker
         if name not in ('__cmp__', '__hash__', '__bool__', '__nonzero__',
@@ -131,7 +130,7 @@ class ProxyPy(PyProxyBase):
             # this one attribute.
             val = getattr(wrapped, name)
         else:
-            val = super(ProxyPy, self).__getattribute__(name)
+            val = super().__getattribute__(name)
         return checker.proxy(val)
 
     def __getattr__(self, name):
@@ -154,107 +153,77 @@ class ProxyPy(PyProxyBase):
         # but we're consistent. We would provide a better error
         # message or even subclass of AttributeError, but that's liable to
         # break (doc)tests.
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        checker = super(ProxyPy, self).__getattribute__('_checker')
+        wrapped = super().__getattribute__('_wrapped')
+        checker = super().__getattribute__('_checker')
         checker.check_getattr(wrapped, name)
         raise AttributeError(name)
 
     def __setattr__(self, name, value):
         if name in ('_wrapped', '_checker'):
-            return super(ProxyPy, self).__setattr__(name, value)
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        checker = super(ProxyPy, self).__getattribute__('_checker')
+            return super().__setattr__(name, value)
+        wrapped = super().__getattribute__('_wrapped')
+        checker = super().__getattribute__('_checker')
         checker.check_setattr(wrapped, name)
         setattr(wrapped, name, value)
 
     def __delattr__(self, name):
         if name in ('_wrapped', '_checker'):
             raise AttributeError()
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        checker = super(ProxyPy, self).__getattribute__('_checker')
+        wrapped = super().__getattribute__('_wrapped')
+        checker = super().__getattribute__('_checker')
         checker.check_setattr(wrapped, name)
         delattr(wrapped, name)
 
-    @_check_name
-    def __getslice__(self, start, end):  # pragma: no cover PY2
-        wrapped = object.__getattribute__(self, '_wrapped')
-        try:
-            getslice = wrapped.__getslice__
-        except AttributeError:
-            return wrapped.__getitem__(slice(start, end))
-        return getslice(start, end)
-
-    @_check_name
-    def __setslice__(self, start, end, value):  # pragma: no cover PY2
-        wrapped = object.__getattribute__(self, '_wrapped')
-        try:
-            setslice = wrapped.__setslice__
-        except AttributeError:
-            return wrapped.__setitem__(slice(start, end), value)
-        return setslice(start, end, value)
-
-    def __cmp__(self, other):  # pragma: no cover PY2
-        # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        return cmp(wrapped, other)  # noqa: F821 undefined name 'cmp'
-
     def __lt__(self, other):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return wrapped < other
 
     def __le__(self, other):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return wrapped <= other
 
     def __eq__(self, other):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return wrapped == other
 
     def __ne__(self, other):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return wrapped != other
 
     def __ge__(self, other):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return wrapped >= other
 
     def __gt__(self, other):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return wrapped > other
 
     def __hash__(self):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return hash(wrapped)
 
     def __nonzero__(self):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         return bool(wrapped)
     __bool__ = __nonzero__
 
     def __length_hint__(self):
         # no check
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
+        wrapped = super().__getattribute__('_wrapped')
         try:
             hint = wrapped.__length_hint__
         except AttributeError:
             return NotImplemented
         else:
             return hint()
-
-    def __coerce__(self, other):  # pragma: no cover PY2
-        # For some reason _check_name does not work for coerce()
-        wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-        checker = super(ProxyPy, self).__getattribute__('_checker')
-        checker.check(wrapped, '__coerce__')
-        return super(ProxyPy, self).__coerce__(other)
 
     def __str__(self):
         try:
@@ -266,8 +235,8 @@ class ProxyPy(PyProxyBase):
             raise
         except:  # noqa: E722 do not use bare 'except'
             # The C implementation catches all exceptions.
-            wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-            return '<security proxied %s.%s instance at %s>' % (
+            wrapped = super().__getattribute__('_wrapped')
+            return '<security proxied {}.{} instance at {}>'.format(
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
                 _fmt_address(wrapped))
 
@@ -280,8 +249,8 @@ class ProxyPy(PyProxyBase):
         except TypeError:
             raise
         except:  # noqa: E722 do not use bare 'except'
-            wrapped = super(ProxyPy, self).__getattribute__('_wrapped')
-            return '<security proxied %s.%s instance at %s>' % (
+            wrapped = super().__getattribute__('_wrapped')
+            return '<security proxied {}.{} instance at {}>'.format(
                 wrapped.__class__.__module__, wrapped.__class__.__name__,
                 _fmt_address(wrapped))
 
@@ -292,15 +261,15 @@ for name in ['__call__',
              # '__unicode__', # Unchecked in C proxy
              '__reduce__',
              '__reduce_ex__',
-             # '__lt__',      # Unchecked in C proxy (rich coparison)
-             # '__le__',      # Unchecked in C proxy (rich coparison)
-             # '__eq__',      # Unchecked in C proxy (rich coparison)
-             # '__ne__',      # Unchecked in C proxy (rich coparison)
-             # '__ge__',      # Unchecked in C proxy (rich coparison)
-             # '__gt__',      # Unchecked in C proxy (rich coparison)
-             # '__nonzero__', # Unchecked in C proxy (rich coparison)
-             # '__bool__',    # Unchecked in C proxy (rich coparison)
-             # '__hash__',    # Unchecked in C proxy (rich coparison)
+             # '__lt__',      # Unchecked in C proxy (rich comparison)
+             # '__le__',      # Unchecked in C proxy (rich comparison)
+             # '__eq__',      # Unchecked in C proxy (rich comparison)
+             # '__ne__',      # Unchecked in C proxy (rich comparison)
+             # '__ge__',      # Unchecked in C proxy (rich comparison)
+             # '__gt__',      # Unchecked in C proxy (rich comparison)
+             # '__nonzero__', # Unchecked in C proxy (rich comparison)
+             # '__bool__',    # Unchecked in C proxy (rich comparison)
+             # '__hash__',    # Unchecked in C proxy (rich comparison)
              # '__cmp__',     # Unchecked in C proxy
              '__getitem__',
              '__setitem__',
@@ -380,7 +349,7 @@ def getCheckerPy(proxy):
     return super(ProxyPy, proxy).__getattribute__('_checker')
 
 
-_builtin_isinstance = sys.modules[_BUILTINS].isinstance
+_builtin_isinstance = sys.modules['builtins'].isinstance
 
 
 def getObjectPy(proxy):

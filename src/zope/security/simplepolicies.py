@@ -29,7 +29,7 @@ from zope.security.interfaces import ISecurityPolicy
 
 @zope.interface.implementer(IInteraction)
 @zope.interface.provider(ISecurityPolicy)
-class ParanoidSecurityPolicy(object):
+class ParanoidSecurityPolicy:
     """
     Prohibit all access by any non-system principal, unless the item
     is :data:`public <zope.security.checker.CheckerPublic>`.

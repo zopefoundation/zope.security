@@ -27,7 +27,7 @@ from zope.security.proxy import Proxy
 from zope.security.proxy import getChecker
 
 
-class DecoratedSecurityCheckerDescriptor(object):
+class DecoratedSecurityCheckerDescriptor:
     """Descriptor for a Decorator that provides a decorated security checker.
     """
 
@@ -36,7 +36,7 @@ class DecoratedSecurityCheckerDescriptor(object):
             return self
         else:
             proxied_object = getProxiedObject(inst)
-            if type(proxied_object) is Proxy:
+            if isinstance(proxied_object, Proxy):
                 checker = getChecker(proxied_object)
             else:
                 checker = getattr(proxied_object, '__Security_checker__', None)

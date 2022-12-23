@@ -22,12 +22,12 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
                                               unittest.TestCase):
 
     def setUp(self):
-        super(DecoratedSecurityCheckerDescriptorTests, self).setUp()
+        super().setUp()
         from zope.security.checker import _clear
         _clear()
 
     def tearDown(self):
-        super(DecoratedSecurityCheckerDescriptorTests, self).tearDown()
+        super().tearDown()
         from zope.security.checker import _clear
         _clear()
 
@@ -44,7 +44,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         defineChecker(Foo, NoProxy)
         foo = Foo()
@@ -65,7 +65,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         from zope.security.checker import defineChecker
         from zope.security.interfaces import ForbiddenAttribute
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         fooChecker = NamesChecker(['a'])  # a is public
         defineChecker(Foo, fooChecker)
@@ -96,7 +96,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         foo = Foo()
         defineChecker(Foo, NoProxy)
@@ -116,7 +116,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         fooChecker = NamesChecker(['a'])  # a is public
         defineChecker(Foo, fooChecker)
@@ -137,7 +137,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         from zope.security.checker import defineChecker
         from zope.security.proxy import ProxyFactory
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         fooChecker = NamesChecker(['a'])  # a is public
         defineChecker(Foo, fooChecker)
@@ -162,7 +162,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         defineChecker(Foo, NoProxy)
         foo = Foo()

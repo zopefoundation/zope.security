@@ -45,7 +45,7 @@ def assertLocation(adapter, parent):
     return adapter
 
 
-class LocatingTrustedAdapterFactory(object):
+class LocatingTrustedAdapterFactory:
     """
     Adapt an adapter factory to provide trusted and (locatable) adapters.
 
@@ -109,7 +109,7 @@ class TrustedAdapterFactory(LocatingTrustedAdapterFactory):
         return self._customizeUnprotected(adapter, context)
 
 
-class LocatingUntrustedAdapterFactory(object):
+class LocatingUntrustedAdapterFactory:
     """
     Adapt an adapter factory to provide locatable untrusted adapters
 
