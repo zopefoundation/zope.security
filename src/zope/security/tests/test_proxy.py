@@ -405,21 +405,6 @@ class AbstractProxyTestBase:
         self.assertRaises(ForbiddenAttribute, lambda: proxy * 2)
         self.assertEqual(checker._checked, '__mul__')
 
-    def test___div___w_checker_allows(self):
-        target = 3
-        checker = DummyChecker()
-        proxy = self._makeOne(target, checker)
-        self.assertEqual(proxy / 2, target / 2)
-        self.assertEqual(checker._checked, '__truediv__')
-
-    def test___div___w_checker_forbids(self):
-        from zope.security.interfaces import ForbiddenAttribute
-        target = 3
-        checker = DummyChecker(ForbiddenAttribute)
-        proxy = self._makeOne(target, checker)
-        self.assertRaises(ForbiddenAttribute, lambda: proxy / 2)
-        self.assertEqual(checker._checked, '__truediv__')
-
     def test___truediv___w_checker_allows(self):
         target = 3.0
         checker = DummyChecker()
@@ -753,41 +738,6 @@ class AbstractProxyTestBase:
             proxy *= 3
         self.assertEqual(checker._checked, '__imul__')
 
-    def test___idiv___not_inplace_checker_allows(self):
-        target = 6
-        checker = DummyChecker()
-        proxy = before = self._makeOne(target, checker)
-        proxy /= 3
-        self.assertIsNot(proxy, before)
-        self.assertEqual(proxy, 2)
-        self.assertEqual(checker._checked, '__itruediv__')
-
-    def test___idiv___inplace_checker_allows(self):
-        class Foo:
-            def __init__(self, value):
-                self.value = value
-
-            def __idiv__(self, rhs):
-                self.value /= rhs
-                return self
-            __itruediv__ = __idiv__
-        target = Foo(6)
-        checker = DummyChecker()
-        proxy = before = self._makeOne(target, checker)
-        proxy /= 3
-        self.assertIs(proxy, before)
-        self.assertEqual(target.value, 2)
-        self.assertEqual(checker._checked, '__itruediv__')
-
-    def test___idiv___w_checker_forbids(self):
-        from zope.security.interfaces import ForbiddenAttribute
-        target = 6
-        checker = DummyChecker(ForbiddenAttribute)
-        proxy = self._makeOne(target, checker)
-        with self.assertRaises(ForbiddenAttribute):
-            proxy /= 3
-        self.assertEqual(checker._checked, '__itruediv__')
-
     def test___itruediv___not_inplace_checker_allows(self):
         target = 6
         checker = DummyChecker()
@@ -805,7 +755,6 @@ class AbstractProxyTestBase:
             def __itruediv__(self, rhs):
                 self.value /= rhs
                 return self
-            __idiv__ = __itruediv__
         target = Foo(6)
         checker = DummyChecker()
         proxy = before = self._makeOne(target, checker)
