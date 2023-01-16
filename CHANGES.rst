@@ -5,6 +5,9 @@
 6.0 (unreleased)
 ================
 
+- Remove proxying code for names that no longer exist in Python 3.
+  (`#92 <https://github.com/zopefoundation/zope.security/issues/92>`_)
+
 - Drop support for Python 2.7, 3.5, 3.6.
 
 
