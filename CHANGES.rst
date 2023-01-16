@@ -2,7 +2,7 @@
  Changes
 =========
 
-6.0 (unreleased)
+6.0 (2023-01-16)
 ================
 
 - Remove proxying code for names that no longer exist in Python 3.
