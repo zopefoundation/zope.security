@@ -1985,7 +1985,7 @@ class TestSecurityPolicy(QuietWatchingChecker,
         class C:
             pass
         self.assertEqual(checker.check(C, '__hash__'), None)
-        self.assertEqual(checker.check(C, '__nonzero__'), None)
+        self.assertEqual(checker.check(C, '__bool__'), None)
         self.assertEqual(checker.check(C, '__class__'), None)
         self.assertEqual(checker.check(C, '__implements__'), None)
         self.assertEqual(checker.check(C, '__lt__'), None)

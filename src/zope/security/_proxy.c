@@ -55,7 +55,6 @@ DECLARE_STRING(__cmp__);
 DECLARE_STRING(__contains__);
 DECLARE_STRING(__delitem__);
 DECLARE_STRING(__getitem__);
-DECLARE_STRING(__getslice__);
 DECLARE_STRING(__hash__);
 DECLARE_STRING(__iter__);
 DECLARE_STRING(__len__);
@@ -107,7 +106,6 @@ DECLARE_STRING(proxy);
 DECLARE_STRING(__repr__);
 DECLARE_STRING(__rpow__);
 DECLARE_STRING(__setitem__);
-DECLARE_STRING(__setslice__);
 DECLARE_STRING(__str__);
 
 typedef struct {
@@ -639,25 +637,6 @@ proxy_isetitem(SecurityProxy *self, Py_ssize_t i, PyObject *value)
   return res;
 }
 
-static PyObject *
-proxy_slice(SecurityProxy *self, Py_ssize_t start, Py_ssize_t end)
-{
-  PyObject *result = NULL;
-
-  if (check(self, str_check, str___getslice__) >= 0) {
-    result = PySequence_GetSlice(self->proxy.proxy_object, start, end);
-    PROXY_RESULT(self, result);
-  }
-  return result;
-}
-
-static int
-proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j, PyObject *value)
-{
-  if (check(self, str_check, str___setslice__) >= 0)
-    return PySequence_SetSlice(self->proxy.proxy_object, i, j, value);
-  return -1;
-}
 
 static int
 proxy_contains(SecurityProxy *self, PyObject *value)
@@ -751,9 +730,9 @@ proxy_as_sequence = {
   0,                                        /* sq_concat */
   0,                                        /* sq_repeat */
   (ssizeargfunc)proxy_igetitem,             /* sq_item */
-  (ssizessizeargfunc)proxy_slice,           /* sq_slice */
+  0,                                        /* sq_slice, unused in PY3 */
   (ssizeobjargproc)proxy_isetitem,          /* sq_ass_item */
-  (ssizessizeobjargproc)proxy_ass_slice,    /* sq_ass_slice */
+  0,                                        /* sq_ass_slice, unused in PY3 */
   (objobjproc)proxy_contains,               /* sq_contains */
 };
 
@@ -896,7 +875,6 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   INIT_STRING(__contains__);
   INIT_STRING(__delitem__);
   INIT_STRING(__getitem__);
-  INIT_STRING(__getslice__);
   INIT_STRING(__hash__);
   INIT_STRING(__iter__);
   INIT_STRING(__len__);
@@ -948,7 +926,6 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   INIT_STRING(__repr__);
   INIT_STRING(__rpow__);
   INIT_STRING(__setitem__);
-  INIT_STRING(__setslice__);
   INIT_STRING(__str__);
 
 

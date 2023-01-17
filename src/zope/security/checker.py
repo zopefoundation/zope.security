@@ -719,7 +719,7 @@ def moduleChecker(module):
 _available_by_default[:] = [
     '__lt__', '__le__', '__eq__',
     '__gt__', '__ge__', '__ne__',
-    '__hash__', '__nonzero__',
+    '__hash__', '__bool__',
     '__class__', '__providedBy__', '__implements__',
     '__repr__', '__conform__',
     '__name__', '__parent__',
@@ -843,14 +843,14 @@ _default_checkers = {
                         'get', 'has_key', 'copy', '__str__', 'keys',
                         'values', 'items', 'iterkeys', 'iteritems',
                         'itervalues', '__contains__']),
-    list: NamesChecker(['__getitem__', '__getslice__', '__len__', '__iter__',
+    list: NamesChecker(['__getitem__', '__len__', '__iter__',
                         '__contains__', 'index', 'count', '__str__',
                         '__add__', '__radd__', ]),
     set: _setChecker,
     frozenset: _setChecker,
     # XXX: actually decimal.Decimal has more methods, which are unlisted here
     #      so expect ForbiddenAttribute on such
-    decimal.Decimal: NamesChecker(['__nonzero__', '__cmp__', '__eq__',
+    decimal.Decimal: NamesChecker(['__bool__', '__cmp__', '__eq__',
                                    '__ne__', '__hash__',
                                    '__str__',
                                    '__neg__', '__pos__', '__abs__',
@@ -870,7 +870,7 @@ _default_checkers = {
                                    'to_eng_string', 'to_integral']),
 
     # YAGNI: () a rock
-    tuple: NamesChecker(['__getitem__', '__getslice__', '__add__', '__radd__',
+    tuple: NamesChecker(['__getitem__', '__add__', '__radd__',
                          '__contains__', '__len__', '__iter__',
                          '__str__']),
     Proxy: NoProxy,
