@@ -2,6 +2,13 @@
  Changes
 =========
 
+6.1 (unreleased)
+================
+
+- Remove more proxying code for names that no longer exist in Python 3.
+  (`#92 <https://github.com/zopefoundation/zope.security/issues/92>`_)
+
+
 6.0 (2023-01-16)
 ================
 

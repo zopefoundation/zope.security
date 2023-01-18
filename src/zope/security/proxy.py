@@ -103,7 +103,7 @@ class ProxyPy(PyProxyBase):
         checker = super().__getattribute__('_checker')
         if name == '_checker':
             return checker
-        if name not in ('__cmp__', '__hash__', '__bool__', '__nonzero__',
+        if name not in ('__cmp__', '__hash__', '__bool__',
                         '__lt__', '__le__', '__eq__', '__ne__', '__ge__',
                         '__gt__'):
             checker.check_getattr(wrapped, name)
@@ -209,11 +209,10 @@ class ProxyPy(PyProxyBase):
         wrapped = super().__getattribute__('_wrapped')
         return hash(wrapped)
 
-    def __nonzero__(self):
+    def __bool__(self):
         # no check
         wrapped = super().__getattribute__('_wrapped')
         return bool(wrapped)
-    __bool__ = __nonzero__
 
     def __length_hint__(self):
         # no check
@@ -267,7 +266,6 @@ for name in ['__call__',
              # '__ne__',      # Unchecked in C proxy (rich comparison)
              # '__ge__',      # Unchecked in C proxy (rich comparison)
              # '__gt__',      # Unchecked in C proxy (rich comparison)
-             # '__nonzero__', # Unchecked in C proxy (rich comparison)
              # '__bool__',    # Unchecked in C proxy (rich comparison)
              # '__hash__',    # Unchecked in C proxy (rich comparison)
              # '__cmp__',     # Unchecked in C proxy
