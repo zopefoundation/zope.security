@@ -58,7 +58,7 @@ DECLARE_STRING(__getitem__);
 DECLARE_STRING(__hash__);
 DECLARE_STRING(__iter__);
 DECLARE_STRING(__len__);
-DECLARE_STRING(next);
+DECLARE_STRING(__next__);
 DECLARE_STRING(op_abs);
 DECLARE_STRING(op_add);
 DECLARE_STRING(op_and);
@@ -351,7 +351,7 @@ proxy_iternext(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check_getattr, str_next) >= 0)
+  if (check(self, str_check_getattr, str___next__) >= 0)
     {
       result = PyIter_Next(self->proxy.proxy_object);
       PROXY_RESULT(self, result);
@@ -878,7 +878,7 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   INIT_STRING(__hash__);
   INIT_STRING(__iter__);
   INIT_STRING(__len__);
-  INIT_STRING(next);
+  INIT_STRING(__next__);
   INIT_STRING_OP(abs);
   INIT_STRING_OP(add);
   INIT_STRING_OP(and);

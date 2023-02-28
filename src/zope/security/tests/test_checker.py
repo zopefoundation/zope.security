@@ -586,8 +586,6 @@ class CheckerTestsBase(QuietWatchingChecker):
                 finally:
                     self.index += 1
 
-            next = __next__
-
             def __length_hint__(self):
                 self.hint_called = True
                 return self.hint
