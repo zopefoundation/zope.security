@@ -1490,7 +1490,9 @@ class Checker:
     unproxied_types = {str, }
 
     def check_getattr(self, _object, name):
-        if name not in ("foo", "next", "__class__", "__name__", "__module__"):
+        if name in ("__class__", "__name__", "__module__"):
+            return
+        if not self.ok or name not in ("__next__", "foo"):
             raise RuntimeError
 
     def check_setattr(self, _object, name):
@@ -1535,7 +1537,6 @@ class Something:
 
     def __next__(self):
         return 42  # Infinite sequence
-    next = __next__
 
     def __len__(self):
         return 42
@@ -1651,10 +1652,10 @@ class ProxyFactoryTests(unittest.TestCase):
         self.shouldFail(iter, self.p)
 
     def testNextOK(self):
-        self.assertEqual(self.p.next(), 42)
+        self.assertEqual(next(self.p), 42)
 
     def testNextFail(self):
-        self.shouldFail(self.p.next)
+        self.shouldFail(next, self.p)
 
     def testHashOK(self):
         self.assertEqual(hash(self.p), hash(self.x))

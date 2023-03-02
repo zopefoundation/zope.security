@@ -5,6 +5,10 @@
 6.2 (unreleased)
 ----------------
 
+- Make ``next()`` on C proxies call ``__next__`` rather than ``next`` (see
+  PEP 3114), and drop support for the Python 2 ``next`` method name from
+  pure-Python proxies.
+
 
 6.1 (2023-01-18)
 ================
