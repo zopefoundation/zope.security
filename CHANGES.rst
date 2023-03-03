@@ -9,6 +9,8 @@
   PEP 3114), and drop support for the Python 2 ``next`` method name from
   pure-Python proxies.
 
+- Add preliminary support for Python 3.12 as of 3.12a5.
+
 
 6.1 (2023-01-18)
 ================
