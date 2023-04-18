@@ -65,35 +65,12 @@ def read(*rnames):
     with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
         return f.read()
 
-# Include directories for C extensions
-# Sniff the location of the headers in the package distribution
-
-
-class ModuleHeaderDir:
-
-    def __init__(self, require_spec, where='../..'):
-        # By default, assume top-level pkg has the same name as the dist.
-        # Also assume that headers are located in the package dir, and
-        # are meant to be included as follows:
-        #    #include "module/header_name.h"
-        self._require_spec = require_spec
-        self._where = where
-
-    def __str__(self):
-        from pkg_resources import require
-        from pkg_resources import resource_filename
-        require(self._require_spec)
-        path = resource_filename(self._require_spec, self._where)
-        return os.path.abspath(path)
-
-
-include = [ModuleHeaderDir('zope.proxy')]
 
 codeoptimization = [
     Extension(
         "zope.security._proxy",
-        [os.path.join('src', 'zope', 'security', "_proxy.c")],
-        include_dirs=include,
+        include_dirs=[os.path.join('include', 'zope.proxy')],
+        sources=[os.path.join('src', 'zope', 'security', "_proxy.c")]
     ),
     Extension(
         "zope.security._zope_security_checker",
@@ -111,10 +88,8 @@ is_pypy = py_impl() == 'PyPy'
 is_jython = 'java' in sys.platform
 
 if is_pypy or is_jython:
-    setup_requires = []
     ext_modules = []
 else:
-    setup_requires = ['zope.proxy >= 4.3.0']
     ext_modules = codeoptimization
 
 
@@ -169,7 +144,6 @@ setup(name='zope.security',
       packages=find_packages('src'),
       package_dir={'': 'src'},
       namespace_packages=['zope'],
-      setup_requires=setup_requires,
       cmdclass={
           'build_ext': optional_build_ext,
       },
