@@ -77,7 +77,7 @@ else:
     ]
 
 setup(name='zope.security',
-      version='4.0.4',
+      version='4.0.5.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
