@@ -1,7 +1,7 @@
 Changes
 =======
 
-4.0.4 (unreleased)
+4.0.4 (2023-05-02)
 ------------------
 
 - Drop using ``setup_requires`` to be able to build this package using
