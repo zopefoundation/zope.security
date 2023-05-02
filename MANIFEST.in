@@ -3,6 +3,7 @@ include *.txt
 
 recursive-include docs *
 recursive-include src *
+recursive-include include *.h
 
 global-exclude *.dll
 global-exclude *.pyc

@@ -4,7 +4,8 @@ Changes
 4.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Drop using ``setup_requires`` to be able to build this package using
+  ``zc.buildout`` on Python 2.
 
 
 4.0.3 (2015-06-02)
