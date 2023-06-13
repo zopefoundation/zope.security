@@ -36,7 +36,12 @@ additional-rules = [
 
 [check-manifest]
 additional-ignores = [
-    "docs/_build/html/_sources/api/*",
+    "docs/_build/*/*/*/*/*",
+    "docs/_build/*/*/*/*",
+    "docs/_build/*/*/*",
+    "docs/_build/*/*",
+    "docs/_build/*",
+    "src/coverage.xml",
     ]
 
 [flake8]
