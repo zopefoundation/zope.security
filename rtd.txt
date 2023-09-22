@@ -1,8 +1,0 @@
-repoze.sphinx.autointerface
-Sphinx
-zope.component
-zope.configuration
-zope.interface
-zope.location
-zope.proxy
-zope.testing
