@@ -2,7 +2,7 @@
 # https://github.com/zopefoundation/meta/tree/master/config/c-code
 [meta]
 template = "c-code"
-commit-id = "b21fbbf2"
+commit-id = "47bae5a7"
 
 [python]
 with-appveyor = true
@@ -21,6 +21,9 @@ additional-envlist = [
 testenv-setenv = [
     "ZOPE_INTERFACE_STRICT_IRO=1",
     "watch: ZOPE_WATCH_CHECKERS=1",
+    ]
+testenv-deps = [
+    "py37: urllib3 < 2",
     ]
 
 [coverage]
