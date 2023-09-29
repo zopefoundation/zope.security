@@ -1,0 +1,3 @@
+Sphinx
+repoze.sphinx.autointerface
+zope.security
