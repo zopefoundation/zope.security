@@ -2,7 +2,7 @@
  Changes
 =========
 
-6.2 (unreleased)
+6.2 (2023-10-05)
 ----------------
 
 - Make ``next()`` on C proxies call ``__next__`` rather than ``next`` (see
