@@ -5,6 +5,8 @@
 6.3 (unreleased)
 ----------------
 
+- Add preliminary support for Python 3.13 as of 3.13a3. Requiring ``zope.proxy >= 5.2``.
+
 
 6.2 (2023-10-05)
 ----------------
