@@ -18,27 +18,28 @@ __docformat__ = 'restructuredtext'
 from zope.configuration.fields import GlobalObject
 from zope.configuration.fields import MessageID
 from zope.interface import Interface
-from zope.interface import implementer
 from zope.schema import Id
 from zope.schema.interfaces import IFromUnicode
 
-from zope.security.permission import checkPermission
-from zope.security.management import setSecurityPolicy
+from zope.security._compat import implementer_if_needed
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
+from zope.security.management import setSecurityPolicy
+from zope.security.permission import checkPermission
 
-@implementer(IFromUnicode)
+
+@implementer_if_needed(IFromUnicode)
 class Permission(Id):
     r"""This field describes a permission.
     """
 
-    def fromUnicode(self, u):
-        u = super(Permission, self).fromUnicode(u)
+    def fromUnicode(self, value):
+        u = super().fromUnicode(value)
 
         map = getattr(self.context, 'permission_mapping', {})
         return map.get(u, u)
 
     def _validate(self, value):
-        super(Permission, self)._validate(value)
+        super()._validate(value)
 
         if value != zope_Public:
             self.context.action(
@@ -60,9 +61,10 @@ class ISecurityPolicyDirective(Interface):
     """Defines the security policy that will be used for Zope."""
 
     component = GlobalObject(
-        title=u"Component",
-        description=u"Pointer to the object that will handle the security.",
+        title="Component",
+        description="Pointer to the object that will handle the security.",
         required=True)
+
 
 def securityPolicy(_context, component):
     _context.action(
@@ -71,43 +73,48 @@ def securityPolicy(_context, component):
         args=(component,)
     )
 
+
 class IPermissionDirective(Interface):
     """Define a new security object."""
 
     id = Id(
-        title=u"ID",
-        description=u"ID as which this object will be known and used.",
+        title="ID",
+        description="ID as which this object will be known and used.",
         required=True)
 
     title = MessageID(
-        title=u"Title",
-        description=u"Provides a title for the object.",
+        title="Title",
+        description="Provides a title for the object.",
         required=True)
 
     description = MessageID(
-        title=u"Description",
-        description=u"Provides a description for the object.",
+        title="Description",
+        description="Provides a description for the object.",
         required=False)
 
-def permission(_context, id, title, description=u''):
+
+def permission(_context, id, title, description=''):
+    from zope.component.zcml import utility
+
     from zope.security.interfaces import IPermission
     from zope.security.permission import Permission
-    from zope.component.zcml import utility
     permission = Permission(id, title, description)
     utility(_context, IPermission, permission, name=id)
+
 
 class IRedefinePermission(Interface):
     """Define a permission to replace another permission."""
 
     from_ = Permission(
-        title=u"Original permission",
-        description=u"Original permission ID to redefine.",
+        title="Original permission",
+        description="Original permission ID to redefine.",
         required=True)
 
     to = Permission(
-        title=u"Substituted permission",
-        description=u"Substituted permission ID.",
+        title="Substituted permission",
+        description="Substituted permission ID.",
         required=True)
+
 
 def redefinePermission(_context, from_, to):
     _context = _context.context

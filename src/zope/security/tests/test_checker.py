@@ -17,8 +17,6 @@ import unittest
 
 from zope.security import checker as sec_checker
 from zope.security.tests import QuietWatchingChecker
-from zope.security._compat import PYTHON3 as PY3
-from zope.security._compat import PYTHON2 as PY2
 
 
 # pylint:disable=protected-access,inherit-non-class,no-method-argument,old-style-class
@@ -31,8 +29,10 @@ class Test_ProxyFactory(unittest.TestCase):
         return ProxyFactory(obj, checker)
 
     def test_w_already_proxied_no_checker(self):
-        from zope.security.proxy import Proxy, getChecker
+        from zope.security.proxy import Proxy
+        from zope.security.proxy import getChecker
         obj = object()
+
         def _check(*x):
             raise AssertionError("Never called")
         proxy = Proxy(obj, _check)
@@ -41,8 +41,10 @@ class Test_ProxyFactory(unittest.TestCase):
         self.assertIs(getChecker(returned), _check)
 
     def test_w_already_proxied_same_checker(self):
-        from zope.security.proxy import Proxy, getChecker
+        from zope.security.proxy import Proxy
+        from zope.security.proxy import getChecker
         obj = object()
+
         def _check(*x):
             raise AssertionError("Never called")
         proxy = Proxy(obj, _check)
@@ -53,9 +55,11 @@ class Test_ProxyFactory(unittest.TestCase):
     def test_w_already_proxied_different_checker(self):
         from zope.security.proxy import Proxy
         obj = object()
+
         def _check(*x):
             raise AssertionError("Never called")
         proxy = Proxy(obj, _check)
+
         def _sneaky(*x):
             raise AssertionError("Never called")
         self.assertRaises(TypeError, self._callFUT, proxy, _sneaky)
@@ -63,6 +67,7 @@ class Test_ProxyFactory(unittest.TestCase):
     def test_w_explicit_checker(self):
         from zope.security.proxy import getChecker
         obj = object()
+
         def _check(*x):
             raise AssertionError("Never called")
         returned = self._callFUT(obj, _check)
@@ -75,9 +80,11 @@ class Test_ProxyFactory(unittest.TestCase):
         self.assertIs(returned, obj)
 
     def test_no_checker_w_dunder(self):
-        from zope.security.proxy import getChecker, getObject
-        _check = object() # don't use a func, due to bound method
-        class _WithChecker(object):
+        from zope.security.proxy import getChecker
+        from zope.security.proxy import getObject
+        _check = object()  # don't use a func, due to bound method
+
+        class _WithChecker:
             __Security_checker__ = _check
         obj = _WithChecker()
         returned = self._callFUT(obj)
@@ -89,11 +96,14 @@ class Test_ProxyFactory(unittest.TestCase):
         from zope.security.checker import Checker
         from zope.security.checker import _checkers
         from zope.security.checker import _clear
-        from zope.security.proxy import getChecker, getObject
-        class _Obj(object):
+        from zope.security.proxy import getChecker
+        from zope.security.proxy import getObject
+
+        class _Obj:
             pass
         obj = _Obj()
         _checker = Checker({})
+
         def _check(*args):
             return _checker
         _checkers[_Obj] = _check
@@ -113,10 +123,11 @@ class Test_canWrite(unittest.TestCase):
         return canWrite(obj, name)
 
     def _makeChecker(self, ch_get=None, ch_set=None):
-        class _Checker(object):
+        class _Checker:
             def check_getattr(self, obj, name):
                 if ch_get is not None:
                     raise ch_get()
+
             def check_setattr(self, obj, name):
                 if ch_set is not None:
                     raise ch_set()
@@ -167,7 +178,7 @@ class Test_canAccess(unittest.TestCase):
         return canAccess(obj, name)
 
     def _makeChecker(self, ch_get=None):
-        class _Checker(object):
+        class _Checker:
             def check_getattr(self, obj, name):
                 if ch_get is not None:
                     raise ch_get()
@@ -196,6 +207,7 @@ class Test_canAccess(unittest.TestCase):
 
 _marker = object()
 
+
 class CheckerTestsBase(QuietWatchingChecker):
     # pylint:disable=no-member
 
@@ -211,11 +223,13 @@ class CheckerTestsBase(QuietWatchingChecker):
 
     def test_class_conforms_to_IChecker(self):
         from zope.interface.verify import verifyClass
+
         from zope.security.interfaces import IChecker
         verifyClass(IChecker, self._getTargetClass())
 
     def test_instance_conforms_to_IChecker(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IChecker
         verifyObject(IChecker, self._makeOne())
 
@@ -267,7 +281,8 @@ class CheckerTestsBase(QuietWatchingChecker):
 
     def test_check_setattr_w_interaction_allows(self):
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return True
         checker = self._makeOne(set_permissions={'name': 'view'})
@@ -279,9 +294,10 @@ class CheckerTestsBase(QuietWatchingChecker):
             del thread_local.interaction
 
     def test_check_setattr_w_interaction_denies(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
         checker = self._makeOne(set_permissions={'name': 'view'})
@@ -313,7 +329,8 @@ class CheckerTestsBase(QuietWatchingChecker):
 
     def test_check_non_public_w_interaction_allows(self):
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return True
         checker = self._makeOne({'name': 'view'})
@@ -325,9 +342,10 @@ class CheckerTestsBase(QuietWatchingChecker):
             del thread_local.interaction
 
     def test_check_non_public_w_interaction_denies(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
         checker = self._makeOne({'name': 'view'})
@@ -340,8 +358,10 @@ class CheckerTestsBase(QuietWatchingChecker):
             del thread_local.interaction
 
     def test_proxy_already_proxied(self):
-        from zope.security.proxy import Proxy, getChecker
+        from zope.security.proxy import Proxy
+        from zope.security.proxy import getChecker
         obj = object()
+
         def _check(*x):
             raise AssertionError("Never called")
         proxy = Proxy(obj, _check)
@@ -357,9 +377,11 @@ class CheckerTestsBase(QuietWatchingChecker):
         self.assertIs(returned, obj)
 
     def test_proxy_no_checker_w_dunder(self):
-        from zope.security.proxy import getChecker, getObject
-        _check = object() # don't use a func, due to bound method
-        class _WithChecker(object):
+        from zope.security.proxy import getChecker
+        from zope.security.proxy import getObject
+        _check = object()  # don't use a func, due to bound method
+
+        class _WithChecker:
             __Security_checker__ = _check
         obj = _WithChecker()
         checker = self._makeOne()
@@ -372,11 +394,14 @@ class CheckerTestsBase(QuietWatchingChecker):
         from zope.security.checker import Checker
         from zope.security.checker import _checkers
         from zope.security.checker import _clear
-        from zope.security.proxy import getChecker, getObject
-        class _Obj(object):
+        from zope.security.proxy import getChecker
+        from zope.security.proxy import getObject
+
+        class _Obj:
             pass
         obj = _Obj()
         _checker = Checker({})
+
         def _check(*args):
             return _checker
         _checkers[_Obj] = _check
@@ -390,10 +415,11 @@ class CheckerTestsBase(QuietWatchingChecker):
             _clear()
 
     def test_Decimal_operations(self):
-        from zope.security.proxy import Proxy
-        from zope.security.checker import _default_checkers
         from decimal import Decimal
         from decimal import DecimalTuple
+
+        from zope.security.checker import _default_checkers
+        from zope.security.proxy import Proxy
 
         checker = _default_checkers[Decimal]
 
@@ -420,8 +446,6 @@ class CheckerTestsBase(QuietWatchingChecker):
         self.assertEqual(proxy // Decimal('1'), Decimal('1'))
         self.assertEqual(float(proxy), 1.1)
         self.assertEqual(int(proxy), 1)
-        if PY2:
-            self.assertEqual(long(proxy), 1)
         self.assertEqual(proxy ** 2, Decimal('1.21'))
         self.assertEqual(1 ** proxy, Decimal('1'))
         self.assertEqual(proxy.adjusted(), 0)
@@ -432,8 +456,8 @@ class CheckerTestsBase(QuietWatchingChecker):
         self.assertEqual(proxy.quantize(Decimal('1.10')), Decimal('1.10'))
 
     def _check_iteration_of_dict_like(self, dict_like):
-        from zope.security.proxy import Proxy
         from zope.security.checker import _default_checkers
+        from zope.security.proxy import Proxy
 
         checker = _default_checkers[dict]
 
@@ -450,7 +474,6 @@ class CheckerTestsBase(QuietWatchingChecker):
         self.assertEqual([1], list(proxy.keys()))
         self.assertEqual([1], list(proxy))
         self.assertEqual([2], list(proxy.values()))
-
 
     def test_iteration_of_btree_items_keys_values(self):
         # iteration of BTree.items() is allowed by default.
@@ -475,21 +498,21 @@ class CheckerTestsBase(QuietWatchingChecker):
     def test_iteration_of_interface_implementedBy(self):
         # Iteration of implementedBy is allowed by default
         # See https://github.com/zopefoundation/zope.security/issues/27
-        from zope.security.proxy import Proxy
-        from zope.security.checker import Checker
-
-        from zope.interface import providedBy
-        from zope.interface import implementer
         from zope.interface import Interface
+        from zope.interface import implementer
+        from zope.interface import providedBy
+
+        from zope.security.checker import Checker
+        from zope.security.proxy import Proxy
 
         class I1(Interface):
             pass
 
         @implementer(I1)
-        class O(object):
+        class Obj:
             pass
 
-        o = O()
+        o = Obj()
 
         checker = Checker({})
 
@@ -497,20 +520,20 @@ class CheckerTestsBase(QuietWatchingChecker):
 
         # Since the object itself doesn't have any interfaces,
         # the providedBy will return the implementedBy of the class
-        l = list(providedBy(proxy))
+        provided_by = list(providedBy(proxy))
 
-        self.assertEqual(l, [I1])
+        self.assertEqual(provided_by, [I1])
 
     def test_iteration_of_interface_providesBy(self):
         # Iteration of zope.interface.Provides is allowed by default
         # See https://github.com/zopefoundation/zope.security/issues/27
-        from zope.security.proxy import Proxy
-        from zope.security.checker import Checker
-
-        from zope.interface import providedBy
+        from zope.interface import Interface
         from zope.interface import alsoProvides
         from zope.interface import implementer
-        from zope.interface import Interface
+        from zope.interface import providedBy
+
+        from zope.security.checker import Checker
+        from zope.security.proxy import Proxy
 
         class I1(Interface):
             pass
@@ -519,10 +542,10 @@ class CheckerTestsBase(QuietWatchingChecker):
             pass
 
         @implementer(I1)
-        class O(object):
+        class Obj:
             pass
 
-        o = O()
+        o = Obj()
         alsoProvides(o, I2)
 
         checker = Checker({})
@@ -531,9 +554,9 @@ class CheckerTestsBase(QuietWatchingChecker):
 
         # Since the object has its own interfaces, provided
         # by will return a zope.interface.Provides object
-        l = list(providedBy(proxy))
+        provided_by = list(providedBy(proxy))
 
-        self.assertEqual(l, [I2, I1])
+        self.assertEqual(provided_by, [I2, I1])
 
     def test_iteration_with_length_hint(self):
         # PEP 424 implemented officially in Python 3.4 and
@@ -541,10 +564,10 @@ class CheckerTestsBase(QuietWatchingChecker):
         # __length_hint__ method to be defined on iterators. It should
         # be allowed by default. See
         # https://github.com/zopefoundation/zope.security/issues/27
-        from zope.security.proxy import Proxy
         from zope.security.checker import _iteratorChecker
+        from zope.security.proxy import Proxy
 
-        class Iter(object):
+        class Iter:
             __Security_checker__ = _iteratorChecker
 
             items = (0, 1, 2)
@@ -563,8 +586,6 @@ class CheckerTestsBase(QuietWatchingChecker):
                 finally:
                     self.index += 1
 
-            next = __next__
-
             def __length_hint__(self):
                 self.hint_called = True
                 return self.hint
@@ -577,25 +598,22 @@ class CheckerTestsBase(QuietWatchingChecker):
         # The hint is called when we proxy the root object
         i = Iter()
         proxy = Proxy(i, _iteratorChecker)
-        l = list(proxy)
-        self.assertEqual(l, [0, 1, 2])
+        self.assertEqual(list(proxy), [0, 1, 2])
         self.assertTrue(i.hint_called, "__length_hint__ should be called")
 
         # The hint is called when we proxy its iterator
         i = Iter()
         it = iter(i)
         proxy = Proxy(it, _iteratorChecker)
-        l = list(proxy)
-        self.assertEqual(l, [0, 1, 2])
+        self.assertEqual(list(proxy), [0, 1, 2])
         self.assertTrue(i.hint_called, "__length_hint__ should be called")
-
 
     def test_iteration_of_itertools_groupby(self):
         # itertools.groupby is a custom iterator type.
         # The groups it returns are also custom.
-        from zope.security.checker import ProxyFactory
-
         from itertools import groupby
+
+        from zope.security.checker import ProxyFactory
 
         group = groupby([0])
         list_group = list(group)
@@ -630,12 +648,14 @@ class TestChecker(CheckerTestsBase, unittest.TestCase):
     def _getTargetClass(self):
         return sec_checker.Checker
 
+
 @unittest.skipIf(sec_checker.Checker is sec_checker.WatchingChecker,
                  "WatchingChecker is the default")
 class TestWatchingChecker(TestChecker):
 
     def _getTargetClass(self):
         return sec_checker.WatchingChecker
+
 
 class TestTracebackSupplement(unittest.TestCase):
 
@@ -647,28 +667,27 @@ class TestTracebackSupplement(unittest.TestCase):
         return self._getTargetClass()(obj)
 
     def test_getInfo_builtin_types(self):
-        from zope.security._compat import _BUILTINS
         for val, typ in [('', 'str'),
                          (0, 'int'),
                          (1.0, 'float'),
                          ((), 'tuple'),
                          ([], 'list'),
                          ({}, 'dict'),
-                        ]:
+                         ]:
             tbs = self._makeOne(val)
             self.assertEqual(tbs.getInfo().splitlines(),
-                             ['   - class: %s.%s' % (_BUILTINS, typ),
-                              '   - type: %s.%s' % (_BUILTINS, typ),
-                             ])
+                             ['   - class: builtins.{}'.format(typ),
+                              '   - type: builtins.{}'.format(typ),
+                              ])
 
     def test_getInfo_newstyle_instance(self):
-        class C(object):
+        class C:
             pass
         tbs = self._makeOne(C())
         self.assertEqual(tbs.getInfo().splitlines(),
                          ['   - class: %s.C' % self.__class__.__module__,
                           '   - type: %s.C' % self.__class__.__module__,
-                         ])
+                          ])
 
     def test_getInfo_classic_instance(self):
         class C:
@@ -678,9 +697,8 @@ class TestTracebackSupplement(unittest.TestCase):
         lines = tbs.getInfo().splitlines()
         self.assertEqual(lines[0],
                          '   - class: %s.C' % self.__class__.__module__)
-        kind = '__builtin__.instance' if PY2 else '%s.C' % self.__class__.__module__
         self.assertEqual(lines[1],
-                         '   - type: ' + kind)
+                         '   - type: %s.C' % self.__class__.__module__)
 
 
 class TestGlobal(unittest.TestCase):
@@ -714,6 +732,7 @@ class Test_NamesChecker(unittest.TestCase):
 
     def test_empty_names_no_kw(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IChecker
         checker = self._callFUT()
         verifyObject(IChecker, checker)
@@ -762,7 +781,9 @@ class Test_InterfaceChecker(unittest.TestCase):
     def test_simple_iface_wo_kw(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.checker import CheckerPublic
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         checker = self._callFUT(IFoo)
@@ -772,6 +793,7 @@ class Test_InterfaceChecker(unittest.TestCase):
     def test_simple_iface_w_explicit_permission(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         other_perm = object()
@@ -781,7 +803,9 @@ class Test_InterfaceChecker(unittest.TestCase):
     def test_simple_iface_w_kw(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.checker import CheckerPublic
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         other_perm = object()
@@ -793,9 +817,12 @@ class Test_InterfaceChecker(unittest.TestCase):
     def test_derived_iface(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.checker import CheckerPublic
+
         class IFoo(Interface):
             bar = Attribute('Bar')
+
         class IBar(IFoo):
             baz = Attribute('Baz')
         checker = self._callFUT(IBar)
@@ -806,7 +833,9 @@ class Test_InterfaceChecker(unittest.TestCase):
     def test_w_clash(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.checker import DuplicationError
+
         class IFoo(Interface):
             bar = Attribute('Bar')
             bam = Attribute('Bam')
@@ -823,6 +852,7 @@ class Test_MultiChecker(unittest.TestCase):
 
     def test_empty(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IChecker
         checker = self._callFUT([])
         verifyObject(IChecker, checker)
@@ -839,6 +869,7 @@ class Test_MultiChecker(unittest.TestCase):
     def test_w_spec_as_iface(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         other_perm = object()
@@ -849,7 +880,9 @@ class Test_MultiChecker(unittest.TestCase):
     def test_w_spec_as_names_and_iface(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.checker import CheckerPublic
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         other_perm = object()
@@ -863,8 +896,10 @@ class Test_MultiChecker(unittest.TestCase):
     def test_w_spec_as_names_and_iface_clash(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.checker import CheckerPublic
         from zope.security.checker import DuplicationError
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         other_perm = object()
@@ -877,7 +912,7 @@ class Test_MultiChecker(unittest.TestCase):
         other_perm = object()
         spec = {'foo': CheckerPublic,
                 'bar': other_perm,
-               }
+                }
         checker = self._callFUT([spec])
         self.assertIs(checker.permission_id('foo'), CheckerPublic)
         self.assertIs(checker.permission_id('bar'), other_perm)
@@ -895,8 +930,7 @@ class Test_MultiChecker(unittest.TestCase):
                           [(('foo', 'bar'), CheckerPublic), spec])
 
 
-
-class _SelectCheckerBase(object):
+class _SelectCheckerBase:
     # pylint:disable=no-member
 
     def _callFUT(self, obj):
@@ -912,13 +946,14 @@ class _SelectCheckerBase(object):
 
     def test_w_basic_types_NoProxy(self):
         import datetime
+
         from zope.i18nmessageid import Message
         msg = Message('msg')
         for obj in [object(),
                     42,
                     3.14,
                     None,
-                    u'text',
+                    'text',
                     b'binary',
                     msg,
                     True,
@@ -927,13 +962,14 @@ class _SelectCheckerBase(object):
                     datetime.date.today(),
                     datetime.datetime.now().time(),
                     datetime.tzinfo(),
-                   ]:
+                    ]:
             self.assertIsNone(self._callFUT(obj))
 
     def test_w_checker_inst(self):
         from zope.security.checker import Checker
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = _checkers[Foo] = Checker({})
         self.assertIs(self._callFUT(Foo()), checker)
@@ -941,9 +977,11 @@ class _SelectCheckerBase(object):
     def test_w_factory_returning_checker(self):
         from zope.security.checker import Checker
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = Checker({})
+
         def _factory(obj):
             return checker
         _checkers[Foo] = _factory
@@ -952,8 +990,10 @@ class _SelectCheckerBase(object):
     def test_w_factory_returning_NoProxy(self):
         from zope.security.checker import NoProxy
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
+
         def _factory(obj):
             return NoProxy
         _checkers[Foo] = _factory
@@ -961,8 +1001,10 @@ class _SelectCheckerBase(object):
 
     def test_w_factory_returning_None(self):
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
+
         def _factory(obj):
             pass
         _checkers[Foo] = _factory
@@ -971,57 +1013,46 @@ class _SelectCheckerBase(object):
     def test_w_factory_factory(self):
         from zope.security.checker import Checker
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = Checker({})
+
         def _factory(obj):
             return checker
+
         def _factory_factory(obj):
             return _factory
         _checkers[Foo] = _factory_factory
         self.assertIs(self._callFUT(Foo()), checker)
 
     def test_itertools_checkers(self):
-        from zope.security.checker import _iteratorChecker
-        import sys
         import itertools
-        pred = lambda x: x
+
+        from zope.security.checker import _iteratorChecker
+
+        def pred(x):
+            return x
         iterable = (1, 2, 3)
         pred_iterable = (pred, iterable)
-        missing_in_py3 = {'ifilter', 'ifilterfalse', 'imap',
-                          'izip', 'izip_longest'}
-        missing_in_py2 = {'zip_longest', 'accumulate', 'compress',
-                          'combinations', 'combinations_with_replacement'}
-        missing = missing_in_py3 if sys.version_info[0] >= 3 else missing_in_py2
         for func, args in (
                 ('count', ()),
                 ('cycle', ((),)),
                 ('dropwhile', pred_iterable),
-                ('ifilter', pred_iterable),
-                ('ifilterfalse', pred_iterable),
-                ('imap', pred_iterable),
                 ('islice', (iterable, 2)),
-                ('izip', (iterable,)),
-                ('izip_longest', (iterable,)),
                 ('permutations', (iterable,)),
                 ('product', (iterable,)),
                 ('repeat', (1, 2)),
                 ('starmap', pred_iterable),
                 ('takewhile', pred_iterable),
                 ('tee', (iterable,)),
-                # Python 3 additions
                 ('zip_longest', (iterable,)),
                 ('accumulate', (iterable,)),
                 ('compress', (iterable, ())),
                 ('combinations', (iterable, 1)),
                 ('combinations_with_replacement', (iterable, 1)),
         ):
-            try:
-                func = getattr(itertools, func)
-            except AttributeError:
-                if func in missing:
-                    continue
-                self.fail("Attribute error raised", func)
+            func = getattr(itertools, func)
             __traceback_info__ = func
             result = func(*args)
             if func == itertools.tee:
@@ -1037,12 +1068,11 @@ class Test_selectCheckerPy(_SelectCheckerBase, unittest.TestCase):
         return selectCheckerPy(obj)
 
 
-
 @unittest.skipIf(sec_checker.selectChecker is sec_checker.selectCheckerPy,
                  "Pure Python")
 class Test_selectChecker(_SelectCheckerBase, unittest.TestCase):
 
-    def _callFUT(self, obj):
+    def _callFUT(self, obj):  # pragma: no cover
         from zope.security.checker import selectChecker
         return selectChecker(obj)
 
@@ -1062,13 +1092,14 @@ class Test_getCheckerForInstancesOf(unittest.TestCase):
         return getCheckerForInstancesOf(obj)
 
     def test_miss(self):
-        class Unknown(object):
+        class Unknown:
             pass
         self.assertIsNone(self._callFUT(Unknown))
 
     def test_hit(self):
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = _checkers[Foo] = object()
         self.assertIs(self._callFUT(Foo), checker)
@@ -1094,16 +1125,18 @@ class Test_defineChecker(unittest.TestCase):
                     42,
                     3.14,
                     None,
-                    u'text',
+                    'text',
                     b'binary',
                     True,
-                   ]:
+                    ]:
             self.assertRaises(TypeError, self._callFUT, obj, checker)
 
     def test_w_duplicate(self):
         from zope.exceptions import DuplicationError
+
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker1, checker2 = object(), object()
         _checkers[Foo] = checker1
@@ -1112,13 +1145,15 @@ class Test_defineChecker(unittest.TestCase):
     def test_w_newstyle_class(self):
         from zope.security.checker import _checkers
         checker = object()
-        class Foo(object):
+
+        class Foo:
             pass
         self._callFUT(Foo, checker)
         self.assertIs(_checkers[Foo], checker)
 
     def test_w_module(self):
         import zope.interface
+
         from zope.security.checker import _checkers
         checker = object()
         self._callFUT(zope.interface, checker)
@@ -1127,6 +1162,7 @@ class Test_defineChecker(unittest.TestCase):
     def test_w_oldstyle_class(self):
         from zope.security.checker import _checkers
         checker = object()
+
         class Foo:
             pass
         self._callFUT(Foo, checker)
@@ -1148,13 +1184,14 @@ class Test_undefineChecker(unittest.TestCase):
         return undefineChecker(type_)
 
     def test_miss(self):
-        class Foo(object):
+        class Foo:
             pass
         self.assertRaises(KeyError, self._callFUT, Foo)
 
     def test_hit(self):
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         _checkers[Foo] = object()
         self._callFUT(Foo)
@@ -1185,51 +1222,56 @@ class TestCombinedChecker(QuietWatchingChecker,
 
     def test_class_conforms_to_IChecker(self):
         from zope.interface.verify import verifyClass
+
         from zope.security.interfaces import IChecker
         verifyClass(IChecker, self._getTargetClass())
 
     def test_instance_conforms_to_IChecker(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IChecker
         verifyObject(IChecker, self._makeOne())
 
     def test_check_lhs_ok_rhs_not_called(self):
-        from zope.security.checker import CheckerPublic
         from zope.security.checker import Checker
+        from zope.security.checker import CheckerPublic
+
         class _NeverCalled(Checker):
-            def check(self, object, name): # pylint:disable=redefined-builtin
+            def check(self, object, name):  # pylint:disable=redefined-builtin
                 raise AssertionError("Never called")
 
         lhs = self._makeOther({'name': CheckerPublic})
         rhs = _NeverCalled({})
         combined = self._makeOne(lhs, rhs)
-        combined.check(object(), 'name') # no raise
+        combined.check(object(), 'name')  # no raise
 
     def test_check_lhs_unauth_rhs_ok(self):
-        from zope.security.checker import CheckerPublic
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.checker import CheckerPublic
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther({'name': 'view'}) # unauth
+        lhs = self._makeOther({'name': 'view'})  # unauth
         rhs = self._makeOther({'name': CheckerPublic})
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
         try:
-            combined.check(object(), 'name') #no raise
+            combined.check(object(), 'name')  # no raise
         finally:
             del thread_local.interaction
 
     def test_check_lhs_unauth_rhs_forbidden(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther({'name': 'view'}) # unauth
-        rhs = self._makeOther() # forbidden
+        lhs = self._makeOther({'name': 'view'})  # unauth
+        rhs = self._makeOther()  # forbidden
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
         try:
@@ -1239,13 +1281,14 @@ class TestCombinedChecker(QuietWatchingChecker,
             del thread_local.interaction
 
     def test_check_lhs_unauth_rhs_unauth(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther({'name': 'view'}) # unauth
+        lhs = self._makeOther({'name': 'view'})  # unauth
         rhs = self._makeOther({'name': 'inspect'})
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
@@ -1258,28 +1301,29 @@ class TestCombinedChecker(QuietWatchingChecker,
     def test_check_lhs_forbidden_rhs_ok(self):
         from zope.security.checker import CheckerPublic
 
-        lhs = self._makeOther() # forbidden
+        lhs = self._makeOther()  # forbidden
         rhs = self._makeOther({'name': CheckerPublic})
         combined = self._makeOne(lhs, rhs)
-        combined.check(object(), 'name') # no raise
+        combined.check(object(), 'name')  # no raise
 
     def test_check_lhs_forbidden_rhs_forbidden(self):
         from zope.security.interfaces import Forbidden
 
-        lhs = self._makeOther() # forbidden
-        rhs = self._makeOther() # forbidden
+        lhs = self._makeOther()  # forbidden
+        rhs = self._makeOther()  # forbidden
         combined = self._makeOne(lhs, rhs)
         self.assertRaises(Forbidden,
                           combined.check, object(), 'name')
 
     def test_check_lhs_forbidden_rhs_unauth(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther() # Forbidden
+        lhs = self._makeOther()  # Forbidden
         rhs = self._makeOther({'name': 'inspect'})
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
@@ -1290,42 +1334,45 @@ class TestCombinedChecker(QuietWatchingChecker,
             del thread_local.interaction
 
     def test_check_setattr_lhs_ok_rhs_not_called(self):
-        from zope.security.checker import CheckerPublic
         from zope.security.checker import Checker
+        from zope.security.checker import CheckerPublic
+
         class _NeverCalled(Checker):
-            def check_setattr(self, object, name): # pylint:disable=redefined-builtin
+            def check_setattr(self, object, name):
                 raise AssertionError("Never called")
 
         lhs = self._makeOther(set_permissions={'name': CheckerPublic})
         rhs = _NeverCalled({})
         combined = self._makeOne(lhs, rhs)
-        combined.check_setattr(object(), 'name') # no raise
+        combined.check_setattr(object(), 'name')  # no raise
 
     def test_check_setattr_lhs_unauth_rhs_ok(self):
-        from zope.security.checker import CheckerPublic
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.checker import CheckerPublic
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther(set_permissions={'name': 'update'}) # unauth
+        lhs = self._makeOther(set_permissions={'name': 'update'})  # unauth
         rhs = self._makeOther(set_permissions={'name': CheckerPublic})
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
         try:
-            combined.check_setattr(object(), 'name') # no raise
+            combined.check_setattr(object(), 'name')  # no raise
         finally:
             del thread_local.interaction
 
     def test_check_setattr_lhs_unauth_rhs_forbidden(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther(set_permissions={'name': 'view'}) # unauth
-        rhs = self._makeOther() # forbidden
+        lhs = self._makeOther(set_permissions={'name': 'view'})  # unauth
+        rhs = self._makeOther()  # forbidden
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
         try:
@@ -1335,14 +1382,15 @@ class TestCombinedChecker(QuietWatchingChecker,
             del thread_local.interaction
 
     def test_check_setattr_lhs_unauth_rhs_unauth(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther(set_permissions={'name': 'view'}) # unauth
-        rhs = self._makeOther(set_permissions={'name': 'inspect'}) # unauth
+        lhs = self._makeOther(set_permissions={'name': 'view'})  # unauth
+        rhs = self._makeOther(set_permissions={'name': 'inspect'})  # unauth
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
         try:
@@ -1354,29 +1402,30 @@ class TestCombinedChecker(QuietWatchingChecker,
     def test_check_setattr_lhs_forbidden_rhs_ok(self):
         from zope.security.checker import CheckerPublic
 
-        lhs = self._makeOther() # forbidden
+        lhs = self._makeOther()  # forbidden
         rhs = self._makeOther(set_permissions={'name': CheckerPublic})
         combined = self._makeOne(lhs, rhs)
-        combined.check_setattr(object(), 'name') # no raise
+        combined.check_setattr(object(), 'name')  # no raise
 
     def test_check_setattr_lhs_forbidden_rhs_forbidden(self):
         from zope.security.interfaces import Forbidden
 
-        lhs = self._makeOther() # forbidden
-        rhs = self._makeOther() # forbidden
+        lhs = self._makeOther()  # forbidden
+        rhs = self._makeOther()  # forbidden
         combined = self._makeOne(lhs, rhs)
         self.assertRaises(Forbidden,
                           combined.check_setattr, object(), 'name')
 
     def test_check_setattr_lhs_forbidden_rhs_unauth(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security._definitions import thread_local
-        class _Interaction(object):
+        from zope.security.interfaces import Unauthorized
+
+        class _Interaction:
             def checkPermission(self, obj, perm):
                 return False
 
-        lhs = self._makeOther() # forbidden
-        rhs = self._makeOther(set_permissions={'name': 'inspect'}) # unauth
+        lhs = self._makeOther()  # forbidden
+        rhs = self._makeOther(set_permissions={'name': 'inspect'})  # unauth
         combined = self._makeOne(lhs, rhs)
         thread_local.interaction = _Interaction()
         try:
@@ -1385,12 +1434,15 @@ class TestCombinedChecker(QuietWatchingChecker,
         finally:
             del thread_local.interaction
 
-@unittest.skipIf(sec_checker.WatchingCombinedChecker is sec_checker.CombinedChecker,
-                 "WatchingCombinedChecker is the default")
+
+@unittest.skipIf(
+    sec_checker.WatchingCombinedChecker is sec_checker.CombinedChecker,
+    "WatchingCombinedChecker is the default")
 class TestWatchingCombinedChecker(TestCombinedChecker):
 
     def _getTargetClass(self):
         return sec_checker.WatchingCombinedChecker
+
 
 class TestCheckerLoggingMixin(unittest.TestCase):
 
@@ -1399,14 +1451,16 @@ class TestCheckerLoggingMixin(unittest.TestCase):
         return CheckerLoggingMixin
 
     def _makeOne(self, raising=None):
-        class _Checker(object):
+        class _Checker:
             def __init__(self, raising, stream):
                 self._file = stream
                 self._raising = raising
+
             def check(self, obj, name):
                 if self._raising:
                     raise self._raising
             check_getattr = check_setattr = check
+
         class _Derived(self._getTargetClass(), _Checker):
             pass
         return _Derived(raising, self._makeStream())
@@ -1418,7 +1472,7 @@ class TestCheckerLoggingMixin(unittest.TestCase):
         return _Stream()
 
     def _makeObject(self):
-        class _Object(object):
+        class _Object:
             def __repr__(self):
                 return 'TESTING'
         return _Object()
@@ -1572,13 +1626,15 @@ class Test__instanceChecker(unittest.TestCase):
 
     def test_miss(self):
         from zope.security.checker import _defaultChecker
-        class Foo(object):
+
+        class Foo:
             pass
         self.assertIs(self._callFUT(Foo()), _defaultChecker)
 
     def test_hit(self):
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = _checkers[Foo] = object()
         self.assertIs(self._callFUT(Foo()), checker)
@@ -1604,11 +1660,10 @@ class Test_moduleChecker(unittest.TestCase):
 
     def test_hit(self):
         from zope.interface import verify
+
         from zope.security.checker import _checkers
         checker = _checkers[verify] = object()
         self.assertIs(self._callFUT(verify), checker)
-
-
 
 
 # Pre-geddon tests start here
@@ -1617,7 +1672,7 @@ class TestSecurityPolicy(QuietWatchingChecker,
                          unittest.TestCase):
 
     def setUp(self):
-        super(TestSecurityPolicy, self).setUp()
+        super().setUp()
 
         from zope.security.management import newInteraction
         from zope.security.management import setSecurityPolicy
@@ -1626,7 +1681,7 @@ class TestSecurityPolicy(QuietWatchingChecker,
         newInteraction()
 
     def tearDown(self):
-        super(TestSecurityPolicy, self).tearDown()
+        super().tearDown()
 
         from zope.security.management import endInteraction
         from zope.security.management import setSecurityPolicy
@@ -1638,72 +1693,70 @@ class TestSecurityPolicy(QuietWatchingChecker,
         # Py3 has no ClassType and no old-style classes
         import types
         old_type = getattr(types, 'ClassType', type)
-        self.assertTrue((PY2 and old_type is not type)
-                        or (PY3 and old_type is type))
+        self.assertTrue(old_type is type)
         return old_type
 
     def _makeSecurityPolicy(self):
         from zope.interface import implementer
+
         from zope.security.interfaces import ISecurityPolicy
+
         @implementer(ISecurityPolicy)
-        class SecurityPolicy(object):
+        class SecurityPolicy:
             def checkPermission(self, permission, _object):
                 return permission == 'test_allowed'
         return SecurityPolicy
 
-    def test_defineChecker_oldstyle_class(self):
-        from zope.security.checker import defineChecker
+    def test_defineChecker_class(self):
         from zope.security.checker import NamesChecker
-        old_type = self._get_old_class_type()
-        class ClassicClass:
-            __metaclass__ = old_type
-        self.assertIsInstance(ClassicClass, old_type)
-
-        defineChecker(ClassicClass, NamesChecker())
-
-    def test_defineChecker_newstyle_class(self):
         from zope.security.checker import defineChecker
-        from zope.security.checker import NamesChecker
-        class NewStyleClass(object):
+
+        class NewStyleClass:
             pass
         self.assertIsInstance(NewStyleClass, type)
         defineChecker(NewStyleClass, NamesChecker())
 
     def test_defineChecker_module(self):
         import zope.security
-        from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
+        from zope.security.checker import defineChecker
         defineChecker(zope.security, NamesChecker())
 
     def test_defineChecker_error(self):
-        from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
+        from zope.security.checker import defineChecker
         not_a_type = object()
         self.assertRaises(TypeError,
                           defineChecker, not_a_type, NamesChecker())
 
     def _makeClasses(self):
         old_type = self._get_old_class_type()
+
         class OldInst:
             a = 1
+
             def b(self):
                 raise AssertionError("Never called")
             c = 2
+
             def gete(self):
                 raise AssertionError("Never called")
             e = property(gete)
+
             def __getitem__(self, x):
                 raise AssertionError("Never called")
+
             def __setitem__(self, x, v):
                 raise AssertionError("Never called")
 
         self.assertIsInstance(OldInst, old_type)
 
-        class NewInst(OldInst, object):
+        class NewInst(OldInst):
             # This is not needed, but left in to show the change of metaclass
             # __metaclass__ = type
             def gete(self):
                 raise AssertionError("Never called")
+
             def sete(self, v):
                 raise AssertionError("Never called")
             e = property(gete, sete)
@@ -1718,10 +1771,10 @@ class TestSecurityPolicy(QuietWatchingChecker,
     # - allow and disallow by permission
     def test_check_getattr(self):
         # pylint:disable=attribute-defined-outside-init
+        from zope.security.checker import CheckerPublic
+        from zope.security.checker import NamesChecker
         from zope.security.interfaces import Forbidden
         from zope.security.interfaces import Unauthorized
-        from zope.security.checker import NamesChecker
-        from zope.security.checker import CheckerPublic
 
         OldInst, NewInst = self._makeClasses()
 
@@ -1769,10 +1822,10 @@ class TestSecurityPolicy(QuietWatchingChecker,
 
     def test_check_setattr(self):
         # pylint:disable=attribute-defined-outside-init
-        from zope.security.interfaces import Forbidden
-        from zope.security.interfaces import Unauthorized
         from zope.security.checker import Checker
         from zope.security.checker import CheckerPublic
+        from zope.security.interfaces import Forbidden
+        from zope.security.interfaces import Unauthorized
 
         OldInst, NewInst = self._makeClasses()
 
@@ -1809,11 +1862,11 @@ class TestSecurityPolicy(QuietWatchingChecker,
             self.assertRaises(Forbidden, checker.check_setattr, inst, 'f')
 
     def test_proxy(self):
-        from zope.security.proxy import getChecker
-        from zope.security.proxy import removeSecurityProxy
         from zope.security.checker import BasicTypes_examples
         from zope.security.checker import CheckerPublic
         from zope.security.checker import NamesChecker
+        from zope.security.proxy import getChecker
+        from zope.security.proxy import removeSecurityProxy
 
         OldInst, NewInst = self._makeClasses()
 
@@ -1851,10 +1904,12 @@ class TestSecurityPolicy(QuietWatchingChecker,
             self.assertEqual(next(proxy), 1)
 
     def testLayeredProxies(self):
-        #Test that a Proxy will not be re-proxied.
-        from zope.security.proxy import Proxy, getObject
+        # Test that a Proxy will not be re-proxied.
         from zope.security.checker import Checker
         from zope.security.checker import NamesChecker
+        from zope.security.proxy import Proxy
+        from zope.security.proxy import getObject
+
         class Base:
             __Security_checker__ = NamesChecker(['__Security_checker__'])
         base = Base()
@@ -1869,7 +1924,6 @@ class TestSecurityPolicy(QuietWatchingChecker,
         proxy2 = checker.proxy(proxy1)
         self.assertIs(proxy2, proxy1)
         self.assertIs(getObject(proxy2), base)
-
 
     def testMultiChecker(self):
         from zope.interface import Interface
@@ -1925,10 +1979,11 @@ class TestSecurityPolicy(QuietWatchingChecker,
     def testAlwaysAvailable(self):
         from zope.security.checker import NamesChecker
         checker = NamesChecker(())
-        class C(object):
+
+        class C:
             pass
         self.assertEqual(checker.check(C, '__hash__'), None)
-        self.assertEqual(checker.check(C, '__nonzero__'), None)
+        self.assertEqual(checker.check(C, '__bool__'), None)
         self.assertEqual(checker.check(C, '__class__'), None)
         self.assertEqual(checker.check(C, '__implements__'), None)
         self.assertEqual(checker.check(C, '__lt__'), None)
@@ -1941,8 +1996,8 @@ class TestSecurityPolicy(QuietWatchingChecker,
         self.assertEqual(checker.check(C, '__parent__'), None)
 
     def test_setattr(self):
-        from zope.security.interfaces import Forbidden
         from zope.security.checker import NamesChecker
+        from zope.security.interfaces import Forbidden
 
         OldInst, NewInst = self._makeClasses()
 
@@ -1959,13 +2014,14 @@ class TestSecurityPolicy(QuietWatchingChecker,
 
     def test_ProxyFactory(self):
         # pylint:disable=attribute-defined-outside-init
-        from zope.security.checker import _defaultChecker
-        from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
         from zope.security.checker import ProxyFactory
-        from zope.security.proxy import getChecker
+        from zope.security.checker import _defaultChecker
+        from zope.security.checker import defineChecker
         from zope.security.proxy import Proxy
-        class SomeClass(object):
+        from zope.security.proxy import getChecker
+
+        class SomeClass:
             pass
         checker = NamesChecker()
         specific_checker = NamesChecker()
@@ -1994,15 +2050,17 @@ class TestSecurityPolicy(QuietWatchingChecker,
         self.assertIs(getChecker(proxy), specific_checker)
 
     def test_define_and_undefineChecker(self):
-        from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
+        from zope.security.checker import defineChecker
         from zope.security.checker import undefineChecker
-        class SomeClass(object):
+
+        class SomeClass:
             pass
         obj = SomeClass()
 
         checker = NamesChecker()
-        from zope.security.checker import _defaultChecker, selectChecker
+        from zope.security.checker import _defaultChecker
+        from zope.security.checker import selectChecker
         self.assertIs(selectChecker(obj), _defaultChecker)
         defineChecker(SomeClass, checker)
         self.assertIs(selectChecker(obj), checker)
@@ -2010,9 +2068,10 @@ class TestSecurityPolicy(QuietWatchingChecker,
         self.assertIs(selectChecker(obj), _defaultChecker)
 
     def test_ProxyFactory_using_proxy(self):
-        from zope.security.checker import ProxyFactory
         from zope.security.checker import NamesChecker
-        class SomeClass(object):
+        from zope.security.checker import ProxyFactory
+
+        class SomeClass:
             pass
         obj = SomeClass()
         checker = NamesChecker()
@@ -2040,12 +2099,13 @@ class TestSecurityPolicy(QuietWatchingChecker,
         # and call access to methods.
 
         # For example, consider this humble pair of class and object.
-        from zope.security.interfaces import Forbidden
         from zope.security.checker import Checker
         from zope.security.checker import canAccess
         from zope.security.checker import canWrite
         from zope.security.checker import defineChecker
-        class SomeClass(object):
+        from zope.security.interfaces import Forbidden
+
+        class SomeClass:
             pass
         obj = SomeClass()
 
@@ -2057,24 +2117,24 @@ class TestSecurityPolicy(QuietWatchingChecker,
         # For these tests, the SecurityPolicy defined at the top of this file
         # is in place.  It is a stub.  Normally, the security policy would
         # have knowledge of interactions and participants, and would determine
-        # on the basis of the particpants and the object if a certain permission
-        # were authorized.  This stub simply says that the 'test_allowed'
-        # permission is authorized and nothing else is, for any object you pass
-        # it.
+        # on the basis of the participants and the object if a certain
+        # permission were authorized.  This stub simply says that the
+        # 'test_allowed' permission is authorized and nothing else is, for any
+        # object you pass it.
 
         # Therefore, according to the checker created here, the current
         # 'interaction' (as stubbed out in the security policy) will be allowed
         # to access and write foo, and access bar.  The interaction is
         # unauthorized for accessing baz and writing bar.  Any other access or
-        # write is not merely unauthorized but forbidden--including write access
-        # for baz.
+        # write is not merely unauthorized but forbidden--including write
+        # access for baz.
         checker = Checker(
-            {'foo':'test_allowed', # these are the read settings
-             'bar':'test_allowed',
-             'baz':'you_will_not_have_this_permission'},
-            {'foo':'test_allowed', # these are the write settings
-             'bar':'you_will_not_have_this_permission',
-             'bing':'you_will_not_have_this_permission'})
+            {'foo': 'test_allowed',  # these are the read settings
+             'bar': 'test_allowed',
+             'baz': 'you_will_not_have_this_permission'},
+            {'foo': 'test_allowed',  # these are the write settings
+             'bar': 'you_will_not_have_this_permission',
+             'bing': 'you_will_not_have_this_permission'})
         defineChecker(SomeClass, checker)
 
         # so, our hapless interaction may write and access foo...
@@ -2110,17 +2170,19 @@ class TestSecurityPolicy(QuietWatchingChecker,
         self.assertTrue(not canWrite(obj, 'bing'))
         self.assertRaises(Forbidden, canAccess, obj, 'bing')
 
+
 class TestCheckerPublic(unittest.TestCase):
 
     def test_that_pickling_CheckerPublic_retains_identity(self):
         import pickle
+
         from zope.security.checker import CheckerPublic
         self.assertIs(pickle.loads(pickle.dumps(CheckerPublic)),
                       CheckerPublic)
 
     def test_that_CheckerPublic_identity_works_even_when_proxied(self):
-        from zope.security.checker import ProxyFactory
         from zope.security.checker import CheckerPublic
+        from zope.security.checker import ProxyFactory
         self.assertIs(ProxyFactory(CheckerPublic), CheckerPublic)
 
 
@@ -2153,15 +2215,19 @@ class TestMixinDecoratedChecker(unittest.TestCase):
 
     def _makeSecurityPolicy(self):
         from zope.interface import implementer
+
         from zope.security.interfaces import ISecurityPolicy
+
         @implementer(ISecurityPolicy)
-        class RecordedSecurityPolicy(object):
+        class RecordedSecurityPolicy:
             def __init__(self):
                 self._checked = []
                 self.permissions = {}
+
             def checkPermission(self, permission, _obj):
                 self._checked.append(permission)
                 return self.permissions.get(permission, True)
+
             def checkChecked(self, checked):
                 res = self._checked == checked
                 self._checked = []
@@ -2209,21 +2275,22 @@ class TestMixinDecoratedChecker(unittest.TestCase):
         from zope.security.checker import Checker
         return Checker(self.decorationGetMap, self.decorationSetMap)
 
+
 class TestCombinedCheckerMixin(QuietWatchingChecker,
                                TestMixinDecoratedChecker,
                                unittest.TestCase):
 
     def setUp(self):
-        super(TestCombinedCheckerMixin, self).setUp()
+        super().setUp()
         self.decoratedSetUp()
 
     def tearDown(self):
         self.decoratedTearDown()
-        super(TestCombinedCheckerMixin, self).tearDown()
+        super().tearDown()
 
     def test_checking(self):
-        from zope.security.interfaces import Unauthorized
         from zope.security.checker import CombinedChecker
+        from zope.security.interfaces import Unauthorized
         cc = CombinedChecker(self.overridingChecker, self.originalChecker)
         self.check_checking_impl(cc)
 
@@ -2235,7 +2302,7 @@ class TestCombinedCheckerMixin(QuietWatchingChecker,
         self.assertTrue(
             self.interaction.checkChecked(['dc_get_permission',
                                            'get_permission'])
-            )
+        )
 
         # This should raise Unauthorized instead of ForbiddenAttribute, since
         # access can be granted if you e.g. login with different credentials.
@@ -2244,6 +2311,7 @@ class TestCombinedCheckerMixin(QuietWatchingChecker,
 
     def test_interface(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.checker import CombinedChecker
         from zope.security.interfaces import IChecker
         dc = CombinedChecker(self.overridingChecker, self.originalChecker)
@@ -2263,7 +2331,8 @@ class TestBasicTypes(unittest.TestCase):
     def test___setitem__(self):
         from zope.security.checker import BasicTypes
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = object()
         BasicTypes[Foo] = checker
@@ -2273,7 +2342,8 @@ class TestBasicTypes(unittest.TestCase):
     def test___delitem__(self):
         from zope.security.checker import BasicTypes
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = object()
         BasicTypes[Foo] = checker
@@ -2288,22 +2358,24 @@ class TestBasicTypes(unittest.TestCase):
     def test_update(self):
         from zope.security.checker import BasicTypes
         from zope.security.checker import _checkers
-        class Foo(object):
+
+        class Foo:
             pass
         checker = object()
-        BasicTypes.update({Foo:  checker})
+        BasicTypes.update({Foo: checker})
         self.assertIs(BasicTypes[Foo], checker)
         self.assertIs(_checkers[Foo], checker)
-
 
     def test(self):
         from zope.security.checker import BasicTypes
         from zope.security.checker import NoProxy
         from zope.security.checker import _checkers
         from zope.security.checker import _clear
-        class MyType(object):
+
+        class MyType:
             pass
-        class MyType2(object):
+
+        class MyType2:
             pass
 
         # When an item is added to the basic types, it should also be added to
@@ -2340,18 +2412,13 @@ class TestBasicTypes(unittest.TestCase):
         self.assertIn(int, keys)
         self.assertIn(float, keys)
         self.assertIn(str, keys)
-        try:
-            unicode
-        except NameError: # pragma: no cover Py3k
-            pass
-        else:             # pragma: no cover Python2
-            self.assertIn(unicode, keys)
         self.assertIn(object, keys)
         # ...
 
         # Finally, the ``clear()`` method has been deactivated to avoid
         # unwanted deletions.
         self.assertRaises(NotImplementedError, BasicTypes.clear)
+
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)

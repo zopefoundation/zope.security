@@ -26,19 +26,21 @@ from zope.schema.vocabulary import SimpleTerm
 from zope.schema.vocabulary import SimpleVocabulary
 
 from zope.security.checker import CheckerPublic
-from zope.security.interfaces import IPermission
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
+from zope.security.interfaces import IPermission
+
 
 @implementer(IPermission)
-class Permission(object):
+class Permission:
     """
     Default implementation of :class:`zope.security.interfaces.IPermission`.
     """
 
-    def __init__(self, id, title=u"", description=u""):
+    def __init__(self, id, title="", description=""):
         self.id = id
         self.title = title
         self.description = description
+
 
 def checkPermission(context, permission_id):
     """
@@ -50,6 +52,7 @@ def checkPermission(context, permission_id):
     if not queryUtility(IPermission, permission_id, context=context):
         raise ValueError("Undefined permission ID", permission_id)
 
+
 def allPermissions(context=None):
     """
     Get the IDs of all defined permission object utilities.
@@ -57,6 +60,7 @@ def allPermissions(context=None):
     for name, _permission in getUtilitiesFor(IPermission, context):
         if name != zope_Public:
             yield name
+
 
 def PermissionsVocabulary(context=None):
     """
@@ -69,7 +73,9 @@ def PermissionsVocabulary(context=None):
         terms.append(SimpleTerm(permission, name))
     return SimpleVocabulary(terms)
 
+
 directlyProvides(PermissionsVocabulary, IVocabularyFactory)
+
 
 def PermissionIdsVocabulary(context=None):
     """
@@ -97,7 +103,8 @@ def PermissionIdsVocabulary(context=None):
             terms.append(SimpleTerm(name, name, name))
     terms = sorted(terms, key=operator.attrgetter('title'))
     if has_public:
-        terms.insert(0, SimpleTerm(CheckerPublic, zope_Public, u'Public'))
+        terms.insert(0, SimpleTerm(CheckerPublic, zope_Public, 'Public'))
     return SimpleVocabulary(terms)
+
 
 directlyProvides(PermissionIdsVocabulary, IVocabularyFactory)

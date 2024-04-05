@@ -14,7 +14,9 @@
 """Test handler for 'protectClass' directive
 """
 import unittest
+
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
+
 
 class Test_protectName(unittest.TestCase):
 
@@ -100,8 +102,8 @@ class Test_protectLikeUnto(unittest.TestCase):
     def test_w_existing_like_unto_checker_wo_existing_checker(self):
         from zope.security.checker import Checker
         from zope.security.checker import CheckerPublic
-        from zope.security.checker import defineChecker
         from zope.security.checker import _checkers
+        from zope.security.checker import defineChecker
         permission = object()
         foo_checker = Checker({'bar': CheckerPublic}, {'bar': permission})
         defineChecker(Foo, foo_checker)
@@ -115,8 +117,8 @@ class Test_protectLikeUnto(unittest.TestCase):
     def test_w_existing_like_unto_checker_w_existing_checker(self):
         from zope.security.checker import Checker
         from zope.security.checker import CheckerPublic
-        from zope.security.checker import defineChecker
         from zope.security.checker import _checkers
+        from zope.security.checker import defineChecker
         permission1, permission2 = object(), object()
         foo_checker = Checker({'bar': CheckerPublic}, {'bar': permission2})
         defineChecker(Foo, foo_checker)
@@ -130,7 +132,7 @@ class Test_protectLikeUnto(unittest.TestCase):
                          foo_checker.set_permissions)
 
 
-class Foo(object):
+class Foo:
     bar = 'Bar'
 
 
@@ -140,7 +142,8 @@ class Bar(Foo):
 
 def test_suite():
     return unittest.TestSuite((
-        unittest.makeSuite(Test_protectName),
-        unittest.makeSuite(Test_protectSetAttribute),
-        unittest.makeSuite(Test_protectLikeUnto),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_protectName),
+        unittest.defaultTestLoader.loadTestsFromTestCase(
+            Test_protectSetAttribute),
+        unittest.defaultTestLoader.loadTestsFromTestCase(Test_protectLikeUnto),
     ))

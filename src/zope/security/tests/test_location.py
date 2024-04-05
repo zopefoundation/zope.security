@@ -16,6 +16,7 @@
 import unittest
 
 from zope.location.location import LocationProxy
+
 from zope.security.tests import QuietWatchingChecker
 
 
@@ -23,10 +24,11 @@ class LocationSecurityProxyTests(QuietWatchingChecker,
                                  unittest.TestCase):
 
     def test_locationproxy_security(self):
-        from zope.security.checker import defineChecker
         from zope.security.checker import NamesChecker
+        from zope.security.checker import defineChecker
         from zope.security.proxy import ProxyFactory
-        class Unlocated(object):
+
+        class Unlocated:
             a = 'a'
         unlocated = Unlocated()
         located = LocationProxy(unlocated)

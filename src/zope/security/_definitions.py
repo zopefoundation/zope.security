@@ -14,16 +14,20 @@
 """Common definitions to avoid circular imports
 """
 import threading
+
 import zope.interface
 
 from zope.security import interfaces
 
+
 thread_local = threading.local()
 
+
 @zope.interface.implementer(interfaces.ISystemPrincipal)
-class SystemUser(object):
-    id = u'zope.security.management.system_user'
-    title = u'System'
-    description = u''
+class SystemUser:
+    id = 'zope.security.management.system_user'
+    title = 'System'
+    description = ''
+
 
 system_user = SystemUser()

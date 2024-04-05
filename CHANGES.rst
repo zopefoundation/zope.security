@@ -2,12 +2,122 @@
  Changes
 =========
 
-5.0 (unreleased)
+6.3 (unreleased)
+----------------
+
+- Nothing changed yet.
+
+
+6.2 (2023-10-05)
+----------------
+
+- Make ``next()`` on C proxies call ``__next__`` rather than ``next`` (see
+  PEP 3114), and drop support for the Python 2 ``next`` method name from
+  pure-Python proxies.
+
+- Drop using ``setup_requires`` due to constant problems on GHA.
+
+- Add support for Python 3.12.
+
+
+6.1 (2023-01-18)
 ================
+
+- Remove more proxying code for names that no longer exist in Python 3.
+  (`#92 <https://github.com/zopefoundation/zope.security/issues/92>`_)
+
+
+6.0 (2023-01-16)
+================
+
+- Remove proxying code for names that no longer exist in Python 3.
+  (`#92 <https://github.com/zopefoundation/zope.security/issues/92>`_)
+
+- Drop support for Python 2.7, 3.5, 3.6.
+
+
+5.8 (2022-11-30)
+================
+
+- The extra ``untrustedpython`` now for Python 3, too, installs
+  ``zope.untrustedpython``.
+
+
+5.7 (2022-11-17)
+================
+
+- Release to rebuild full set of binary wheels.
+
+
+5.6 (2022-11-16)
+================
+
+- Add support for building arm64 wheels on macOS.
+
+
+5.5 (2022-11-06)
+================
+
+- Add support for final release of Python 3.11.
+
+
+5.4 (2022-09-15)
+================
+
+- Disable unsafe math optimizations in C code.  See `pull request 89
+  <https://github.com/zopefoundation/zope.security/pull/89>`_.
+
+
+5.3 (2022-04-27)
+================
+
+- Allow calling bound methods of some built-in objects such as ``().__repr__``
+  and ``{}.__repr__`` by default. This worked on Python 2, but raised
+  ``ForbiddenAttribute`` on Python 3. See `issue 75
+  <https://github.com/zopefoundation/zope.security/issues/75>`_.
+
+- Remove usage of ``unittest.makeSuite`` as it is deprecated in Python 3.11+.
+  See `issue 83
+  <https://github.com/zopefoundation/zope.security/issues/83>`_.
+
+- Add support for Python 3.11 (as of 3.11.0a7).
+
+
+5.2 (2022-03-10)
+================
+
+- Add support for Python 3.9 and 3.10.
+
+
+5.1.1 (2020-03-23)
+==================
+
+- Ensure all objects have consistent interface resolution orders (if
+  all dependencies are up-to-date). See `issue 71
+  <https://github.com/zopefoundation/zope.security/issues/71>`_.
+
+
+5.1.0 (2020-02-14)
+==================
+
+- Let proxied interfaces be iterated on Python 3. This worked on
+  Python 2, but raised ``ForbiddenAttribute`` an Python 3. See
+  `zope.interface issue 141 <https://github.com/zopefoundation/zope.interface/issues/141>`_.
+
+- Allow to use a common Sphinx version for Python 2 and 3.
+
+
+5.0.0 (2019-11-11)
+==================
 
 - Drop support for Python 3.4.
 
-- Add support for Python 3.8a3.
+- Add support for Python 3.8.
+
+- Properly declare dependency on zope.schema >= 4.2.0, introduced in
+  zope.security 4.2.1.
+
+- Fix dict item view iteration on PyPy3 7.x.
 
 
 4.3.1 (2019-01-03)

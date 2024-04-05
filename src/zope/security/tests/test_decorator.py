@@ -14,6 +14,7 @@
 """Test zope.security.decorator
 """
 import unittest
+
 from zope.security.tests import QuietWatchingChecker
 
 
@@ -21,12 +22,12 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
                                               unittest.TestCase):
 
     def setUp(self):
-        super(DecoratedSecurityCheckerDescriptorTests, self).setUp()
+        super().setUp()
         from zope.security.checker import _clear
         _clear()
 
     def tearDown(self):
-        super(DecoratedSecurityCheckerDescriptorTests, self).tearDown()
+        super().tearDown()
         from zope.security.checker import _clear
         _clear()
 
@@ -39,10 +40,11 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_neither_wrapper_nor_object_has_checker(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         defineChecker(Foo, NoProxy)
         foo = Foo()
@@ -57,42 +59,44 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
 
     def test_both_wrapper_and_object_have_checkers_not_security_proxied(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import CombinedChecker
         from zope.security.checker import NamesChecker
         from zope.security.checker import defineChecker
         from zope.security.interfaces import ForbiddenAttribute
 
-        class Foo(object):
+        class Foo:
             a = 'a'
-        fooChecker = NamesChecker(['a']) # a is public
+        fooChecker = NamesChecker(['a'])  # a is public
         defineChecker(Foo, fooChecker)
         foo = Foo()
-        fooChecker.check(foo, 'a') # no raise
+        fooChecker.check(foo, 'a')  # no raise
         self.assertRaises(ForbiddenAttribute,
                           fooChecker.check, foo, 'b')
 
         class Wrapper(ProxyBase):
             b = 'b'
             __Security_checker__ = self._makeOne()
-        wrapperChecker = NamesChecker(['b']) # b is public
+        wrapperChecker = NamesChecker(['b'])  # b is public
         defineChecker(Wrapper, wrapperChecker)
         wrapper = Wrapper(foo)
         self.assertRaises(ForbiddenAttribute,
                           wrapperChecker.check, foo, 'a')
-        wrapperChecker.check(foo, 'b') # no raise
+        wrapperChecker.check(foo, 'b')  # no raise
 
         checker = wrapper.__Security_checker__
         self.assertTrue(isinstance(checker, CombinedChecker))
-        checker.check(wrapper, 'a') # no raise
-        checker.check(wrapper, 'b') # no raise
+        checker.check(wrapper, 'a')  # no raise
+        checker.check(wrapper, 'b')  # no raise
 
     def test_only_wrapper_has_checker(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NamesChecker
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         foo = Foo()
         defineChecker(Foo, NoProxy)
@@ -100,20 +104,21 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         class Wrapper(ProxyBase):
             b = 'b'
             __Security_checker__ = self._makeOne()
-        wrapperChecker = NamesChecker(['b']) # b is public
+        wrapperChecker = NamesChecker(['b'])  # b is public
         defineChecker(Wrapper, wrapperChecker)
         wrapper = Wrapper(foo)
         self.assertTrue(wrapper.__Security_checker__ is wrapperChecker)
 
     def test_only_object_has_checker(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NamesChecker
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
-        fooChecker = NamesChecker(['a']) # a is public
+        fooChecker = NamesChecker(['a'])  # a is public
         defineChecker(Foo, fooChecker)
         foo = Foo()
 
@@ -124,17 +129,17 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         wrapper = Wrapper(foo)
         self.assertTrue(wrapper.__Security_checker__ is fooChecker)
 
-
     def test_both_wrapper_and_object_have_checkers_security_proxied(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import CombinedChecker
         from zope.security.checker import NamesChecker
         from zope.security.checker import defineChecker
         from zope.security.proxy import ProxyFactory
 
-        class Foo(object):
+        class Foo:
             a = 'a'
-        fooChecker = NamesChecker(['a']) # a is public
+        fooChecker = NamesChecker(['a'])  # a is public
         defineChecker(Foo, fooChecker)
         foo = Foo()
         f_sec = ProxyFactory(foo)
@@ -142,21 +147,22 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         class Wrapper(ProxyBase):
             b = 'b'
             __Security_checker__ = self._makeOne()
-        wrapperChecker = NamesChecker(['b']) # b is public
+        wrapperChecker = NamesChecker(['b'])  # b is public
         defineChecker(Wrapper, wrapperChecker)
         w_sec = Wrapper(f_sec)
 
         checker = w_sec.__Security_checker__
         self.assertTrue(isinstance(checker, CombinedChecker))
-        checker.check(w_sec, 'a') # no raise
-        checker.check(w_sec, 'b') # no raise
+        checker.check(w_sec, 'a')  # no raise
+        checker.check(w_sec, 'b')  # no raise
 
     def test_cannot_overwrite(self):
         from zope.proxy import ProxyBase
+
         from zope.security.checker import NoProxy
         from zope.security.checker import defineChecker
 
-        class Foo(object):
+        class Foo:
             a = 'a'
         defineChecker(Foo, NoProxy)
         foo = Foo()

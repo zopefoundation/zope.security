@@ -21,15 +21,15 @@ that the classes themselves are implementations of
 """
 import zope.interface
 
+from zope.security._definitions import system_user
 from zope.security.checker import CheckerPublic
 from zope.security.interfaces import IInteraction
 from zope.security.interfaces import ISecurityPolicy
-from zope.security._definitions import system_user
 
 
 @zope.interface.implementer(IInteraction)
 @zope.interface.provider(ISecurityPolicy)
-class ParanoidSecurityPolicy(object):
+class ParanoidSecurityPolicy:
     """
     Prohibit all access by any non-system principal, unless the item
     is :data:`public <zope.security.checker.CheckerPublic>`.

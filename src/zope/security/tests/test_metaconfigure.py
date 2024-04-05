@@ -14,7 +14,9 @@
 """Test ZCML directives
 """
 import unittest
+
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME as zope_Public
+
 
 class Test_dottedName(unittest.TestCase):
 
@@ -40,7 +42,7 @@ class ClassDirectiveTests(unittest.TestCase):
     def _makeOne(self, _context, class_):
         return self._getTargetClass()(_context, class_)
 
-    #def test_ctor_non_class(self): TODO  needs better guard in __init__
+    # def test_ctor_non_class(self): TODO  needs better guard in __init__
 
     def test_implements_empty(self):
         context = DummyZCMLContext()
@@ -52,6 +54,7 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Interface
         from zope.interface import classImplements
+
         class IFoo(Interface):
             pass
         context = DummyZCMLContext()
@@ -59,7 +62,7 @@ class ClassDirectiveTests(unittest.TestCase):
         directive.implements(context, [IFoo])
         self.assertEqual(len(context._actions), 2)
         self.assertEqual(context._actions[0]['discriminator'][:2],
-                         ('ContentDirective', Foo, )) #3rd is object()
+                         ('ContentDirective', Foo, ))  # 3rd is object()
         self.assertTrue(context._actions[0]['callable'] is classImplements)
         self.assertEqual(context._actions[0]['args'], (Foo, IFoo))
         self.assertTrue(context._actions[1]['discriminator'] is None)
@@ -71,8 +74,10 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Interface
         from zope.interface import classImplements
+
         class IFoo(Interface):
             pass
+
         class IBar(Interface):
             pass
         context = DummyZCMLContext()
@@ -80,7 +85,7 @@ class ClassDirectiveTests(unittest.TestCase):
         directive.implements(context, [IFoo, IBar])
         self.assertEqual(len(context._actions), 4)
         self.assertEqual(context._actions[0]['discriminator'][:2],
-                         ('ContentDirective', Foo, )) #3rd is object()
+                         ('ContentDirective', Foo, ))  # 3rd is object()
         self.assertTrue(context._actions[0]['callable'] is classImplements)
         self.assertEqual(context._actions[0]['args'], (Foo, IFoo))
         self.assertTrue(context._actions[1]['discriminator'] is None)
@@ -88,7 +93,7 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(context._actions[1]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
         self.assertEqual(context._actions[2]['discriminator'][:2],
-                         ('ContentDirective', Foo, )) #3rd is object()
+                         ('ContentDirective', Foo, ))  # 3rd is object()
         self.assertTrue(context._actions[2]['callable'] is classImplements)
         self.assertEqual(context._actions[2]['args'], (Foo, IBar))
         self.assertTrue(context._actions[3]['discriminator'] is None)
@@ -98,14 +103,15 @@ class ClassDirectiveTests(unittest.TestCase):
 
     def test_require_only_like_class(self):
         from zope.security.protectclass import protectLikeUnto
-        class Bar(object):
+
+        class Bar:
             pass
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
         directive.require(context, like_class=Bar)
         self.assertEqual(len(context._actions), 1)
         self.assertEqual(context._actions[0]['discriminator'][:2],
-                         ('mimic', Foo, )) #3rd is object()
+                         ('mimic', Foo, ))  # 3rd is object()
         self.assertTrue(context._actions[0]['callable'] is protectLikeUnto)
         self.assertEqual(context._actions[0]['args'], (Foo, Bar))
 
@@ -120,14 +126,16 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.configuration.exceptions import ConfigurationError
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
-        self.assertRaises(ConfigurationError,
-                          directive.require, context, attributes=('foo', 'bar'))
+        with self.assertRaises(ConfigurationError):
+            directive.require(context, attributes=('foo', 'bar'))
 
     def test_require_w_single_interface(self):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
+
         class IFoo(Interface):
             bar = Attribute("Bar")
             baz = Attribute("Baz")
@@ -152,14 +160,18 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
+
         class IFoo(Interface):
             bar = Attribute("Bar")
+
         class IBar(Interface):
             baz = Attribute("Baz")
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
-        directive.require(context, permission='testing', interface=[IFoo, IBar])
+        directive.require(context, permission='testing',
+                          interface=[IFoo, IBar])
         self.assertEqual(len(context._actions), 4)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectName', Foo, 'bar'))
@@ -212,12 +224,14 @@ class ClassDirectiveTests(unittest.TestCase):
 
     def test_require_w_set_schema_normal_fields(self):
         from zope.component.interface import provideInterface
-        from zope.schema import Field
         from zope.interface import Interface
+        from zope.schema import Field
+
         from zope.security.protectclass import protectSetAttribute
+
         class IFoo(Interface):
-            bar = Field(u"Bar")
-            baz = Field(u"Baz")
+            bar = Field("Bar")
+            baz = Field("Baz")
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
@@ -239,6 +253,7 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         class IFoo(Interface):
             bar = Attribute("Bar")
         context = DummyZCMLContext()
@@ -252,10 +267,11 @@ class ClassDirectiveTests(unittest.TestCase):
 
     def test_require_w_set_schema_ignores_readonly_fields(self):
         from zope.component.interface import provideInterface
-        from zope.schema import Field
         from zope.interface import Interface
+        from zope.schema import Field
+
         class IFoo(Interface):
-            bar = Field(u"Bar", readonly=True)
+            bar = Field("Bar", readonly=True)
         context = DummyZCMLContext()
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
@@ -275,7 +291,9 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
+
         class IFoo(Interface):
             bar = Attribute("Bar")
             baz = Attribute("Baz")
@@ -302,9 +320,12 @@ class ClassDirectiveTests(unittest.TestCase):
         from zope.component.interface import provideInterface
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.protectclass import protectName
+
         class IFoo(Interface):
             bar = Attribute("Bar")
+
         class IBar(Interface):
             baz = Attribute("Baz")
         context = DummyZCMLContext()
@@ -353,8 +374,8 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(directive(), ())
 
     def test_factory_wo_explicit_id(self):
-        from zope.component.interfaces import IFactory
         from zope.component.interface import provideInterface
+        from zope.component.interfaces import IFactory
         from zope.component.zcml import handler
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -379,8 +400,8 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(context._actions[1]['args'], ('', IFactory))
 
     def test_factory_w_explicit_id(self):
-        from zope.component.interfaces import IFactory
         from zope.component.interface import provideInterface
+        from zope.component.interfaces import IFactory
         from zope.component.zcml import handler
         context = DummyZCMLContext()
         context.info = 'INFO'
@@ -402,7 +423,7 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(context._actions[1]['args'], ('', IFactory))
 
 
-class Foo(object):
+class Foo:
     pass
 
 
@@ -488,7 +509,9 @@ class Test_allow(unittest.TestCase):
     def test_w_interface(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         context = DummyZCMLContext()
@@ -505,7 +528,9 @@ class Test_allow(unittest.TestCase):
     def test_w_both(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
+
         class IFoo(Interface):
             bar = Attribute('Bar')
             baz = Attribute('Baz')
@@ -585,7 +610,9 @@ class Test_requre(unittest.TestCase):
     def test_w_interface(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
+
         class IFoo(Interface):
             bar = Attribute('Bar')
         context = DummyZCMLContext()
@@ -603,7 +630,9 @@ class Test_requre(unittest.TestCase):
     def test_w_both(self):
         from zope.interface import Attribute
         from zope.interface import Interface
+
         from zope.security.metaconfigure import protectModule
+
         class IFoo(Interface):
             bar = Attribute('Bar')
             baz = Attribute('Baz')
@@ -633,7 +662,7 @@ class Test_requre(unittest.TestCase):
                          ('testing', 'baz', perm))
 
 
-class DummyZCMLContext(object):
+class DummyZCMLContext:
 
     def __init__(self):
         self._actions = []

@@ -1,0 +1,5 @@
+Sphinx
+repoze.sphinx.autointerface
+sphinx_rtd_theme>1
+docutils<0.19
+zope.security

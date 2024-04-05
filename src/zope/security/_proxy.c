@@ -19,85 +19,54 @@ Security Proxy Implementation
 
 static PyObject *__class__str = 0, *__name__str = 0, *__module__str = 0;
 
-// Compatibility with Python 2
-#if PY_MAJOR_VERSION < 3
-  #define IS_STRING PyString_Check
+#define PyInt_FromLong PyLong_FromLong
 
-  #define MAKE_STRING(name) PyString_AS_STRING(name)
+#define IS_STRING PyUnicode_Check
 
-  #define FROM_STRING PyString_FromString
+#define MAKE_STRING(name) PyBytes_AS_STRING( \
+        PyUnicode_AsUTF8String(name))
 
-  #define FROM_STRING_FORMAT PyString_FromFormat
+#define FROM_STRING PyUnicode_FromString
 
-  #define INTERN PyString_InternFromString
+#define FROM_STRING_FORMAT PyUnicode_FromFormat
 
-  #define MOD_ERROR_VAL
+#define INTERN PyUnicode_InternFromString
 
-  #define MOD_SUCCESS_VAL(val)
+#define MOD_ERROR_VAL NULL
 
-  #define MOD_INIT(name) void init##name(void)
+#define MOD_SUCCESS_VAL(val) val
 
-  #define MOD_DEF(ob, name, doc, methods) \
-          ob = Py_InitModule3(name, methods, doc);
+#define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
 
-#else
-
-  #define PyInt_FromLong PyLong_FromLong
-
-  #define IS_STRING PyUnicode_Check
-
-  #define MAKE_STRING(name) PyBytes_AS_STRING( \
-          PyUnicode_AsUTF8String(name))
-
-  #define FROM_STRING PyUnicode_FromString
-
-  #define FROM_STRING_FORMAT PyUnicode_FromFormat
-
-  #define INTERN PyUnicode_InternFromString
-
-  #define MOD_ERROR_VAL NULL
-
-  #define MOD_SUCCESS_VAL(val) val
-
-  #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
-
-  #define MOD_DEF(ob, name, doc, methods) \
-          static struct PyModuleDef moduledef = { \
-            PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
-          ob = PyModule_Create(&moduledef);
-#endif
+#define MOD_DEF(ob, name, doc, methods) \
+        static struct PyModuleDef moduledef = { \
+          PyModuleDef_HEAD_INIT, name, doc, -1, methods, }; \
+        ob = PyModule_Create(&moduledef);
 
 #define DECLARE_STRING(N) static PyObject *str_##N
 
 DECLARE_STRING(__3pow__);
+DECLARE_STRING(__bool__);
 DECLARE_STRING(__call__);
 DECLARE_STRING(check);
 DECLARE_STRING(check_getattr);
 DECLARE_STRING(check_setattr);
 DECLARE_STRING(__cmp__);
-DECLARE_STRING(__coerce__);
 DECLARE_STRING(__contains__);
 DECLARE_STRING(__delitem__);
 DECLARE_STRING(__getitem__);
-DECLARE_STRING(__getslice__);
 DECLARE_STRING(__hash__);
 DECLARE_STRING(__iter__);
 DECLARE_STRING(__len__);
-DECLARE_STRING(next);
-DECLARE_STRING(__nonzero__);
+DECLARE_STRING(__next__);
 DECLARE_STRING(op_abs);
 DECLARE_STRING(op_add);
 DECLARE_STRING(op_and);
-DECLARE_STRING(op_div);
 DECLARE_STRING(op_divmod);
 DECLARE_STRING(op_float);
 DECLARE_STRING(op_floordiv);
-DECLARE_STRING(op_hex);
 DECLARE_STRING(op_iadd);
 DECLARE_STRING(op_iand);
-#if PY_MAJOR_VERSION < 3
-DECLARE_STRING(op_idiv);
-#endif
 DECLARE_STRING(op_ifloordiv);
 DECLARE_STRING(op_ilshift);
 DECLARE_STRING(op_imod);
@@ -110,17 +79,14 @@ DECLARE_STRING(op_irshift);
 DECLARE_STRING(op_isub);
 DECLARE_STRING(op_itruediv);
 DECLARE_STRING(op_ixor);
-DECLARE_STRING(op_long);
 DECLARE_STRING(op_lshift);
 DECLARE_STRING(op_mod);
 DECLARE_STRING(op_mul);
 DECLARE_STRING(op_neg);
-DECLARE_STRING(op_oct);
 DECLARE_STRING(op_or);
 DECLARE_STRING(op_pos);
 DECLARE_STRING(op_radd);
 DECLARE_STRING(op_rand);
-DECLARE_STRING(op_rdiv);
 DECLARE_STRING(op_rdivmod);
 DECLARE_STRING(op_rfloordiv);
 DECLARE_STRING(op_rlshift);
@@ -140,7 +106,6 @@ DECLARE_STRING(proxy);
 DECLARE_STRING(__repr__);
 DECLARE_STRING(__rpow__);
 DECLARE_STRING(__setitem__);
-DECLARE_STRING(__setslice__);
 DECLARE_STRING(__str__);
 
 typedef struct {
@@ -390,7 +355,7 @@ proxy_iternext(SecurityProxy *self)
 {
   PyObject *result = NULL;
 
-  if (check(self, str_check_getattr, str_next) >= 0)
+  if (check(self, str_check_getattr, str___next__) >= 0)
     {
       result = PyIter_Next(self->proxy.proxy_object);
       PROXY_RESULT(self, result);
@@ -490,14 +455,6 @@ proxy_repr(SecurityProxy *self)
   return result;
 }
 
-#if PY_MAJOR_VERSION < 3
-static int
-proxy_compare(SecurityProxy *self, PyObject *other)
-{
-  return PyObject_Compare(self->proxy.proxy_object, other);
-}
-#endif
-
 static long
 proxy_hash(SecurityProxy *self)
 {
@@ -536,11 +493,6 @@ call_##M(PyObject *self) \
 
 NUMBER_METHOD(int)
 NUMBER_METHOD(float)
-#if PY_MAJOR_VERSION < 3
-NUMBER_METHOD(long)
-NUMBER_METHOD(oct)
-NUMBER_METHOD(hex)
-#endif
 
 static PyObject *
 call_ipow(PyObject *self, PyObject *other)
@@ -552,9 +504,6 @@ call_ipow(PyObject *self, PyObject *other)
 BINOP(add, PyNumber_Add)
 BINOP(sub, PyNumber_Subtract)
 BINOP(mul, PyNumber_Multiply)
-#if PY_MAJOR_VERSION < 3
-BINOP(div, PyNumber_Divide)
-#endif
 BINOP(mod, PyNumber_Remainder)
 BINOP(divmod, PyNumber_Divmod)
 
@@ -604,60 +553,12 @@ BINOP(and, PyNumber_And)
 BINOP(xor, PyNumber_Xor)
 BINOP(or, PyNumber_Or)
 
-#if PY_MAJOR_VERSION < 3
-static int
-proxy_coerce(PyObject **p_self, PyObject **p_other)
-{
-  PyObject *self = *p_self;
-  PyObject *other = *p_other;
-
-  assert(Proxy_Check(self));
-
-  if (check((SecurityProxy*)self, str_check, str___coerce__) >= 0)
-    {
-      PyObject *left = ((SecurityProxy*)self)->proxy.proxy_object;
-      PyObject *right = other;
-      int r;
-      r = PyNumber_CoerceEx(&left, &right);
-      if (r != 0)
-        return r;
-      /* Now left and right have been INCREF'ed.
-         Any new value that comes out is proxied;
-         any unchanged value is left unchanged. */
-      if (left == ((SecurityProxy*)self)->proxy.proxy_object) {
-        /* Keep the old proxy */
-        Py_DECREF(left);
-        Py_INCREF(self);
-        left = self;
-      }
-      else {
-        PROXY_RESULT(((SecurityProxy*)self), left);
-        if (left == NULL) {
-          Py_DECREF(right);
-          return -1;
-        }
-      }
-      if (right != other) {
-        PROXY_RESULT(((SecurityProxy*)self), right);
-        if (right == NULL) {
-          Py_DECREF(left);
-          return -1;
-        }
-      }
-      *p_self = left;
-      *p_other = right;
-      return 0;
-    }
-  return -1;
-}
-#endif
-
 UNOP(neg, PyNumber_Negative)
 UNOP(pos, PyNumber_Positive)
 UNOP(abs, PyNumber_Absolute)
 
 static int
-proxy_nonzero(PyObject *self)
+proxy_bool(PyObject *self)
 {
   return PyObject_IsTrue(((SecurityProxy*)self)->proxy.proxy_object);
 }
@@ -665,18 +566,10 @@ proxy_nonzero(PyObject *self)
 UNOP(invert, PyNumber_Invert)
 UNOP(int, call_int)
 UNOP(float, call_float)
-#if PY_MAJOR_VERSION < 3
-UNOP(long, call_long)
-UNOP(oct, call_oct)
-UNOP(hex, call_hex)
-#endif
 
 INPLACE(add, PyNumber_InPlaceAdd)
 INPLACE(sub, PyNumber_InPlaceSubtract)
 INPLACE(mul, PyNumber_InPlaceMultiply)
-#if PY_MAJOR_VERSION < 3
-INPLACE(div, PyNumber_InPlaceDivide)
-#endif
 INPLACE(mod, PyNumber_InPlaceRemainder)
 INPLACE(pow, call_ipow)
 INPLACE(lshift, PyNumber_InPlaceLshift)
@@ -748,25 +641,6 @@ proxy_isetitem(SecurityProxy *self, Py_ssize_t i, PyObject *value)
   return res;
 }
 
-static PyObject *
-proxy_slice(SecurityProxy *self, Py_ssize_t start, Py_ssize_t end)
-{
-  PyObject *result = NULL;
-
-  if (check(self, str_check, str___getslice__) >= 0) {
-    result = PySequence_GetSlice(self->proxy.proxy_object, start, end);
-    PROXY_RESULT(self, result);
-  }
-  return result;
-}
-
-static int
-proxy_ass_slice(SecurityProxy *self, Py_ssize_t i, Py_ssize_t j, PyObject *value)
-{
-  if (check(self, str_check, str___setslice__) >= 0)
-    return PySequence_SetSlice(self->proxy.proxy_object, i, j, value);
-  return -1;
-}
 
 static int
 proxy_contains(SecurityProxy *self, PyObject *value)
@@ -816,45 +690,28 @@ proxy_as_number = {
     proxy_add,                      /* nb_add */
     proxy_sub,                      /* nb_subtract */
     proxy_mul,                      /* nb_multiply */
-#if PY_MAJOR_VERSION < 3
-    proxy_div,                      /* nb_divide */
-#endif
     proxy_mod,                      /* nb_remainder */
     proxy_divmod,                   /* nb_divmod */
     proxy_pow,                      /* nb_power */
     proxy_neg,                      /* nb_negative */
     proxy_pos,                      /* nb_positive */
     proxy_abs,                      /* nb_absolute */
-    proxy_nonzero,                  /* nb_nonzero */
+    proxy_bool,                     /* nb_bool */
     proxy_invert,                   /* nb_invert */
     proxy_lshift,                   /* nb_lshift */
     proxy_rshift,                   /* nb_rshift */
     proxy_and,                      /* nb_and */
     proxy_xor,                      /* nb_xor */
     proxy_or,                       /* nb_or */
-#if PY_MAJOR_VERSION < 3
-    proxy_coerce,                   /* nb_coerce */
-#endif
     proxy_int,                      /* nb_int */
-#if PY_MAJOR_VERSION < 3
-    proxy_long,                     /* nb_long */
-#else
-    0,                              /* nb_reserved */
-#endif
+    0,                              /* nb_reserved, formerly nb_long */
     proxy_float,                    /* nb_float */
-#if PY_MAJOR_VERSION < 3
-    proxy_oct,                      /* nb_oct */
-    proxy_hex,                      /* nb_hex */
-#endif
 
     /* Added in release 2.0 */
     /* These require the Py_TPFLAGS_HAVE_INPLACEOPS flag */
     proxy_iadd,                     /* nb_inplace_add */
     proxy_isub,                     /* nb_inplace_subtract */
     proxy_imul,                     /* nb_inplace_multiply */
-#if PY_MAJOR_VERSION < 3
-    proxy_idiv,                     /* nb_inplace_divide */
-#endif
     proxy_imod,                     /* nb_inplace_remainder */
     (ternaryfunc)proxy_ipow,        /* nb_inplace_power */
     proxy_ilshift,                  /* nb_inplace_lshift */
@@ -877,9 +734,9 @@ proxy_as_sequence = {
   0,                                        /* sq_concat */
   0,                                        /* sq_repeat */
   (ssizeargfunc)proxy_igetitem,             /* sq_item */
-  (ssizessizeargfunc)proxy_slice,           /* sq_slice */
+  0,                                        /* sq_slice, unused in PY3 */
   (ssizeobjargproc)proxy_isetitem,          /* sq_ass_item */
-  (ssizessizeobjargproc)proxy_ass_slice,    /* sq_ass_slice */
+  0,                                        /* sq_ass_slice, unused in PY3 */
   (objobjproc)proxy_contains,               /* sq_contains */
 };
 
@@ -920,11 +777,7 @@ static PyTypeObject SecurityProxyType = {
     0,                                        /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
-#if PY_MAJOR_VERSION < 3
-    (cmpfunc)proxy_compare,                   /* tp_compare */
-#else
-        0,                                      /* tp_reserved */
-#endif
+    0,                                        /* tp_reserved, was tp_compare */
     (reprfunc)proxy_repr,                     /* tp_repr */
     &proxy_as_number,                         /* tp_as_number */
     &proxy_as_sequence,                       /* tp_as_sequence */
@@ -935,16 +788,9 @@ static PyTypeObject SecurityProxyType = {
     (getattrofunc)proxy_getattro,             /* tp_getattro */
     (setattrofunc)proxy_setattro,             /* tp_setattro */
     0,                                        /* tp_as_buffer */
-#if PY_MAJOR_VERSION < 3
     Py_TPFLAGS_DEFAULT |
-    Py_TPFLAGS_BASETYPE |
-    Py_TPFLAGS_CHECKTYPES |
-    Py_TPFLAGS_HAVE_GC,                       /* tp_flags */
-#else // Py_TPFLAGS_CHECKTYPES is always true in Python 3 and removed.
-        Py_TPFLAGS_DEFAULT |
-        Py_TPFLAGS_HAVE_GC |
-        Py_TPFLAGS_BASETYPE,                    /* tp_flags */
-#endif
+    Py_TPFLAGS_HAVE_GC |
+    Py_TPFLAGS_BASETYPE,                      /* tp_flags */
     proxy_doc,                                /* tp_doc */
     (traverseproc)proxy_traverse,             /* tp_traverse */
     0,                                        /* tp_clear */
@@ -1024,34 +870,27 @@ if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
 if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
 
   INIT_STRING(__3pow__);
+  INIT_STRING(__bool__);
   INIT_STRING(__call__);
   INIT_STRING(check);
   INIT_STRING(check_getattr);
   INIT_STRING(check_setattr);
   INIT_STRING(__cmp__);
-  INIT_STRING(__coerce__);
   INIT_STRING(__contains__);
   INIT_STRING(__delitem__);
   INIT_STRING(__getitem__);
-  INIT_STRING(__getslice__);
   INIT_STRING(__hash__);
   INIT_STRING(__iter__);
   INIT_STRING(__len__);
-  INIT_STRING(next);
-  INIT_STRING(__nonzero__);
+  INIT_STRING(__next__);
   INIT_STRING_OP(abs);
   INIT_STRING_OP(add);
   INIT_STRING_OP(and);
-  INIT_STRING_OP(div);
   INIT_STRING_OP(divmod);
   INIT_STRING_OP(float);
   INIT_STRING_OP(floordiv);
-  INIT_STRING_OP(hex);
   INIT_STRING_OP(iadd);
   INIT_STRING_OP(iand);
-#if PY_MAJOR_VERSION < 3
-  INIT_STRING_OP(idiv);
-#endif
   INIT_STRING_OP(ifloordiv);
   INIT_STRING_OP(ilshift);
   INIT_STRING_OP(imod);
@@ -1064,17 +903,14 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   INIT_STRING_OP(isub);
   INIT_STRING_OP(itruediv);
   INIT_STRING_OP(ixor);
-  INIT_STRING_OP(long);
   INIT_STRING_OP(lshift);
   INIT_STRING_OP(mod);
   INIT_STRING_OP(mul);
   INIT_STRING_OP(neg);
-  INIT_STRING_OP(oct);
   INIT_STRING_OP(or);
   INIT_STRING_OP(pos);
   INIT_STRING_OP(radd);
   INIT_STRING_OP(rand);
-  INIT_STRING_OP(rdiv);
   INIT_STRING_OP(rdivmod);
   INIT_STRING_OP(rfloordiv);
   INIT_STRING_OP(rlshift);
@@ -1094,7 +930,6 @@ if((str_op_##S = INTERN("__" #S "__")) == NULL) return MOD_ERROR_VAL
   INIT_STRING(__repr__);
   INIT_STRING(__rpow__);
   INIT_STRING(__setitem__);
-  INIT_STRING(__setslice__);
   INIT_STRING(__str__);
 
 

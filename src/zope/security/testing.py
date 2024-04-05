@@ -17,28 +17,17 @@ Testing support code.
 This module provides some helper/stub objects for setting up interactions.
 """
 import contextlib
-import re
 
-from zope import interface, component
-
-from zope.security import interfaces
-from zope.security.permission import Permission
 import zope.security.management
-from zope.security._compat import PYTHON2 as PY2
+from zope import component
+from zope import interface
+from zope.security import interfaces
 from zope.security.interfaces import PUBLIC_PERMISSION_NAME
+from zope.security.permission import Permission
 
-from zope.testing import renormalizing
-
-_str_prefix = 'b' if PY2 else 'u'
-
-rules = [
-    (re.compile(_str_prefix + "('.*?')"), r"\1"),
-    (re.compile(_str_prefix + '(".*?")'), r"\1"),
-]
-output_checker = renormalizing.RENormalizing(rules)
 
 @interface.implementer(interfaces.IPrincipal)
-class Principal(object):
+class Principal:
     """
     A trivial implementation of :class:`zope.security.interfaces.IPrincipal`.
     """
@@ -53,10 +42,12 @@ class Principal(object):
 
 
 @interface.implementer(interfaces.IParticipation)
-class Participation(object):
+class Participation:
     """
-    A trivial implementation of :class:`zope.security.interfaces.IParticipation`.
+    A trivial implementation of
+    :class:`zope.security.interfaces.IParticipation`.
     """
+
     def __init__(self, principal):
         self.principal = principal
         self.interaction = None
@@ -81,6 +72,7 @@ def addCheckerPublic():
     gsm.registerUtility(perm, interfaces.IPermission, perm.id)
 
     return perm
+
 
 def create_interaction(principal_id, **kw):
     """

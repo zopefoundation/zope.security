@@ -14,7 +14,7 @@
 import unittest
 
 
-class ConformsToIInteraction(object):
+class ConformsToIInteraction:
 
     def _getTargetClass(self):
         raise NotImplementedError("Subclass responsibility")
@@ -24,18 +24,20 @@ class ConformsToIInteraction(object):
 
     def test_class_conforms_to_IInteraction(self):
         from zope.interface.verify import verifyClass
+
         from zope.security.interfaces import IInteraction
         verifyClass(IInteraction, self._getTargetClass())
 
     def test_instance_conforms_to_IInteraction(self):
         from zope.interface.verify import verifyObject
+
         from zope.security.interfaces import IInteraction
         verifyObject(IInteraction, self._makeOne())
 
 
 class ParanoidSecurityPolicyTests(unittest.TestCase,
                                   ConformsToIInteraction,
-                                 ):
+                                  ):
 
     def _getTargetClass(self):
         from zope.security.simplepolicies import ParanoidSecurityPolicy
@@ -46,7 +48,7 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         self.assertEqual(policy.participations, [])
 
     def test_ctor_w_participations(self):
-        class Participation(object):
+        class Participation:
             interaction = None
         p1, p2, p3 = Participation(), Participation(), Participation()
         policy = self._makeOne(p1, p2, p3)
@@ -56,19 +58,19 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         self.assertTrue(p3.interaction is policy)
 
     def test_add_w_foreign_participation(self):
-        class Participation(object):
+        class Participation:
             interaction = object()
         policy = self._makeOne()
         self.assertRaises(ValueError, policy.add, Participation())
 
     def test_remove_w_foreign_participation(self):
-        class Participation(object):
+        class Participation:
             interaction = object()
         policy = self._makeOne()
         self.assertRaises(ValueError, policy.remove, Participation())
 
     def test_remove(self):
-        class Participation(object):
+        class Participation:
             interaction = None
         p1, p2, p3 = Participation(), Participation(), Participation()
         policy = self._makeOne(p1, p2, p3)
@@ -87,7 +89,8 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
 
     def test_checkPermission_w_non_public_only_system_user(self):
         from zope.security._definitions import system_user
-        class Participation(object):
+
+        class Participation:
             interaction = None
             principal = system_user
         policy = self._makeOne(Participation())
@@ -96,7 +99,7 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         self.assertTrue(policy.checkPermission(permission, target))
 
     def test_checkPermission_w_non_public_other_user(self):
-        class Participation(object):
+        class Participation:
             interaction = None
             principal = object()
         policy = self._makeOne(Participation())
@@ -110,6 +113,7 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         policy = self._makeOne()
         self.assertTrue(policy.checkPermission(None, None))
         self.assertTrue(policy.checkPermission(self, self))
+
 
 class PermissiveSecurityPolicyTests(unittest.TestCase,
                                     ConformsToIInteraction):

@@ -21,23 +21,21 @@
 import os
 import platform
 import sys
-
-
 from distutils.errors import CCompilerError
 from distutils.errors import DistutilsExecError
 from distutils.errors import DistutilsPlatformError
 
-
 from setuptools import Extension
-from setuptools.command.build_ext import build_ext
 from setuptools import find_packages
 from setuptools import setup
-from setuptools import Feature
+from setuptools.command.build_ext import build_ext
+
 
 class optional_build_ext(build_ext):
     """This class subclasses build_ext and allows
        the building of C extensions to fail.
     """
+
     def run(self):
         try:
             build_ext.run(self)
@@ -60,66 +58,40 @@ class optional_build_ext(build_ext):
         print('*' * 80)
 
 
-
 here = os.path.abspath(os.path.dirname(__file__))
+
+
 def read(*rnames):
     with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
         return f.read()
 
-# Include directories for C extensions
-# Sniff the location of the headers in the package distribution
-class ModuleHeaderDir(object):
 
-    def __init__(self, require_spec, where='../..'):
-        # By default, assume top-level pkg has the same name as the dist.
-        # Also assume that headers are located in the package dir, and
-        # are meant to be included as follows:
-        #    #include "module/header_name.h"
-        self._require_spec = require_spec
-        self._where = where
+codeoptimization = [
+    Extension(
+        "zope.security._proxy",
+        include_dirs=[os.path.join('include', 'zope.proxy')],
+        sources=[os.path.join('src', 'zope', 'security', "_proxy.c")]
+    ),
+    Extension(
+        "zope.security._zope_security_checker",
+        [os.path.join('src', 'zope', 'security',
+                      "_zope_security_checker.c")]
+    ),
+]
 
-    def __str__(self):
-        from pkg_resources import require
-        from pkg_resources import resource_filename
-        require(self._require_spec)
-        path = resource_filename(self._require_spec, self._where)
-        return os.path.abspath(path)
-
-include = [ModuleHeaderDir('zope.proxy')]
-
-codeoptimization = Feature(
-    "Optional code optimizations",
-    standard=True,
-    ext_modules=[
-        Extension(
-            "zope.security._proxy",
-            [os.path.join('src', 'zope', 'security', "_proxy.c")],
-            include_dirs=include,
-        ),
-        Extension(
-            "zope.security._zope_security_checker",
-            [os.path.join('src', 'zope', 'security',
-                          "_zope_security_checker.c")]
-        ),
-    ]
-)
 
 # Jython cannot build the C optimizations, while on PyPy they are
 # anti-optimizations (the C extension compatibility layer is known-slow,
 # and defeats JIT opportunities).
-py3 = sys.version_info[0] >= 3
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 is_pypy = py_impl() == 'PyPy'
 is_jython = 'java' in sys.platform
 
 if is_pypy or is_jython:
-    setup_requires = []
-    features = {}
+    ext_modules = []
 else:
-    setup_requires = ['zope.proxy >= 4.3.0']
-    features = {
-        'codeoptimization': codeoptimization,
-    }
+    ext_modules = codeoptimization
+
 
 TESTS_REQUIRE = [
     'BTrees',
@@ -132,7 +104,7 @@ TESTS_REQUIRE = [
 
 
 setup(name='zope.security',
-      version='5.0.dev0',
+      version='6.3.dev0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',
@@ -148,14 +120,13 @@ setup(name='zope.security',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: Zope Public License',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
-          'Programming Language :: Python :: 3.5',
-          'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
           'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
+          'Programming Language :: Python :: 3.10',
+          'Programming Language :: Python :: 3.11',
+          'Programming Language :: Python :: 3.12',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
@@ -164,44 +135,50 @@ setup(name='zope.security',
           'Framework :: Zope :: 3',
       ],
       url='http://github.com/zopefoundation/zope.security',
+      project_urls={
+          'Documentation': 'https://zopesecurity.readthedocs.io',
+          'Issue Tracker': ('https://github.com/zopefoundation'
+                            '/zope.security/issues'),
+          'Sources': 'https://github.com/zopefoundation/zope.security',
+      },
       license='ZPL 2.1',
       packages=find_packages('src'),
       package_dir={'': 'src'},
       namespace_packages=['zope'],
-      setup_requires=setup_requires,
       cmdclass={
           'build_ext': optional_build_ext,
       },
-      features=features,
-      python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*',
+      ext_modules=ext_modules,
+      python_requires='>=3.7',
       install_requires=[
           'setuptools',
           'zope.component',
           'zope.i18nmessageid',
           'zope.interface',
           'zope.location',
-          'zope.proxy >= 4.3.0',
-          'zope.schema',
+          'zope.proxy >= 5.2',
+          'zope.schema >= 4.2.0',
       ],
       tests_require=TESTS_REQUIRE,
       extras_require={
           'pytz': [
               "pytz"
           ],
-          'untrustedpython:python_version == "2.7"': [
-              'zope.untrustedpython',
+          'untrustedpython': [
+              'zope.untrustedpython >= 5.0.dev0',
           ],
-          'untrustedpython:python_version >= "3.3"': [],
           'zcml': [
               'zope.configuration'
           ],
           'test': TESTS_REQUIRE,
           'docs': [
-              'Sphinx < 2; python_version < "3"',
-              'Sphinx >= 2; python_version >= "3"',
+              'Sphinx',
               'repoze.sphinx.autointerface',
+              'sphinx_rtd_theme',
+              'zope.configuration',
+              'zope.testing',
           ],
       },
       include_package_data=True,
       zip_safe=False,
-)
+      )
