@@ -5,7 +5,7 @@
 6.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Build windows wheels on GHA.
 
 
 6.2 (2023-10-05)
