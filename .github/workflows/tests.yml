@@ -268,6 +268,11 @@ jobs:
         exclude:
           - os: macos-latest
             python-version: "pypy-3.10"
+          - os: macos-latest
+            python-version: "3.7"
+        include:
+          - os: macos-12
+            python-version: "3.7"
 
     steps:
       - name: checkout
