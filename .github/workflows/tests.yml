@@ -110,8 +110,8 @@ jobs:
           - os: macos-latest
             python-version: "pypy-3.10"
         include:
-          - os: macos-12
-            python-version: "3.7"
+          - python-version: "3.7"
+            os: macos-12
 
     steps:
       - name: checkout
@@ -271,8 +271,8 @@ jobs:
           - os: macos-latest
             python-version: "pypy-3.10"
         include:
-          - os: macos-12
-            python-version: "3.7"
+          - python-version: "3.7"
+            os: macos-12
 
     steps:
       - name: checkout
