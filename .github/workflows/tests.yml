@@ -103,10 +103,15 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
-          - os: macos-11
+          - os: macos-latest
+            python-version: "3.7"
+          - os: macos-latest
             python-version: "pypy-3.10"
+        include:
+          - python-version: "3.7"
+            os: macos-12
 
     steps:
       - name: checkout
@@ -121,15 +126,32 @@ jobs:
       # to save the cache. So it must come before the thing we want to use
       # the cache.
       ###
-      - name: Get pip cache dir
-        id: pip-cache
+      - name: Get pip cache dir (default)
+        id: pip-cache-default
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         run: |
           echo "dir=$(pip cache dir)" >>$GITHUB_OUTPUT
 
-      - name: pip cache
+      - name: Get pip cache dir (Windows)
+        id: pip-cache-windows
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        run: |
+          echo "dir=$(pip cache dir)" >> $Env:GITHUB_OUTPUT
+
+      - name: pip cache (default)
         uses: actions/cache@v4
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         with:
-          path: ${{ steps.pip-cache.outputs.dir }}
+          path: ${{ steps.pip-cache-default.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: pip cache (Windows)
+        uses: actions/cache@v4
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        with:
+          path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -137,7 +159,7 @@ jobs:
       - name: Install Build Dependencies
         run: |
           pip install -U pip
-          pip install -U setuptools wheel twine cffi
+          pip install -U setuptools wheel twine
           pip install -U zope.proxy
 
       - name: Build zope.security (macOS x86_64, Python 3.8+)
@@ -242,10 +264,15 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
-          - os: macos-11
+          - os: macos-latest
+            python-version: "3.7"
+          - os: macos-latest
             python-version: "pypy-3.10"
+        include:
+          - python-version: "3.7"
+            os: macos-12
 
     steps:
       - name: checkout
@@ -260,15 +287,32 @@ jobs:
       # to save the cache. So it must come before the thing we want to use
       # the cache.
       ###
-      - name: Get pip cache dir
-        id: pip-cache
+      - name: Get pip cache dir (default)
+        id: pip-cache-default
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         run: |
           echo "dir=$(pip cache dir)" >>$GITHUB_OUTPUT
 
-      - name: pip cache
+      - name: Get pip cache dir (Windows)
+        id: pip-cache-windows
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        run: |
+          echo "dir=$(pip cache dir)" >> $Env:GITHUB_OUTPUT
+
+      - name: pip cache (default)
         uses: actions/cache@v4
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         with:
-          path: ${{ steps.pip-cache.outputs.dir }}
+          path: ${{ steps.pip-cache-default.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: pip cache (Windows)
+        uses: actions/cache@v4
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        with:
+          path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -295,7 +339,9 @@ jobs:
       - name: Run tests without C extensions
         run:
           # coverage makes PyPy run about 3x slower!
-          PURE_PYTHON=1 python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
+          python -m coverage run -p -m zope.testrunner --test-path=src --auto-color --auto-progress
+        env:
+          PURE_PYTHON: 1
       - name: Report Coverage
         run: |
           coverage combine
@@ -309,7 +355,7 @@ jobs:
 
   coveralls_finish:
     needs: test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
       uses: AndreMiras/coveralls-python-action@develop
@@ -322,7 +368,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9"]
-        os: [ubuntu-20.04]
+        os: [ubuntu-latest]
 
     steps:
       - name: checkout
@@ -337,15 +383,32 @@ jobs:
       # to save the cache. So it must come before the thing we want to use
       # the cache.
       ###
-      - name: Get pip cache dir
-        id: pip-cache
+      - name: Get pip cache dir (default)
+        id: pip-cache-default
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         run: |
           echo "dir=$(pip cache dir)" >>$GITHUB_OUTPUT
 
-      - name: pip cache
+      - name: Get pip cache dir (Windows)
+        id: pip-cache-windows
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        run: |
+          echo "dir=$(pip cache dir)" >> $Env:GITHUB_OUTPUT
+
+      - name: pip cache (default)
         uses: actions/cache@v4
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         with:
-          path: ${{ steps.pip-cache.outputs.dir }}
+          path: ${{ steps.pip-cache-default.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: pip cache (Windows)
+        uses: actions/cache@v4
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        with:
+          path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -373,7 +436,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9"]
-        os: [ubuntu-20.04]
+        os: [ubuntu-latest]
 
     steps:
       - name: checkout
@@ -388,15 +451,32 @@ jobs:
       # to save the cache. So it must come before the thing we want to use
       # the cache.
       ###
-      - name: Get pip cache dir
-        id: pip-cache
+      - name: Get pip cache dir (default)
+        id: pip-cache-default
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         run: |
           echo "dir=$(pip cache dir)" >>$GITHUB_OUTPUT
 
-      - name: pip cache
+      - name: Get pip cache dir (Windows)
+        id: pip-cache-windows
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        run: |
+          echo "dir=$(pip cache dir)" >> $Env:GITHUB_OUTPUT
+
+      - name: pip cache (default)
         uses: actions/cache@v4
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         with:
-          path: ${{ steps.pip-cache.outputs.dir }}
+          path: ${{ steps.pip-cache-default.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: pip cache (Windows)
+        uses: actions/cache@v4
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        with:
+          path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -420,7 +500,7 @@ jobs:
           # python -m pylint --limit-inference-results=1 --rcfile=.pylintrc zope.security -f parseable -r n
 
   manylinux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     # We use a regular Python matrix entry to share as much code as possible.
     strategy:
@@ -441,15 +521,32 @@ jobs:
       # to save the cache. So it must come before the thing we want to use
       # the cache.
       ###
-      - name: Get pip cache dir
-        id: pip-cache
+      - name: Get pip cache dir (default)
+        id: pip-cache-default
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         run: |
           echo "dir=$(pip cache dir)" >>$GITHUB_OUTPUT
 
-      - name: pip cache
+      - name: Get pip cache dir (Windows)
+        id: pip-cache-windows
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        run: |
+          echo "dir=$(pip cache dir)" >> $Env:GITHUB_OUTPUT
+
+      - name: pip cache (default)
         uses: actions/cache@v4
+        if: ${{ !startsWith(runner.os, 'Windows') }}
         with:
-          path: ${{ steps.pip-cache.outputs.dir }}
+          path: ${{ steps.pip-cache-default.outputs.dir }}
+          key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ matrix.python-version }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: pip cache (Windows)
+        uses: actions/cache@v4
+        if: ${{ startsWith(runner.os, 'Windows') }}
+        with:
+          path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ matrix.python-version }}
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -487,7 +584,7 @@ jobs:
           path: wheelhouse/*whl
           name: manylinux_${{ matrix.image }}_wheels.zip
       - name: Restore pip cache permissions
-        run: sudo chown -R $(whoami) ${{ steps.pip-cache.outputs.dir }}
+        run: sudo chown -R $(whoami) ${{ steps.pip-cache-default.outputs.dir }}
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         if: >
