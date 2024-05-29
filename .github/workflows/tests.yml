@@ -97,21 +97,16 @@ jobs:
       matrix:
         python-version:
           - "pypy-3.10"
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
         os: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
           - os: macos-latest
-            python-version: "3.7"
-          - os: macos-latest
             python-version: "pypy-3.10"
-        include:
-          - python-version: "3.7"
-            os: macos-12
 
     steps:
       - name: checkout
@@ -120,6 +115,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
@@ -156,17 +152,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Install Build Dependencies (3.13)
+        if: matrix.python-version == '3.13'
+        run: |
+          pip install -U pip
+          pip install -U "setuptools<69" wheel twine
       - name: Install Build Dependencies
+        if: matrix.python-version != '3.13'
         run: |
           pip install -U pip
           pip install -U "setuptools<69" wheel twine
           pip install -U zope.proxy
 
-      - name: Build zope.security (macOS x86_64, Python 3.8+)
+      - name: Build zope.security (macOS x86_64)
         if: >
           startsWith(runner.os, 'Mac')
-          && !(startsWith(matrix.python-version, 'pypy')
-               || matrix.python-version == '3.7')
+          && !startsWith(matrix.python-version, 'pypy')
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.9
           _PYTHON_HOST_PLATFORM: macosx-10.9-x86_64
@@ -176,11 +177,10 @@ jobs:
           # output (pip install uses a random temporary directory, making this difficult).
           python setup.py build_ext -i
           python setup.py bdist_wheel
-      - name: Build zope.security (macOS arm64, Python 3.8+)
+      - name: Build zope.security (macOS arm64)
         if: >
           startsWith(runner.os, 'Mac')
-          && !(startsWith(matrix.python-version, 'pypy')
-               || matrix.python-version == '3.7')
+          && !startsWith(matrix.python-version, 'pypy')
         env:
           MACOSX_DEPLOYMENT_TARGET: 11.0
           _PYTHON_HOST_PLATFORM: macosx-11.0-arm64
@@ -194,14 +194,21 @@ jobs:
         if: >
           !startsWith(runner.os, 'Mac')
           || startsWith(matrix.python-version, 'pypy')
-          || matrix.python-version == '3.7'
         run: |
           # Next, build the wheel *in place*. This helps ccache, and also lets us cache the configure
           # output (pip install uses a random temporary directory, making this difficult).
           python setup.py build_ext -i
           python setup.py bdist_wheel
 
+      - name: Install zope.security and dependencies (3.13)
+        if: matrix.python-version == '3.13'
+        run: |
+          # Install to collect dependencies into the (pip) cache.
+          # Use "--pre" here because dependencies with support for this future
+          # Python release may only be available as pre-releases
+          pip install --pre .[test]
       - name: Install zope.security and dependencies
+        if: matrix.python-version != '3.13'
         run: |
           # Install to collect dependencies into the (pip) cache.
           pip install .[test]
@@ -215,19 +222,18 @@ jobs:
           startsWith(runner.os, 'Mac')
         uses: actions/upload-artifact@v4
         with:
-          name: zope.security-${{ runner.os }}-${{ matrix.python-version }}.whl
+          # The x86_64 wheel is uploaded with a different name just so it can be
+          # manually downloaded when desired. The wheel itself *cannot* be tested
+          # on the GHA runner, which uses arm64 architecture.
+          name: zope.security-${{ runner.os }}-${{ matrix.python-version }}-x86_64.whl
           path: dist/*x86_64.whl
       - name: Upload zope.security wheel (macOS arm64)
         if: >
           startsWith(runner.os, 'Mac')
-          && !(startsWith(matrix.python-version, 'pypy')
-               || matrix.python-version == '3.7')
+          && !startsWith(matrix.python-version, 'pypy')
         uses: actions/upload-artifact@v4
         with:
-          # The arm64 wheel is uploaded with a different name just so it can be
-          # manually downloaded when desired. The wheel itself *cannot* be tested
-          # on the GHA runner, which uses x86_64 architecture.
-          name: zope.security-${{ runner.os }}-${{ matrix.python-version }}-arm64.whl
+          name: zope.security-${{ runner.os }}-${{ matrix.python-version }}.whl
           path: dist/*arm64.whl
       - name: Upload zope.security wheel (all other platforms)
         if: >
@@ -245,6 +251,7 @@ jobs:
           && startsWith(github.ref, 'refs/tags')
           && !startsWith(runner.os, 'Linux')
           && !startsWith(matrix.python-version, 'pypy')
+          && !startsWith(matrix.python-version, '3.13')
         env:
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         run: |
@@ -258,21 +265,16 @@ jobs:
       matrix:
         python-version:
           - "pypy-3.10"
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
         os: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
           - os: macos-latest
-            python-version: "3.7"
-          - os: macos-latest
             python-version: "pypy-3.10"
-        include:
-          - python-version: "3.7"
-            os: macos-12
 
     steps:
       - name: checkout
@@ -281,6 +283,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
@@ -322,7 +325,22 @@ jobs:
         with:
           name: zope.security-${{ runner.os }}-${{ matrix.python-version }}.whl
           path: dist/
+      - name: Install zope.security 3.13 ${{ matrix.python-version }}
+        if: matrix.python-version == '3.13'
+        run: |
+          pip install -U wheel "setuptools<69"
+          # coverage might have a wheel on PyPI for a future python version which is
+          # not ABI compatible with the current one, so build it from sdist:
+          pip install -U --no-binary :all: coverage
+          # Unzip into src/ so that testrunner can find the .so files
+          # when we ask it to load tests from that directory. This
+          # might also save some build time?
+          unzip -n dist/zope.security-*whl -d src
+          # Use "--pre" here because dependencies with support for this future
+          # Python release may only be available as pre-releases
+          pip install --pre -U -e .[test]
       - name: Install zope.security
+        if: matrix.python-version != '3.13'
         run: |
           pip install -U wheel "setuptools<69"
           pip install -U coverage
@@ -377,6 +395,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
@@ -445,6 +464,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
@@ -512,6 +532,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
       ###
       # Caching.
       # This actually *restores* a cache and schedules a cleanup action
