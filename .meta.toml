@@ -63,3 +63,6 @@ additional-config = [
 additional-build-dependencies = [
     "zope.proxy",
     ]
+
+[c-code]
+require-cffi = true
