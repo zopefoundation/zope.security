@@ -326,6 +326,10 @@ proxy_richcompare(SecurityProxy* self, PyObject* other, int op)
 {
   PyObject *result = NULL;
 
+  if (Proxy_Check(other)) {
+      other = ((SecurityProxy*)(other))->proxy.proxy_object;
+  }
+
   result = PyObject_RichCompare(self->proxy.proxy_object, other, op);
   if (result == Py_True || result == Py_False)
     return result;
