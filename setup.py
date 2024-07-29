@@ -159,7 +159,6 @@ setup(name='zope.security',
           'zope.proxy >= 5.2',
           'zope.schema >= 4.2.0',
       ],
-      tests_require=TESTS_REQUIRE,
       extras_require={
           'pytz': [
               "pytz"
