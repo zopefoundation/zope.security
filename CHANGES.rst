@@ -2,7 +2,7 @@
  Changes
 =========
 
-7.1 (unreleased)
+7.1 (2024-08-16)
 ----------------
 
 - Allow calling methods of type ``<class 'builtin_method'>`` by default. In
