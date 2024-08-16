@@ -8,8 +8,8 @@
 - Allow calling methods of type ``<class 'builtin_method'>`` by default. In
   particular, Python 3.12 refactored the ``io`` module in such a way as to
   slightly change the types of some methods, causing ``zope.security`` to no
-  longer consider them callable. See `zope.file issue #13
-  <https://github.com/zopefoundation/zope.file/issues/13>`.
+  longer consider them callable. See `zope.file#13
+  <https://github.com/zopefoundation/zope.file/issues/13>`_.
 
 
 7.0 (2024-05-30)
