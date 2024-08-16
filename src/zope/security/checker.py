@@ -60,6 +60,7 @@ API
 import abc
 import datetime
 import decimal
+import io
 import os
 import sys
 import types
@@ -879,6 +880,14 @@ _default_checkers = {
     types.MethodType: _callableChecker,
     types.BuiltinFunctionType: _callableChecker,
     types.BuiltinMethodType: _callableChecker,
+    # At least on Python 3.5-3.12, types.BuiltinFunctionType and
+    # types.BuiltinMethodType are both <class 'builtin_function_or_method'>,
+    # or PyCFunctionType.  However, some builtin methods are <class
+    # 'builtin_method'> instead, or PyCMethodType, which is a subclass of
+    # PyCFunctionType but not identical to it.  As of Python 3.12, the io
+    # module makes more use of PyCMethodType, so we can use it to identify
+    # that type.
+    type(io.BytesIO().getbuffer): _callableChecker,
     # method-wrapper
     type(().__repr__): _callableChecker,
     type: _typeChecker,

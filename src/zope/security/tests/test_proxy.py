@@ -13,6 +13,8 @@
 ##############################################################################
 """Security proxy tests
 """
+import io
+import os
 import unittest
 
 from zope.security._compat import PURE_PYTHON
@@ -1814,6 +1816,11 @@ class ProxyFactoryTests(unittest.TestCase):
         from zope.security.proxy import ProxyFactory
 
         self.assertEqual(ProxyFactory({}).__repr__(), '{}')
+
+    def test_builtin_method(self):
+        from zope.security.proxy import ProxyFactory
+
+        self.assertEqual(ProxyFactory(io.FileIO(os.devnull, 'rb').read)(), b'')
 
 
 def test_using_mapping_slots_hack():
