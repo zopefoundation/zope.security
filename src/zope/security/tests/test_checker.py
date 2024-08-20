@@ -676,8 +676,8 @@ class TestTracebackSupplement(unittest.TestCase):
                          ]:
             tbs = self._makeOne(val)
             self.assertEqual(tbs.getInfo().splitlines(),
-                             ['   - class: builtins.{}'.format(typ),
-                              '   - type: builtins.{}'.format(typ),
+                             [f'   - class: builtins.{typ}',
+                              f'   - type: builtins.{typ}',
                               ])
 
     def test_getInfo_newstyle_instance(self):

@@ -80,7 +80,7 @@ class Identity:
         return self.id
 
     def __str__(self):
-        return "<{}> {}".format(str(self.__class__.__name__), str(self.id))
+        return f"<{str(self.__class__.__name__)}> {str(self.id)}"
 
     __repr__ = __str__
 
