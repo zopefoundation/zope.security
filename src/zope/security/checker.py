@@ -304,7 +304,7 @@ class TracebackSupplement:
         try:
             cls = self.obj.__class__
             if hasattr(cls, "__module__"):
-                s = "{}.{}".format(cls.__module__, cls.__name__)
+                s = f"{cls.__module__}.{cls.__name__}"
             else:  # pragma: no cover XXX
                 s = str(cls.__name__)
             result.append("   - class: " + s)
@@ -313,7 +313,7 @@ class TracebackSupplement:
         try:
             cls = type(self.obj)
             if hasattr(cls, "__module__"):
-                s = "{}.{}".format(cls.__module__, cls.__name__)
+                s = f"{cls.__module__}.{cls.__name__}"
             else:  # pragma: no cover XXX
                 s = str(cls.__name__)
             result.append("   - type: " + s)
@@ -617,14 +617,14 @@ class CheckerLoggingMixin:
                               % (name, object), 2)
                 else:
                     self._log(
-                        '[CHK] + Granted: {} on {!r}'.format(name, object), 2)
+                        f'[CHK] + Granted: {name} on {object!r}', 2)
         except Unauthorized:
             self._log(
-                '[CHK] - Unauthorized: {} on {!r}'.format(name, object))
+                f'[CHK] - Unauthorized: {name} on {object!r}')
             raise
         except ForbiddenAttribute:
             self._log(
-                '[CHK] - Forbidden: {} on {!r}'.format(name, object))
+                f'[CHK] - Forbidden: {name} on {object!r}')
             raise
 
     def check_getattr(self, object, name):
@@ -641,12 +641,12 @@ class CheckerLoggingMixin:
                         % (name, object), 2)
         except Unauthorized:
             self._log(
-                '[CHK] - Unauthorized getattr: {} on {!r}'.format(name, object)
+                f'[CHK] - Unauthorized getattr: {name} on {object!r}'
             )
             raise
         except ForbiddenAttribute:
             self._log(
-                '[CHK] - Forbidden getattr: {} on {!r}'.format(name, object))
+                f'[CHK] - Forbidden getattr: {name} on {object!r}')
             raise
 
     __setitem__ = check_getattr
@@ -665,7 +665,7 @@ class CheckerLoggingMixin:
             raise
         except ForbiddenAttribute:
             self._log(
-                '[CHK] - Forbidden setattr: {} on {!r}'.format(name, object))
+                f'[CHK] - Forbidden setattr: {name} on {object!r}')
             raise
 
 

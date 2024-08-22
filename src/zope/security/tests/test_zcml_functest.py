@@ -556,11 +556,11 @@ class TestRequireDirective(unittest.TestCase):
                                 attributes="m2 m3"/>
                           </class>
                           '''.format(
-                                _pfx("test_base"),
-                                P1,
-                                _pfx("test_class"),
-                                _pfx("test_base"),
-                                P2))
+                _pfx("test_base"),
+                P1,
+                _pfx("test_class"),
+                _pfx("test_base"),
+                P2))
 
         # m1 and m2 are in the interface, so should be set, and m3 should not:
         self.assertDeclaration(declaration,

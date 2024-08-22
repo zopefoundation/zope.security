@@ -1278,7 +1278,7 @@ class AbstractProxyTestBase:
                         self.assertEqual(
                             removeSecurityProxy(eval(expr)),
                             z,
-                            "x={!r}; y={!r}; expr={!r}".format(x, y, expr))
+                            f"x={x!r}; y={y!r}; expr={expr!r}")
 
 
 @unittest.skipIf(PURE_PYTHON,
@@ -1743,7 +1743,7 @@ class ProxyFactoryTests(unittest.TestCase):
             x = ProxyFactory(1, self.c)
             z = eval(expr)
             self.assertEqual(removeSecurityProxy(z), y,
-                             "x={!r}; expr={!r}".format(x, expr))
+                             f"x={x!r}; expr={expr!r}")
             self.shouldFail(self._make_eval(expr, locals()), x)
 
     binops = [
@@ -1765,7 +1765,7 @@ class ProxyFactoryTests(unittest.TestCase):
                         self.assertEqual(
                             removeSecurityProxy(eval(expr)),
                             z,
-                            "x={!r}; y={!r}; expr={!r}".format(x, y, expr))
+                            f"x={x!r}; y={y!r}; expr={expr!r}")
                         self.shouldFail(self._make_eval(expr, locals()), x, y)
 
     def test_inplace(self):
