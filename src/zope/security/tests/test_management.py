@@ -47,7 +47,7 @@ class Test(unittest.TestCase):
 
         policy = PermissiveSecurityPolicy
         setSecurityPolicy(policy)
-        self.assertTrue(getSecurityPolicy() is policy)
+        self.assertIs(getSecurityPolicy(), policy)
 
     def test_getInteraction_none_present(self):
         from zope.security.interfaces import NoInteraction
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         from zope.security.management import queryInteraction
         newInteraction()
         interaction = queryInteraction()
-        self.assertTrue(interaction is not None)
+        self.assertIsNotNone(interaction)
 
     def test_newInteraction_repeated_without_end(self):
         from zope.security.management import ExistingInteraction
@@ -99,16 +99,16 @@ class Test(unittest.TestCase):
         interaction = queryInteraction()
         endInteraction()
         restoreInteraction()
-        self.assertTrue(interaction is queryInteraction())
+        self.assertIs(interaction, queryInteraction())
 
     def test_restoreInteraction_after_new(self):
         from zope.security.management import newInteraction
         from zope.security.management import queryInteraction
         from zope.security.management import restoreInteraction
         newInteraction()
-        self.assertTrue(queryInteraction() is not None)
+        self.assertIsNotNone(queryInteraction())
         restoreInteraction()  # restore to no interaction
-        self.assertTrue(queryInteraction() is None)
+        self.assertIsNone(queryInteraction())
 
     def test_restoreInteraction_after_neither(self):
         from zope.security._definitions import thread_local
@@ -123,7 +123,7 @@ class Test(unittest.TestCase):
         except AttributeError:
             pass
         restoreInteraction()
-        self.assertTrue(queryInteraction() is None)
+        self.assertIsNone(queryInteraction())
 
     def test_checkPermission_w_no_interaction(self):
         from zope.security.interfaces import NoInteraction
@@ -143,8 +143,8 @@ class Test(unittest.TestCase):
 
         class PolicyStub:
             def checkPermission(s, p, o,):
-                self.assertTrue(p is permission)
-                self.assertTrue(o is obj)
+                self.assertIs(p, permission)
+                self.assertIs(o, obj)
                 self.assertTrue(s is queryInteraction() or s is interaction)
                 return s is interaction
 

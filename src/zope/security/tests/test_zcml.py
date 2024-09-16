@@ -53,7 +53,7 @@ class PermissionTests(unittest.TestCase,
         permission = self._makeOne()
         p_obj = object()
         permission.context.permission_mapping = {'extant.permission': p_obj}
-        self.assertTrue(permission.fromUnicode('extant.permission') is p_obj)
+        self.assertIs(permission.fromUnicode('extant.permission'), p_obj)
 
     def test__validate_w_public(self):
         context = DummyZCMLContext()
@@ -116,8 +116,8 @@ class Test_permission(unittest.TestCase):
         self.assertEqual(permission.id, 'a.permission')
         self.assertEqual(permission.title, 'TITLE')
         self.assertEqual(permission.description, '')
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'], ('', IPermission))
 
     def test_w_description(self):
@@ -138,8 +138,8 @@ class Test_permission(unittest.TestCase):
         self.assertEqual(permission.id, 'a.permission')
         self.assertEqual(permission.title, 'TITLE')
         self.assertEqual(permission.description, 'DESCRIPTION')
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'], ('', IPermission))
 
 

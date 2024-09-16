@@ -85,7 +85,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         wrapperChecker.check(foo, 'b')  # no raise
 
         checker = wrapper.__Security_checker__
-        self.assertTrue(isinstance(checker, CombinedChecker))
+        self.assertIsInstance(checker, CombinedChecker)
         checker.check(wrapper, 'a')  # no raise
         checker.check(wrapper, 'b')  # no raise
 
@@ -107,7 +107,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         wrapperChecker = NamesChecker(['b'])  # b is public
         defineChecker(Wrapper, wrapperChecker)
         wrapper = Wrapper(foo)
-        self.assertTrue(wrapper.__Security_checker__ is wrapperChecker)
+        self.assertIs(wrapper.__Security_checker__, wrapperChecker)
 
     def test_only_object_has_checker(self):
         from zope.proxy import ProxyBase
@@ -127,7 +127,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
             __Security_checker__ = self._makeOne()
         defineChecker(Wrapper, NoProxy)
         wrapper = Wrapper(foo)
-        self.assertTrue(wrapper.__Security_checker__ is fooChecker)
+        self.assertIs(wrapper.__Security_checker__, fooChecker)
 
     def test_both_wrapper_and_object_have_checkers_security_proxied(self):
         from zope.proxy import ProxyBase
@@ -152,7 +152,7 @@ class DecoratedSecurityCheckerDescriptorTests(QuietWatchingChecker,
         w_sec = Wrapper(f_sec)
 
         checker = w_sec.__Security_checker__
-        self.assertTrue(isinstance(checker, CombinedChecker))
+        self.assertIsInstance(checker, CombinedChecker)
         checker.check(w_sec, 'a')  # no raise
         checker.check(w_sec, 'b')  # no raise
 

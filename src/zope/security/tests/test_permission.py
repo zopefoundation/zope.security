@@ -120,7 +120,7 @@ class Test_PermissionsVocabulary(PlacelessSetup, unittest.TestCase):
     def test_empty(self):
         from zope.schema.vocabulary import SimpleVocabulary
         vocabulary = self._callFUT()
-        self.assertTrue(isinstance(vocabulary, SimpleVocabulary))
+        self.assertIsInstance(vocabulary, SimpleVocabulary)
         self.assertEqual(list(vocabulary), [])
 
     def test_w_registration(self):
@@ -175,7 +175,7 @@ class Test_PermissionIdsVocabulary(PlacelessSetup, unittest.TestCase):
     def test_empty(self):
         from zope.schema.vocabulary import SimpleVocabulary
         vocabulary = self._callFUT()
-        self.assertTrue(isinstance(vocabulary, SimpleVocabulary))
+        self.assertIsInstance(vocabulary, SimpleVocabulary)
         self.assertEqual(list(vocabulary), [])
 
     def test_w_registration(self):

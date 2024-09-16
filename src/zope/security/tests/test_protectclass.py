@@ -36,7 +36,7 @@ class Test_protectName(unittest.TestCase):
         from zope.security.checker import CheckerPublic
         from zope.security.checker import _checkers
         self._callFUT(Foo, 'bar', zope_Public)
-        self.assertTrue(_checkers[Foo].get_permissions['bar'] is CheckerPublic)
+        self.assertIs(_checkers[Foo].get_permissions['bar'], CheckerPublic)
 
     def test_w_existing_checker(self):
         from zope.security.checker import Checker
@@ -44,8 +44,8 @@ class Test_protectName(unittest.TestCase):
         checker = _checkers[Foo] = Checker({})
         permission = object()
         self._callFUT(Foo, 'bar', permission)
-        self.assertTrue(_checkers[Foo] is checker)
-        self.assertTrue(checker.get_permissions['bar'] is permission)
+        self.assertIs(_checkers[Foo], checker)
+        self.assertIs(checker.get_permissions['bar'], permission)
 
 
 class Test_protectSetAttribute(unittest.TestCase):
@@ -66,7 +66,7 @@ class Test_protectSetAttribute(unittest.TestCase):
         from zope.security.checker import CheckerPublic
         from zope.security.checker import _checkers
         self._callFUT(Foo, 'bar', zope_Public)
-        self.assertTrue(_checkers[Foo].set_permissions['bar'] is CheckerPublic)
+        self.assertIs(_checkers[Foo].set_permissions['bar'], CheckerPublic)
 
     def test_w_existing_checker(self):
         from zope.security.checker import Checker
@@ -74,8 +74,8 @@ class Test_protectSetAttribute(unittest.TestCase):
         checker = _checkers[Foo] = Checker({})
         permission = object()
         self._callFUT(Foo, 'bar', permission)
-        self.assertTrue(_checkers[Foo] is checker)
-        self.assertTrue(checker.set_permissions['bar'] is permission)
+        self.assertIs(_checkers[Foo], checker)
+        self.assertIs(checker.set_permissions['bar'], permission)
 
 
 class Test_protectLikeUnto(unittest.TestCase):
@@ -94,10 +94,10 @@ class Test_protectLikeUnto(unittest.TestCase):
 
     def test_wo_existing_like_unto_checker(self):
         from zope.security.checker import _checkers
-        self.assertFalse(Foo in _checkers)
+        self.assertNotIn(Foo, _checkers)
         self._callFUT(Bar, Foo)
-        self.assertFalse(Foo in _checkers)
-        self.assertFalse(Bar in _checkers)
+        self.assertNotIn(Foo, _checkers)
+        self.assertNotIn(Bar, _checkers)
 
     def test_w_existing_like_unto_checker_wo_existing_checker(self):
         from zope.security.checker import Checker

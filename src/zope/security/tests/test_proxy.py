@@ -271,25 +271,25 @@ class AbstractProxyTestBase:
         target = 1
         checker = object()  # checker not consulted
         proxy = self._makeOne(target, checker)
-        self.assertTrue(proxy <= 1)
+        self.assertLessEqual(proxy, 1)
 
     def test__ne__(self):
         target = 1
         checker = object()  # checker not consulted
         proxy = self._makeOne(target, checker)
-        self.assertFalse(proxy != 1)
+        self.assertEqual(proxy, 1)
 
     def test__ge__(self):
         target = 1
         checker = object()  # checker not consulted
         proxy = self._makeOne(target, checker)
-        self.assertTrue(proxy >= 1)
+        self.assertGreaterEqual(proxy, 1)
 
     def test__gt__(self):
         target = 1
         checker = object()  # checker not consulted
         proxy = self._makeOne(target, checker)
-        self.assertTrue(proxy > 0)
+        self.assertGreater(proxy, 0)
 
     def test___hash___w_self(self):
         target = object()
@@ -1081,14 +1081,14 @@ class AbstractProxyTestBase:
         target = [0, 1, 2]
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
-        self.assertTrue(1 in proxy)
+        self.assertIn(1, proxy)
         self.assertEqual(checker._checked, '__contains__')
 
     def test___contains___miss_w_checker_allows(self):
         target = [0, 1, 2]
         checker = DummyChecker()
         proxy = self._makeOne(target, checker)
-        self.assertFalse(4 in proxy)
+        self.assertNotIn(4, proxy)
         self.assertEqual(checker._checked, '__contains__')
 
     def test___contains___w_checker_forbids(self):
@@ -1641,7 +1641,7 @@ class ProxyFactoryTests(unittest.TestCase):
         self.shouldFail(self.p, None)
 
     def testRichCompareOK(self):
-        self.assertTrue(self.p == self.x)
+        self.assertEqual(self.p, self.x)
 
 #    def testRichCompareFail(self):
 #        self.shouldFail(lambda: self.p == self.x)
@@ -1689,7 +1689,7 @@ class ProxyFactoryTests(unittest.TestCase):
         self.shouldFail(doit)
 
     def testContainsOK(self):
-        self.assertTrue(42 in self.p)
+        self.assertIn(42, self.p)
 
     def testContainsFail(self):
         self.shouldFail(lambda: 42 in self.p)
