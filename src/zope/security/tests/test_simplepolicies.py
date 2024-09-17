@@ -53,9 +53,9 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         p1, p2, p3 = Participation(), Participation(), Participation()
         policy = self._makeOne(p1, p2, p3)
         self.assertEqual(policy.participations, [p1, p2, p3])
-        self.assertTrue(p1.interaction is policy)
-        self.assertTrue(p2.interaction is policy)
-        self.assertTrue(p3.interaction is policy)
+        self.assertIs(p1.interaction, policy)
+        self.assertIs(p2.interaction, policy)
+        self.assertIs(p3.interaction, policy)
 
     def test_add_w_foreign_participation(self):
         class Participation:
@@ -77,9 +77,9 @@ class ParanoidSecurityPolicyTests(unittest.TestCase,
         policy.remove(p2)
 
         self.assertEqual(policy.participations, [p1, p3])
-        self.assertTrue(p1.interaction is policy)
-        self.assertTrue(p2.interaction is None)
-        self.assertTrue(p3.interaction is policy)
+        self.assertIs(p1.interaction, policy)
+        self.assertIsNone(p2.interaction)
+        self.assertIs(p3.interaction, policy)
 
     def test_checkPermission_w_public(self):
         from zope.security.checker import CheckerPublic

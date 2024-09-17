@@ -63,10 +63,10 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 2)
         self.assertEqual(context._actions[0]['discriminator'][:2],
                          ('ContentDirective', Foo, ))  # 3rd is object()
-        self.assertTrue(context._actions[0]['callable'] is classImplements)
+        self.assertIs(context._actions[0]['callable'], classImplements)
         self.assertEqual(context._actions[0]['args'], (Foo, IFoo))
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
 
@@ -86,18 +86,18 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 4)
         self.assertEqual(context._actions[0]['discriminator'][:2],
                          ('ContentDirective', Foo, ))  # 3rd is object()
-        self.assertTrue(context._actions[0]['callable'] is classImplements)
+        self.assertIs(context._actions[0]['callable'], classImplements)
         self.assertEqual(context._actions[0]['args'], (Foo, IFoo))
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
         self.assertEqual(context._actions[2]['discriminator'][:2],
                          ('ContentDirective', Foo, ))  # 3rd is object()
-        self.assertTrue(context._actions[2]['callable'] is classImplements)
+        self.assertIs(context._actions[2]['callable'], classImplements)
         self.assertEqual(context._actions[2]['args'], (Foo, IBar))
-        self.assertTrue(context._actions[3]['discriminator'] is None)
-        self.assertTrue(context._actions[3]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[3]['discriminator'])
+        self.assertIs(context._actions[3]['callable'], provideInterface)
         self.assertEqual(context._actions[3]['args'],
                          ('zope.security.tests.test_metaconfigure.IBar', IBar))
 
@@ -112,7 +112,7 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 1)
         self.assertEqual(context._actions[0]['discriminator'][:2],
                          ('mimic', Foo, ))  # 3rd is object()
-        self.assertTrue(context._actions[0]['callable'] is protectLikeUnto)
+        self.assertIs(context._actions[0]['callable'], protectLikeUnto)
         self.assertEqual(context._actions[0]['args'], (Foo, Bar))
 
     def test_require_only_permission(self):
@@ -145,14 +145,14 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 3)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectName', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertIs(context._actions[0]['callable'], protectName)
         self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('protectName', Foo, 'baz'))
-        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertIs(context._actions[1]['callable'], protectName)
         self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
-        self.assertTrue(context._actions[2]['discriminator'] is None)
-        self.assertTrue(context._actions[2]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[2]['discriminator'])
+        self.assertIs(context._actions[2]['callable'], provideInterface)
         self.assertEqual(context._actions[2]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
 
@@ -175,18 +175,18 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 4)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectName', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertIs(context._actions[0]['callable'], protectName)
         self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
         self.assertEqual(context._actions[2]['discriminator'],
                          ('protectName', Foo, 'baz'))
-        self.assertTrue(context._actions[2]['callable'] is protectName)
+        self.assertIs(context._actions[2]['callable'], protectName)
         self.assertEqual(context._actions[2]['args'], (Foo, 'baz', 'testing'))
-        self.assertTrue(context._actions[3]['discriminator'] is None)
-        self.assertTrue(context._actions[3]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[3]['discriminator'])
+        self.assertIs(context._actions[3]['callable'], provideInterface)
         self.assertEqual(context._actions[3]['args'],
                          ('zope.security.tests.test_metaconfigure.IBar', IBar))
 
@@ -199,11 +199,11 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 2)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectName', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertIs(context._actions[0]['callable'], protectName)
         self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('protectName', Foo, 'baz'))
-        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertIs(context._actions[1]['callable'], protectName)
         self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
 
     def test_require_w_set_attributes(self):
@@ -215,11 +215,11 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 2)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectSetAttribute', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectSetAttribute)
+        self.assertIs(context._actions[0]['callable'], protectSetAttribute)
         self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('protectSetAttribute', Foo, 'baz'))
-        self.assertTrue(context._actions[1]['callable'] is protectSetAttribute)
+        self.assertIs(context._actions[1]['callable'], protectSetAttribute)
         self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
 
     def test_require_w_set_schema_normal_fields(self):
@@ -238,14 +238,14 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 3)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectSetAttribute', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectSetAttribute)
+        self.assertIs(context._actions[0]['callable'], protectSetAttribute)
         self.assertEqual(context._actions[0]['args'], (Foo, 'bar', 'testing'))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('protectSetAttribute', Foo, 'baz'))
-        self.assertTrue(context._actions[1]['callable'] is protectSetAttribute)
+        self.assertIs(context._actions[1]['callable'], protectSetAttribute)
         self.assertEqual(context._actions[1]['args'], (Foo, 'baz', 'testing'))
-        self.assertTrue(context._actions[2]['discriminator'] is None)
-        self.assertTrue(context._actions[2]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[2]['discriminator'])
+        self.assertIs(context._actions[2]['callable'], provideInterface)
         self.assertEqual(context._actions[2]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
 
@@ -260,8 +260,8 @@ class ClassDirectiveTests(unittest.TestCase):
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
         self.assertEqual(len(context._actions), 1)
-        self.assertTrue(context._actions[0]['discriminator'] is None)
-        self.assertTrue(context._actions[0]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[0]['discriminator'])
+        self.assertIs(context._actions[0]['callable'], provideInterface)
         self.assertEqual(context._actions[0]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
 
@@ -276,8 +276,8 @@ class ClassDirectiveTests(unittest.TestCase):
         directive = self._makeOne(context, Foo)
         directive.require(context, permission='testing', set_schema=[IFoo])
         self.assertEqual(len(context._actions), 1)
-        self.assertTrue(context._actions[0]['discriminator'] is None)
-        self.assertTrue(context._actions[0]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[0]['discriminator'])
+        self.assertIs(context._actions[0]['callable'], provideInterface)
         self.assertEqual(context._actions[0]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
 
@@ -303,16 +303,16 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 3)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectName', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertIs(context._actions[0]['callable'], protectName)
         self.assertEqual(context._actions[0]['args'],
                          (Foo, 'bar', zope_Public))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('protectName', Foo, 'baz'))
-        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertIs(context._actions[1]['callable'], protectName)
         self.assertEqual(context._actions[1]['args'],
                          (Foo, 'baz', zope_Public))
-        self.assertTrue(context._actions[2]['discriminator'] is None)
-        self.assertTrue(context._actions[2]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[2]['discriminator'])
+        self.assertIs(context._actions[2]['callable'], provideInterface)
         self.assertEqual(context._actions[2]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
 
@@ -334,20 +334,20 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 4)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectName', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertIs(context._actions[0]['callable'], protectName)
         self.assertEqual(context._actions[0]['args'],
                          (Foo, 'bar', zope_Public))
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'],
                          ('zope.security.tests.test_metaconfigure.IFoo', IFoo))
         self.assertEqual(context._actions[2]['discriminator'],
                          ('protectName', Foo, 'baz'))
-        self.assertTrue(context._actions[2]['callable'] is protectName)
+        self.assertIs(context._actions[2]['callable'], protectName)
         self.assertEqual(context._actions[2]['args'],
                          (Foo, 'baz', zope_Public))
-        self.assertTrue(context._actions[3]['discriminator'] is None)
-        self.assertTrue(context._actions[3]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[3]['discriminator'])
+        self.assertIs(context._actions[3]['callable'], provideInterface)
         self.assertEqual(context._actions[3]['args'],
                          ('zope.security.tests.test_metaconfigure.IBar', IBar))
 
@@ -359,12 +359,12 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 2)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('protectName', Foo, 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectName)
+        self.assertIs(context._actions[0]['callable'], protectName)
         self.assertEqual(context._actions[0]['args'],
                          (Foo, 'bar', zope_Public))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('protectName', Foo, 'baz'))
-        self.assertTrue(context._actions[1]['callable'] is protectName)
+        self.assertIs(context._actions[1]['callable'], protectName)
         self.assertEqual(context._actions[1]['args'],
                          (Foo, 'baz', zope_Public))
 
@@ -385,7 +385,7 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(context._actions[0]['discriminator'],
                          ('utility', IFactory,
                           'zope.security.tests.test_metaconfigure.Foo'))
-        self.assertTrue(context._actions[0]['callable'] is handler)
+        self.assertIs(context._actions[0]['callable'], handler)
         args = context._actions[0]['args']
         self.assertEqual(args[0], 'registerUtility')
         factory = args[1]
@@ -395,8 +395,8 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(args[2], IFactory)
         self.assertEqual(args[3], 'zope.security.tests.test_metaconfigure.Foo')
         self.assertEqual(args[4], 'INFO')
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'], ('', IFactory))
 
     def test_factory_w_explicit_id(self):
@@ -410,7 +410,7 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(len(context._actions), 2)
         self.assertEqual(context._actions[0]['discriminator'],
                          ('utility', IFactory, 'test_id'))
-        self.assertTrue(context._actions[0]['callable'] is handler)
+        self.assertIs(context._actions[0]['callable'], handler)
         args = context._actions[0]['args']
         self.assertEqual(args[0], 'registerUtility')
         factory = args[1]
@@ -418,8 +418,8 @@ class ClassDirectiveTests(unittest.TestCase):
         self.assertEqual(args[2], IFactory)
         self.assertEqual(args[3], 'test_id')
         self.assertEqual(args[4], 'INFO')
-        self.assertTrue(context._actions[1]['discriminator'] is None)
-        self.assertTrue(context._actions[1]['callable'] is provideInterface)
+        self.assertIsNone(context._actions[1]['discriminator'])
+        self.assertIs(context._actions[1]['callable'], provideInterface)
         self.assertEqual(context._actions[1]['args'], ('', IFactory))
 
 
@@ -447,7 +447,7 @@ class Test_protectModule(unittest.TestCase):
         perm = object()
         self._callFUT(module, 'name', perm)
         checker = _checkers[module]
-        self.assertTrue(checker.get_permissions['name'] is perm)
+        self.assertIs(checker.get_permissions['name'], perm)
 
     def test_check_w_existing_module_checker_zope_Public(self):
         from zope.security import tests as module
@@ -457,8 +457,8 @@ class Test_protectModule(unittest.TestCase):
         before = _checkers[module] = Checker({'other': CheckerPublic})
         self._callFUT(module, 'name', zope_Public)
         checker = _checkers[module]
-        self.assertTrue(checker is before)
-        self.assertTrue(checker.get_permissions['name'] is CheckerPublic)
+        self.assertIs(checker, before)
+        self.assertIs(checker.get_permissions['name'], CheckerPublic)
 
 
 class Test_allow(unittest.TestCase):
@@ -496,13 +496,13 @@ class Test_allow(unittest.TestCase):
         self.assertEqual(context._actions[0]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'foo'))
-        self.assertTrue(context._actions[0]['callable'] is protectModule)
+        self.assertIs(context._actions[0]['callable'], protectModule)
         self.assertEqual(context._actions[0]['args'],
                          ('testing', 'foo', zope_Public))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'bar'))
-        self.assertTrue(context._actions[1]['callable'] is protectModule)
+        self.assertIs(context._actions[1]['callable'], protectModule)
         self.assertEqual(context._actions[1]['args'],
                          ('testing', 'bar', zope_Public))
 
@@ -521,7 +521,7 @@ class Test_allow(unittest.TestCase):
         self.assertEqual(context._actions[0]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectModule)
+        self.assertIs(context._actions[0]['callable'], protectModule)
         self.assertEqual(context._actions[0]['args'],
                          ('testing', 'bar', zope_Public))
 
@@ -542,19 +542,19 @@ class Test_allow(unittest.TestCase):
         self.assertEqual(context._actions[0]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'foo'))
-        self.assertTrue(context._actions[0]['callable'] is protectModule)
+        self.assertIs(context._actions[0]['callable'], protectModule)
         self.assertEqual(context._actions[0]['args'],
                          ('testing', 'foo', zope_Public))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'bar'))
-        self.assertTrue(context._actions[1]['callable'] is protectModule)
+        self.assertIs(context._actions[1]['callable'], protectModule)
         self.assertEqual(context._actions[1]['args'],
                          ('testing', 'bar', zope_Public))
         self.assertEqual(context._actions[2]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'baz'))
-        self.assertTrue(context._actions[2]['callable'] is protectModule)
+        self.assertIs(context._actions[2]['callable'], protectModule)
         self.assertEqual(context._actions[2]['args'],
                          ('testing', 'baz', zope_Public))
 
@@ -597,13 +597,13 @@ class Test_requre(unittest.TestCase):
         self.assertEqual(context._actions[0]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'foo'))
-        self.assertTrue(context._actions[0]['callable'] is protectModule)
+        self.assertIs(context._actions[0]['callable'], protectModule)
         self.assertEqual(context._actions[0]['args'],
                          ('testing', 'foo', perm))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'bar'))
-        self.assertTrue(context._actions[1]['callable'] is protectModule)
+        self.assertIs(context._actions[1]['callable'], protectModule)
         self.assertEqual(context._actions[1]['args'],
                          ('testing', 'bar', perm))
 
@@ -623,7 +623,7 @@ class Test_requre(unittest.TestCase):
         self.assertEqual(context._actions[0]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'bar'))
-        self.assertTrue(context._actions[0]['callable'] is protectModule)
+        self.assertIs(context._actions[0]['callable'], protectModule)
         self.assertEqual(context._actions[0]['args'],
                          ('testing', 'bar', perm))
 
@@ -645,19 +645,19 @@ class Test_requre(unittest.TestCase):
         self.assertEqual(context._actions[0]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'foo'))
-        self.assertTrue(context._actions[0]['callable'] is protectModule)
+        self.assertIs(context._actions[0]['callable'], protectModule)
         self.assertEqual(context._actions[0]['args'],
                          ('testing', 'foo', perm))
         self.assertEqual(context._actions[1]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'bar'))
-        self.assertTrue(context._actions[1]['callable'] is protectModule)
+        self.assertIs(context._actions[1]['callable'], protectModule)
         self.assertEqual(context._actions[1]['args'],
                          ('testing', 'bar', perm))
         self.assertEqual(context._actions[2]['discriminator'],
                          ('http://namespaces.zope.org/zope:module',
                           'testing', 'baz'))
-        self.assertTrue(context._actions[2]['callable'] is protectModule)
+        self.assertIs(context._actions[2]['callable'], protectModule)
         self.assertEqual(context._actions[2]['args'],
                          ('testing', 'baz', perm))
 

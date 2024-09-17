@@ -71,7 +71,7 @@ class Test_ProxyFactory(unittest.TestCase):
         def _check(*x):
             raise AssertionError("Never called")
         returned = self._callFUT(obj, _check)
-        self.assertFalse(returned is obj)
+        self.assertIsNot(returned, obj)
         self.assertIs(getChecker(returned), _check)
 
     def test_no_checker_no_dunder_no_select(self):
@@ -88,7 +88,7 @@ class Test_ProxyFactory(unittest.TestCase):
             __Security_checker__ = _check
         obj = _WithChecker()
         returned = self._callFUT(obj)
-        self.assertFalse(returned is obj)
+        self.assertIsNot(returned, obj)
         self.assertIs(getObject(returned), obj)
         self.assertIs(getChecker(returned), _check)
 
@@ -109,7 +109,7 @@ class Test_ProxyFactory(unittest.TestCase):
         _checkers[_Obj] = _check
         try:
             returned = self._callFUT(obj)
-            self.assertFalse(returned is obj)
+            self.assertIsNot(returned, obj)
             self.assertIs(getObject(returned), obj)
             self.assertIs(getChecker(returned), _checker)
         finally:
@@ -386,7 +386,7 @@ class CheckerTestsBase(QuietWatchingChecker):
         obj = _WithChecker()
         checker = self._makeOne()
         returned = checker.proxy(obj)
-        self.assertFalse(returned is obj)
+        self.assertIsNot(returned, obj)
         self.assertIs(getObject(returned), obj)
         self.assertIs(getChecker(returned), _check)
 
@@ -408,7 +408,7 @@ class CheckerTestsBase(QuietWatchingChecker):
         try:
             checker = self._makeOne()
             returned = checker.proxy(obj)
-            self.assertFalse(returned is obj)
+            self.assertIsNot(returned, obj)
             self.assertIs(getObject(returned), obj)
             self.assertIs(getChecker(returned), _checker)
         finally:
@@ -427,10 +427,10 @@ class CheckerTestsBase(QuietWatchingChecker):
         proxy = Proxy(value, checker)
 
         self.assertTrue(proxy)
-        self.assertTrue(proxy < Decimal('2'))
-        self.assertTrue(proxy == Decimal('1.1'))
-        self.assertTrue(proxy > Decimal('1'))
-        self.assertTrue(proxy != Decimal('1'))
+        self.assertLess(proxy, Decimal('2'))
+        self.assertEqual(proxy, Decimal('1.1'))
+        self.assertGreater(proxy, Decimal('1'))
+        self.assertNotEqual(proxy, Decimal('1'))
         self.assertEqual(-proxy, Decimal('-1.1'))
         self.assertEqual(proxy + Decimal('1.1'), Decimal('2.2'))
         self.assertEqual(Decimal('1.1') + proxy, Decimal('2.2'))
@@ -1195,7 +1195,7 @@ class Test_undefineChecker(unittest.TestCase):
             pass
         _checkers[Foo] = object()
         self._callFUT(Foo)
-        self.assertFalse(Foo in _checkers)
+        self.assertNotIn(Foo, _checkers)
 
 
 class TestCombinedChecker(QuietWatchingChecker,
@@ -1693,7 +1693,7 @@ class TestSecurityPolicy(QuietWatchingChecker,
         # Py3 has no ClassType and no old-style classes
         import types
         old_type = getattr(types, 'ClassType', type)
-        self.assertTrue(old_type is type)
+        self.assertIs(old_type, type)
         return old_type
 
     def _makeSecurityPolicy(self):
@@ -2348,8 +2348,8 @@ class TestBasicTypes(unittest.TestCase):
         checker = object()
         BasicTypes[Foo] = checker
         del BasicTypes[Foo]
-        self.assertFalse(Foo in BasicTypes)
-        self.assertFalse(Foo in _checkers)
+        self.assertNotIn(Foo, BasicTypes)
+        self.assertNotIn(Foo, _checkers)
 
     def test_clear(self):
         from zope.security.checker import BasicTypes

@@ -5,7 +5,7 @@
 7.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Declare final support for Python 3.13.
 
 
 7.1 (2024-08-16)
