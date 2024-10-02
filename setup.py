@@ -31,6 +31,9 @@ from setuptools import setup
 from setuptools.command.build_ext import build_ext
 
 
+version = '7.3'
+
+
 class optional_build_ext(build_ext):
     """This class subclasses build_ext and allows
        the building of C extensions to fail.
@@ -104,7 +107,7 @@ TESTS_REQUIRE = [
 
 
 setup(name='zope.security',
-      version='7.3.dev0',
+      version=version,
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='Zope Security Framework',

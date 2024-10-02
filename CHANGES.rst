@@ -2,7 +2,7 @@
  Changes
 =========
 
-7.3 (unreleased)
+7.3 (2024-10-02)
 ----------------
 
 - Respect ``PURE_PYTHON`` environment variable set to ``0``.
