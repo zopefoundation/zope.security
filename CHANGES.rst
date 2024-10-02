@@ -5,6 +5,8 @@
 7.3 (unreleased)
 ----------------
 
+- Respect ``PURE_PYTHON`` environment variable set to ``0``.
+
 
 7.2 (2024-09-17)
 ----------------

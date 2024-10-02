@@ -24,10 +24,10 @@ It also defines helpers for permission checking (:func:`canAccess`,
 (:func:`getCheckerForInstancesOf`, :func:`selectChecker`).
 
 This module is accelerated with a C implementation on CPython by
-default. If the environment variable ``PURE_PYTHON`` is set (to any
-value) before this module is imported, the C extensions will be
-bypassed and the reference Python implementations will be used. This
-can be helpful for debugging and tracing.
+default. If the environment variable ``PURE_PYTHON`` is set to ``1``
+before this module is imported, the C extensions will be bypassed and
+the reference Python implementations will be used. This can be helpful for
+debugging and tracing.
 
 Debugging Permissions Problems
 ==============================

@@ -19,7 +19,7 @@ import platform
 
 py_impl = getattr(platform, 'python_implementation', lambda: None)
 PYPY = py_impl() == 'PyPy'
-PURE_PYTHON = os.environ.get('PURE_PYTHON', PYPY)
+PURE_PYTHON = int(os.environ.get('PURE_PYTHON', PYPY))
 
 
 class implementer_if_needed:
