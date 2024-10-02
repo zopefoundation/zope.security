@@ -31,7 +31,7 @@ from setuptools import setup
 from setuptools.command.build_ext import build_ext
 
 
-version = '7.3'
+version = '7.4.dev0'
 
 
 class optional_build_ext(build_ext):
@@ -159,7 +159,7 @@ setup(name='zope.security',
           'zope.i18nmessageid',
           'zope.interface',
           'zope.location',
-          'zope.proxy >= 5.2',
+          'zope.proxy >= 6.1',
           'zope.schema >= 4.2.0',
       ],
       extras_require={
