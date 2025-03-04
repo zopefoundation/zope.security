@@ -2,12 +2,12 @@
 # https://github.com/zopefoundation/meta/tree/master/config/c-code
 [meta]
 template = "c-code"
-commit-id = "d8a8b5ed"
+commit-id = "3c1c588c"
 
 [python]
 with-windows = true
 with-pypy = true
-with-future-python = false
+with-future-python = true
 with-docs = true
 with-sphinx-doctests = true
 with-macos = false
@@ -15,7 +15,7 @@ with-macos = false
 [tox]
 use-flake8 = true
 additional-envlist = [
-    "py38-watch, py311-watch",
+    "py39-watch, py313-watch",
     ]
 testenv-setenv = [
     "ZOPE_INTERFACE_STRICT_IRO=1",
@@ -53,12 +53,9 @@ additional-config = [
 
 [github-actions]
 additional-config = [
-    "- [\"3.8\",   \"py38-watch\"]",
-    "- [\"3.11\",  \"py311-watch\"]",
+    "- [\"3.8\",   \"py39-watch\"]",
+    "- [\"3.13\",  \"py313-watch\"]",
     ]
 additional-build-dependencies = [
     "zope.proxy",
     ]
-
-[c-code]
-require-cffi = true

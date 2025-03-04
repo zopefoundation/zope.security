@@ -5,6 +5,10 @@
 7.4 (unreleased)
 ----------------
 
+- Drop support for Python 3.8.
+
+- Add preliminary support for Python 3.14.
+
 
 7.3 (2024-10-02)
 ----------------
