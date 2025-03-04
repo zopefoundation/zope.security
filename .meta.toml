@@ -2,7 +2,7 @@
 # https://github.com/zopefoundation/meta/tree/master/config/c-code
 [meta]
 template = "c-code"
-commit-id = "3c1c588c"
+commit-id = "2d8bba0c"
 
 [python]
 with-windows = true
@@ -53,9 +53,6 @@ additional-config = [
 
 [github-actions]
 additional-config = [
-    "- [\"3.8\",   \"py39-watch\"]",
+    "- [\"3.9\",   \"py39-watch\"]",
     "- [\"3.13\",  \"py313-watch\"]",
-    ]
-additional-build-dependencies = [
-    "zope.proxy",
     ]

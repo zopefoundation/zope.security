@@ -5,6 +5,7 @@
 [build-system]
 requires = [
     "setuptools <= 75.6.0",
+    "zope.proxy",
 ]
 build-backend = "setuptools.build_meta"
 
