@@ -247,9 +247,6 @@ class TimeGenerator:
         pass
 
     def turn(self):
-
-        global _homes
-
         for h in _homes.values():
             agents = h.getAgents()
             for a in agents:
@@ -289,7 +286,6 @@ def WanderLust(agent):
 
 def GreenerPastures(agent):
     """ where do they want to go today """
-    global _homes
     possible_homes = _homes.keys()
     possible_homes.remove(agent.getHome().getId())
     return _homes.get(random.choice(possible_homes))

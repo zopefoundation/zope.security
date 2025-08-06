@@ -587,7 +587,6 @@ perms = []
 
 
 def dummy(context_, perm):
-    global perms
     perms.append(perm)
 
 
