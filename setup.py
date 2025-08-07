@@ -26,7 +26,6 @@ from distutils.errors import DistutilsExecError
 from distutils.errors import DistutilsPlatformError
 
 from setuptools import Extension
-from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.build_ext import build_ext
 
@@ -102,7 +101,7 @@ TESTS_REQUIRE = [
     'zope.configuration',
     'zope.location',
     'zope.testing',
-    'zope.testrunner',
+    'zope.testrunner >= 6.4',
 ]
 
 
@@ -144,9 +143,6 @@ setup(name='zope.security',
           'Sources': 'https://github.com/zopefoundation/zope.security',
       },
       license='ZPL-2.1',
-      packages=find_packages('src'),
-      package_dir={'': 'src'},
-      namespace_packages=['zope'],
       cmdclass={
           'build_ext': optional_build_ext,
       },
