@@ -26,12 +26,11 @@ from distutils.errors import DistutilsExecError
 from distutils.errors import DistutilsPlatformError
 
 from setuptools import Extension
-from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.build_ext import build_ext
 
 
-version = '7.4.dev0'
+version = '8.0.dev0'
 
 
 class optional_build_ext(build_ext):
@@ -102,7 +101,7 @@ TESTS_REQUIRE = [
     'zope.configuration',
     'zope.location',
     'zope.testing',
-    'zope.testrunner',
+    'zope.testrunner >= 6.4',
 ]
 
 
@@ -144,9 +143,10 @@ setup(name='zope.security',
           'Sources': 'https://github.com/zopefoundation/zope.security',
       },
       license='ZPL-2.1',
-      packages=find_packages('src'),
+      # we need the following two parameters because we compile C code,
+      # otherwise only the shared library is installed:
       package_dir={'': 'src'},
-      namespace_packages=['zope'],
+      packages=['zope.security',],
       cmdclass={
           'build_ext': optional_build_ext,
       },
