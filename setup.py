@@ -158,7 +158,7 @@ setup(name='zope.security',
           'zope.i18nmessageid',
           'zope.interface',
           'zope.location',
-          'zope.proxy >= 7',
+          'zope.proxy >= 6.1',
           'zope.schema >= 4.2.0',
       ],
       extras_require={
