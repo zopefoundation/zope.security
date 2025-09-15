@@ -14,7 +14,7 @@
 #include <Python.h>
 
 static PyObject *_checkers, *_defaultChecker, *_available_by_default, *NoProxy;
-static PyObject *Proxy, *thread_local, *CheckerPublic;
+static PyObject *Proxy, *_thread_local, *CheckerPublic;
 static PyObject *ForbiddenAttribute, *Unauthorized;
 
 
@@ -105,7 +105,7 @@ checkPermission(PyObject *permission, PyObject *object, PyObject *name)
 
 /*          if thread_local.interaction.checkPermission(permission, object): */
 /*                 return */
-      interaction = PyObject_GetAttr(thread_local, str_interaction);
+      interaction = PyObject_GetAttr(_thread_local, str_interaction);
       if (interaction == NULL)
         return -1;
       r = PyObject_CallMethodObjArgs(interaction, str_checkPermission,
@@ -620,8 +620,8 @@ if((str_##S = INTERN(#S)) == NULL) return MOD_ERROR_VAL
   {
     return MOD_ERROR_VAL;
   }
-  thread_local = PyObject_GetAttrString(m, "thread_local");
-  if (thread_local == NULL)
+  _thread_local = PyObject_GetAttrString(m, "thread_local");
+  if (_thread_local == NULL)
   {
     return MOD_ERROR_VAL;
   }
