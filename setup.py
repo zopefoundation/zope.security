@@ -153,7 +153,6 @@ setup(name='zope.security',
       ext_modules=ext_modules,
       python_requires='>=3.9',
       install_requires=[
-          'setuptools',
           'zope.component',
           'zope.i18nmessageid',
           'zope.interface',
