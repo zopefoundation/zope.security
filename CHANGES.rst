@@ -2,7 +2,7 @@
  Changes
 =========
 
-8.1 (unreleased)
+8.1 (2025-09-23)
 ----------------
 
 - Fix ``zope.security._zope_security_checker`` extension build failure with C23.
