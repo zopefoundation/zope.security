@@ -5,7 +5,8 @@
 8.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix ``zope.security._zope_security_checker`` extension build failure with
+  C23.
 
 
 8.0 (2025-09-15)
