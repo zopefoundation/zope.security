@@ -5,7 +5,7 @@
 8.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Remove run-time dependency on ``setuptools``.
 
 
 8.1 (2025-09-23)
