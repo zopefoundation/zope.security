@@ -5,6 +5,8 @@
 8.2 (unreleased)
 ----------------
 
+- Drop support for Python 3.9.
+
 - Remove run-time dependency on ``setuptools``.
 
 
