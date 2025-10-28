@@ -30,7 +30,7 @@ from setuptools import setup
 from setuptools.command.build_ext import build_ext
 
 
-version = '8.2'
+version = '8.3.dev0'
 
 
 class optional_build_ext(build_ext):
