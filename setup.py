@@ -30,9 +30,6 @@ from setuptools import setup
 from setuptools.command.build_ext import build_ext
 
 
-version = '8.3.dev0'
-
-
 class optional_build_ext(build_ext):
     """This class subclasses build_ext and allows
        the building of C extensions to fail.
@@ -58,14 +55,6 @@ class optional_build_ext(build_ext):
         print()
         print(e)
         print('*' * 80)
-
-
-here = os.path.abspath(os.path.dirname(__file__))
-
-
-def read(*rnames):
-    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
-        return f.read()
 
 
 codeoptimization = [
@@ -95,90 +84,5 @@ else:
     ext_modules = codeoptimization
 
 
-TESTS_REQUIRE = [
-    'BTrees',
-    'zope.component',
-    'zope.configuration',
-    'zope.location',
-    'zope.testing',
-    'zope.testrunner >= 6.4',
-]
-
-
-setup(name='zope.security',
-      version=version,
-      author='Zope Foundation and Contributors',
-      author_email='zope-dev@zope.dev',
-      description='Zope Security Framework',
-      long_description=(
-          read('README.rst')
-          + '\n\n' +
-          read('CHANGES.rst')
-      ),
-      keywords="zope security policy principal permission",
-      classifiers=[
-          'Development Status :: 5 - Production/Stable',
-          'Environment :: Web Environment',
-          'Intended Audience :: Developers',
-          'License :: OSI Approved :: Zope Public License',
-          'Programming Language :: Python',
-          'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.10',
-          'Programming Language :: Python :: 3.11',
-          'Programming Language :: Python :: 3.12',
-          'Programming Language :: Python :: 3.13',
-          'Programming Language :: Python :: 3.14',
-          'Programming Language :: Python :: Implementation :: CPython',
-          'Programming Language :: Python :: Implementation :: PyPy',
-          'Natural Language :: English',
-          'Operating System :: OS Independent',
-          'Topic :: Internet :: WWW/HTTP',
-          'Framework :: Zope :: 3',
-      ],
-      url='http://github.com/zopefoundation/zope.security',
-      project_urls={
-          'Documentation': 'https://zopesecurity.readthedocs.io',
-          'Issue Tracker': ('https://github.com/zopefoundation'
-                            '/zope.security/issues'),
-          'Sources': 'https://github.com/zopefoundation/zope.security',
-      },
-      license='ZPL-2.1',
-      # we need the following two parameters because we compile C code,
-      # otherwise only the shared library is installed:
-      package_dir={'': 'src'},
-      packages=['zope.security',],
-      cmdclass={
-          'build_ext': optional_build_ext,
-      },
-      ext_modules=ext_modules,
-      python_requires='>=3.10',
-      install_requires=[
-          'zope.component',
-          'zope.i18nmessageid',
-          'zope.interface',
-          'zope.location',
-          'zope.proxy >= 6.1',
-          'zope.schema >= 4.2.0',
-      ],
-      extras_require={
-          'pytz': [
-              "pytz"
-          ],
-          'untrustedpython': [
-              'zope.untrustedpython >= 5.0.dev0',
-          ],
-          'zcml': [
-              'zope.configuration'
-          ],
-          'test': TESTS_REQUIRE,
-          'docs': [
-              'Sphinx',
-              'repoze.sphinx.autointerface',
-              'sphinx_rtd_theme',
-              'zope.configuration',
-              'zope.testing',
-          ],
-      },
-      include_package_data=True,
-      zip_safe=False,
-      )
+setup(cmdclass={'build_ext': optional_build_ext},
+      ext_modules=ext_modules)

@@ -1,11 +1,10 @@
-=========
- Changes
-=========
+Change log
+==========
 
 8.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Move all supported package metadata into ``pyproject.toml``.
 
 
 8.2 (2025-10-28)
@@ -79,14 +78,14 @@
 
 
 6.1 (2023-01-18)
-================
+----------------
 
 - Remove more proxying code for names that no longer exist in Python 3.
   (`#92 <https://github.com/zopefoundation/zope.security/issues/92>`_)
 
 
 6.0 (2023-01-16)
-================
+----------------
 
 - Remove proxying code for names that no longer exist in Python 3.
   (`#92 <https://github.com/zopefoundation/zope.security/issues/92>`_)
@@ -95,39 +94,39 @@
 
 
 5.8 (2022-11-30)
-================
+----------------
 
 - The extra ``untrustedpython`` now for Python 3, too, installs
   ``zope.untrustedpython``.
 
 
 5.7 (2022-11-17)
-================
+----------------
 
 - Release to rebuild full set of binary wheels.
 
 
 5.6 (2022-11-16)
-================
+----------------
 
 - Add support for building arm64 wheels on macOS.
 
 
 5.5 (2022-11-06)
-================
+----------------
 
 - Add support for final release of Python 3.11.
 
 
 5.4 (2022-09-15)
-================
+----------------
 
 - Disable unsafe math optimizations in C code.  See `pull request 89
   <https://github.com/zopefoundation/zope.security/pull/89>`_.
 
 
 5.3 (2022-04-27)
-================
+----------------
 
 - Allow calling bound methods of some built-in objects such as ``().__repr__``
   and ``{}.__repr__`` by default. This worked on Python 2, but raised
@@ -142,13 +141,13 @@
 
 
 5.2 (2022-03-10)
-================
+----------------
 
 - Add support for Python 3.9 and 3.10.
 
 
 5.1.1 (2020-03-23)
-==================
+------------------
 
 - Ensure all objects have consistent interface resolution orders (if
   all dependencies are up-to-date). See `issue 71
@@ -156,7 +155,7 @@
 
 
 5.1.0 (2020-02-14)
-==================
+------------------
 
 - Let proxied interfaces be iterated on Python 3. This worked on
   Python 2, but raised ``ForbiddenAttribute`` an Python 3. See
@@ -166,7 +165,7 @@
 
 
 5.0.0 (2019-11-11)
-==================
+------------------
 
 - Drop support for Python 3.4.
 
@@ -179,14 +178,14 @@
 
 
 4.3.1 (2019-01-03)
-==================
+------------------
 
 - Fix the decimal.Decimal checker, ``__truediv__`` was missing causing
   ``ForbiddenAttribute`` on a ``ProxyFactory(Decimal('1')) / 1`` operation
 
 
 4.3.0 (2018-08-24)
-==================
+------------------
 
 - Add the interface ``ISystemPrincipal`` and make
   ``zope.security.management.system_user`` a regular object that
@@ -195,13 +194,13 @@
 
 
 4.2.3 (2018-08-09)
-==================
+------------------
 
 - Add support for Python 3.7.
 
 
 4.2.2 (2018-01-11)
-==================
+------------------
 
 - Make the pure-Python proxy on Python 2 *not* check permissions for
   ``__unicode__`` just like the C implementation. Note that
@@ -213,7 +212,7 @@
 
 
 4.2.1 (2017-11-30)
-==================
+------------------
 
 - Fix the default values for ``Permission`` fields ``title`` and
   ``description`` under Python 2. See `issue 48
@@ -225,7 +224,7 @@
 
 
 4.2.0 (2017-09-20)
-==================
+------------------
 
 - Fix the extremely rare potential for a crash when the C extensions
   are in use. See `issue 35 <https://github.com/zopefoundation/zope.security/issues/35>`_.
@@ -282,8 +281,9 @@
 
 - Reach 100% test coverage and maintain it via automated checks.
 
+
 4.1.1 (2017-05-17)
-==================
+------------------
 
 - Fix `issue 23 <https://github.com/zopefoundation/zope.security/issues/23>`_:
   iteration of ``collections.OrderedDict`` and its various views is
@@ -292,8 +292,9 @@
 - As a further fix for issue 20, iteration of ``BTree`` itself is now
   allowed by default.
 
+
 4.1.0 (2017-04-24)
-==================
+------------------
 
 - When testing ``PURE_PYTHON`` environments under ``tox``, avoid poisoning
   the user's global wheel cache.
@@ -306,27 +307,31 @@
   iteration of pure-Python ``BTrees.items()``, and also creating a list from
   ``BTrees.items()`` on Python 3. The same applies for ``keys()`` and ``values()``.
 
+
 4.0.3 (2015-06-02)
-==================
+------------------
 
 - Fix iteration over security proxies in Python 3 using the pure-Python
   implementation.
 
+
 4.0.2 (2015-06-02)
-==================
+------------------
 
 - Fix compatibility with ``zope.proxy`` 4.1.5 under PyPy.
 
 - Fix the very first call to ``removeSecurityProxy`` returning
   incorrect results if given a proxy under PyPy.
 
+
 4.0.1 (2014-03-19)
-==================
+------------------
 
 - Add support for Python 3.4.
 
+
 4.0.0 (2013-07-09)
-==================
+------------------
 
 - Update ``boostrap.py`` to version 2.2.
 
@@ -337,7 +342,7 @@
 
 
 4.0.0b1 (2013-03-11)
-====================
+--------------------
 
 - Add support for PyPy.
 
@@ -345,26 +350,27 @@
 
 
 4.0.0a5 (2013-02-28)
-====================
+--------------------
 
 - Undo changes from 4.0.0a4. Instead, ``zope.untrustedpython`` is only
   included during Python 2 installs.
 
 
 4.0.0a4 (2013-02-28)
-====================
+--------------------
 
 - Remove ``untrustedpython`` extra again, since we do not want to support
   ``zope.untrustedpython`` in ZTK 2.0. If BBB is really needed, we will create
   a 3.10.0 release.
 
 4.0.0a3 (2013-02-15)
-====================
+--------------------
 
 - Fix test breakage in 4.0.0a2 due to deprecation strategy.
 
+
 4.0.0a2 (2013-02-15)
-====================
+--------------------
 
 - Add back the ``untrustedpython`` extra:  now pulls in
   ``zope.untrustedpython``.  Restored deprecated backward-compatible imports
@@ -373,7 +379,7 @@
 
 
 4.0.0a1 (2013-02-14)
-====================
+--------------------
 
 - Add support for Python 3.2 and 3.3.
 
@@ -423,27 +429,31 @@
 - Add test convenience helper ``create_interaction`` and
   ``with interaction()``.
 
+
 3.9.0 (2012-12-21)
-==================
+------------------
 
 - Pin ``zope.proxy >= 4.1.0``
 
 - Ship with an included ``proxy.h`` header which is compatible with the
   4.1.x version ov ``zope.proxy``.
 
+
 3.8.5 (2012-12-21)
-==================
+------------------
 
 - Ship with an included ``proxy.h`` header which is compatible with the
   supported versions of ``zope.proxy``.
 
+
 3.8.4 (2012-12-20)
-==================
+------------------
 
 - Pin ``zope.proxy >= 3.4.2, <4.1dev``
 
+
 3.8.3 (2011-09-24)
-==================
+------------------
 
 - Fix a regression introduced in 3.8.1: ``zope.location``\'s LocationProxy
   did not get a security checker if ``zope.security.decorator`` was not
@@ -451,14 +461,15 @@
   ``zope.security.proxy`` without re-introducing the circular import fixed in
   3.8.1.
 
+
 3.8.2 (2011-05-24)
-==================
+------------------
 
 - Fix a test that failed on Python 2.7.
 
 
 3.8.1 (2011-05-03)
-==================
+------------------
 
 - Fix circular import beween ``zope.security.decorator`` and
   ``zope.security.proxy`` which led to an ``ImportError`` when only
@@ -466,7 +477,7 @@
 
 
 3.8.0 (2010-12-14)
-==================
+------------------
 
 - Add tests for our own ``configure.zcml``.
 
@@ -478,7 +489,7 @@
 
 
 3.7.3 (2010-04-30)
-==================
+------------------
 
 - Prefer the standard library's ``doctest`` module to the one from
   ``zope.testing``.
@@ -494,13 +505,13 @@
 
 
 3.7.2 (2009-11-10)
-==================
+------------------
 
 - Add compatibility with Python 2.6 abstract base classes.
 
 
 3.7.1 (2009-08-13)
-==================
+------------------
 
 - Fix for LP bug 181833 (from Gustavo Niemeyer). Before "visiting" a
   sub-object, a check should be made to ensure the object is still valid.
@@ -512,7 +523,7 @@
 
 
 3.7.0 (2009-05-13)
-==================
+------------------
 
 - Make ``pytz`` a soft dependency:  the checker for ``pytz.UTC`` is
   created / tested only if the package is already present.  Run
@@ -520,7 +531,7 @@
 
 
 3.6.3 (2009-03-23)
-==================
+------------------
 
 - Ensure that simple zope.schema's ``VocabularyRegistry`` is used for
   ``PermissionVocabulary`` tests, because it's replaced implicitly in
@@ -534,7 +545,7 @@
 
 
 3.6.2 (2009-03-14)
-==================
+------------------
 
 - Add ``zope.i18nmessageid.Message`` to non-proxied basic types. It's okay,
   because messages are immutable. Done previously by ``zope.app.security``.
@@ -563,7 +574,7 @@
 
 
 3.6.1 (2009-03-10)
-==================
+------------------
 
 - Use ``from`` imports instead of ``zope.deferred`` to avoid circular
   import problems, thus drop dependency on ``zope.deferredimport``.
@@ -582,7 +593,7 @@
 
 
 3.6.0 (2009-01-31)
-==================
+------------------
 
 - Install decorated security checker support on ``LocationProxy`` from the
   outside.
@@ -600,27 +611,27 @@
 
 
 3.5.2 (2008-07-27)
-==================
+------------------
 
 - Make C code compatible with Python 2.5 on 64bit architectures.
 
 
 3.5.1 (2008-06-04)
-==================
+------------------
 
 - Add ``frozenset``, ``set``, ``reversed``, and ``sorted`` to the list of
   safe builtins.
 
 
 3.5.0 (2008-03-05)
-==================
+------------------
 
 - Changed title for ``zope.security.management.system_user`` to be more
   presentable.
 
 
 3.4.3 - (2009/11/26)
-====================
+--------------------
 
 - Backport a fix made by Gary Poster to the 3.4 branch:
   Fix for LP bug 181833 (from Gustavo Niemeyer). Before "visiting" a
@@ -633,7 +644,7 @@
 
 
 3.4.2 - (2009/03/23)
-====================
+--------------------
 
 - Add dependency on ``zope.thread`` to setup.py; without it, the tests were
   failing.
@@ -646,31 +657,31 @@
 
 
 3.4.1 - 2008/07/27
-==================
+------------------
 
 - Make C code compatible with Python 2.5 on 64bit architectures.
 
 
 3.4.0 (2007-10-02)
-==================
+------------------
 
 - Update meta-data.
 
 
 3.4.0b5 (2007-08-15)
-====================
+--------------------
 
 - Fix a circular import in the C implementation.
 
 
 3.4.0b4 (2007-08-14)
-====================
+--------------------
 
 - Improve ugly/brittle ID of ``zope.security.management.system_user``.
 
 
 3.4.0b3 (2007-08-14)
-====================
+--------------------
 
 - Add support for Python 2.5.
 
@@ -683,7 +694,7 @@
 
 
 3.4.0b2 (2007-06-15)
-====================
+--------------------
 
 - Bug: Remove stack extraction in ``newInteraction``. When using eggs this is
   an extremly expensive function. The publisher is now more than 10 times
@@ -691,7 +702,7 @@
 
 
 3.4.0b1
-=======
+-------
 
 - Temporarily fixed the hidden (and accidental) dependency on zope.testing to
   become optional.
@@ -701,7 +712,7 @@ individual package and have been documented in the Zope 3 changelog.
 
 
 3.2.0 (2006-01-05)
-==================
+------------------
 
 - Corresponds to the verison of the ``zope.security`` package shipped as part
   of the Zope 3.2.0 release.
@@ -720,7 +731,7 @@ individual package and have been documented in the Zope 3 changelog.
 
 
 3.1.0 (2005-10-03)
-==================
+------------------
 
 - Add support for use of the new Python 2.4 datatypes, ``set`` and
   ``frozenset``, within checked code.
@@ -749,7 +760,7 @@ individual package and have been documented in the Zope 3 changelog.
 
 
 3.0.0 (2004-11-07)
-==================
+------------------
 
 - Corresponds to the version of the ``zope.security`` package shipped as part
   of the Zope X3.0.0 release.

@@ -12,14 +12,15 @@
 # to show the default.
 
 
+import datetime
 import os
 import sys
+from importlib.metadata import distribution
 
-import pkg_resources
 
-
+year = datetime.datetime.now().year
 sys.path.append(os.path.abspath('../src'))
-rqmt = pkg_resources.require('zope.security')[0]
+rqmt = distribution('zope.security')
 
 # We can't have ZOPE_WATCH_CHECKERS set because it interferes
 # with doctests
@@ -59,7 +60,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'zope.security'
-copyright = '2012, Zope Foundation Contributors <zope-dev@zope.org>'
+copyright = f'2012-{year}, Zope Foundation and contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -110,7 +111,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
