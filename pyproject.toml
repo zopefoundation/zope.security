@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "zope.security"
-version = "8.3"
+version = "8.4.dev0"
 description = "Zope Security Framework"
 keywords = ["zope", "security", "policy", "principal", "permission"]
 readme = "README.rst"
