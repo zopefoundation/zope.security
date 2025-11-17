@@ -10,6 +10,73 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "zope.security"
+version = "8.3.dev0"
+description = "Zope Security Framework"
+keywords = ["zope", "security", "policy", "principal", "permission"]
+readme = "README.rst"
+requires-python = ">=3.10"
+license = "ZPL-2.1"
+authors = [
+  { name = "Zope Foundation and contributors", email = "zope-dev@zope.dev" },
+]
+maintainers = [
+  { name = "Plone Foundation and contributors", email = "zope-dev@zope.dev" },
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Web Environment",
+  "Framework :: Zope :: 3",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: Internet :: WWW/HTTP",
+]
+dependencies = [
+  "zope.component",
+  "zope.i18nmessageid",
+  "zope.interface",
+  "zope.location",
+  "zope.proxy >= 6.1",
+  "zope.schema >= 4.2.0",
+]
+
+[project.optional-dependencies]
+docs = [
+  "Sphinx",
+  "repoze.sphinx.autointerface",
+  "furo",
+  "zope.configuration",
+  "zope.testing",
+]
+pytz = ["pytz"]
+test = [
+  "BTrees",
+  "zope.component",
+  "zope.configuration",
+  "zope.location",
+  "zope.testing",
+  "zope.testrunner >= 6.4",
+]
+untrustedpython = ["zope.untrustedpython >= 5"]
+zcml = ["zope.configuration"]
+
+[project.urls]
+Documentation = "https://zopesecurity.readthedocs.io"
+Issues = "https://github.com/zopefoundation/zope.security/issues"
+Source = "https://github.com/zopefoundation/zope.security"
+Changelog = "https://github.com/zopefoundation/zope.security/blob/master/CHANGES.rst"
+
 [tool.coverage.run]
 branch = true
 source = ["zope.security"]
