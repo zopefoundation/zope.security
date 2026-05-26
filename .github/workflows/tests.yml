@@ -94,6 +94,7 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
         os: [ubuntu-latest, macos-latest, windows-latest, windows-11-arm]
         exclude:
           - os: macos-latest
@@ -145,7 +146,14 @@ jobs:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
 
+
+      - name: Install Build Dependencies (3.15)
+        if: startsWith(matrix.python-version, '3.15')
+        run: |
+          pip install -U pip
+          pip install -U "setuptools >= 78.1.1,< 82" wheel twine cffi pycparser
       - name: Install Build Dependencies
+        if: ${{ !startsWith(matrix.python-version, '3.15') }}
         run: |
           pip install -U pip
           pip install -U "setuptools >= 78.1.1,< 82" wheel twine
@@ -193,7 +201,15 @@ jobs:
         run: |
           python setup.py sdist
 
+      - name: Install zope.security and dependencies (3.15)
+        if: startsWith(matrix.python-version, '3.15')
+        run: |
+          # Install to collect dependencies into the (pip) cache.
+          # Use "--pre" here because dependencies with support for this future
+          # Python release may only be available as pre-releases
+          pip install --pre .[test]
       - name: Install zope.security and dependencies
+        if: ${{ !startsWith(matrix.python-version, '3.15') }}
         run: |
           # Install to collect dependencies into the (pip) cache.
           pip install -U pip "setuptools >= 78.1.1,< 82"
@@ -257,6 +273,7 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
         os: [ubuntu-latest, macos-latest, windows-latest, windows-11-arm]
         exclude:
           - os: macos-latest
@@ -307,6 +324,7 @@ jobs:
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
+
       - name: Download zope.security wheel (Linux/macOS)
         if: "!startsWith(runner.os, 'Windows')"
         uses: actions/download-artifact@v8
@@ -320,7 +338,23 @@ jobs:
         with:
           name: zope.security-${{ runner.os }}-${{ matrix.python-version }}-${{ runner.arch }}.whl
           path: dist/
+      - name: Install zope.security ${{ matrix.python-version }}
+        if: startsWith(matrix.python-version, '3.15')
+        run: |
+          pip install -U wheel "setuptools >= 78.1.1,< 82"
+          # coverage might have a wheel on PyPI for a future python version which is
+          # not ABI compatible with the current one, so build it from sdist:
+          pip install -U --no-binary :all: coverage[toml]
+          # Unzip into src/ so that testrunner can find the .so files
+          # when we ask it to load tests from that directory. This
+          # might also save some build time?
+          ls -l dist/
+          unzip -n dist/*.whl -d src
+          # Use "--pre" here because dependencies with support for this future
+          # Python release may only be available as pre-releases
+          pip install --pre -e .[test]
       - name: Install zope.security
+        if: ${{ !startsWith(matrix.python-version, '3.15') }}
         run: |
           pip install -U wheel "setuptools >= 78.1.1,< 82"
           pip install -U coverage[toml]
@@ -348,7 +382,7 @@ jobs:
       - name: Submit to Coveralls
         # This is a container action, which only runs on Linux.
         if: ${{ startsWith(runner.os, 'Linux') }}
-        uses: AndreMiras/coveralls-python-action@develop
+        uses: coverallsapp/github-action@v2
         with:
           parallel: true
 
@@ -357,7 +391,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: AndreMiras/coveralls-python-action@develop
+      uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
 
@@ -410,6 +444,7 @@ jobs:
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
+
       - name: Download zope.security wheel
         uses: actions/download-artifact@v8
         with:
@@ -476,6 +511,7 @@ jobs:
         with:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ matrix.python-version }}
+
       - name: Download zope.security wheel
         uses: actions/download-artifact@v8
         with:
@@ -550,6 +586,7 @@ jobs:
           path: ${{ steps.pip-cache-windows.outputs.dir }}
           key: ${{ runner.os }}-pip_manylinux-${{ matrix.image }}-${{ matrix.python-version }}
 
+
       - name: Update pip
         run: pip install -U pip
 
@@ -578,6 +615,9 @@ jobs:
 
       - name: Restore pip cache permissions
         run: sudo chown -R $(whoami) ${{ steps.pip-cache-default.outputs.dir }}
+
+      - name: Prevent publishing wheels for unreleased Python versions
+        run: VER=$(echo '3.15' | tr -d .) && ls -al wheelhouse && sudo rm -f wheelhouse/*-cp${VER}*.whl && ls -al wheelhouse
 
   publish:
     name: Publish to PyPI
