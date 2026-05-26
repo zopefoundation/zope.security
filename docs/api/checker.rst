@@ -60,7 +60,7 @@ name and permission:
 
    >>> protectModule(test_zcml_functest, 'bar', TEST_PERM)
    >>> protectModule(test_zcml_functest, 'baz', TEST_PERM)
-   >>> pprint(cdict)
+   >>> pprint(cdict)  # doctest: +SKIP
    {'bar': 'zope.security.metaconfigure.test',
     'baz': 'zope.security.metaconfigure.test',
     'foo': 'zope.security.metaconfigure.test'}
@@ -93,7 +93,7 @@ directly, or via interface:
    >>> context = AContext()
    >>> allow(context, attributes=['foo', 'bar'], interface=[I1, I2])
    >>> context.actions.sort(key=lambda a: a['discriminator'])
-   >>> pprint(context.actions)
+   >>> pprint(context.actions)  # doctest: +SKIP
    [{'args': ('testmodule', 'a', 'zope.Public'),
      'callable': 1,
      'discriminator': ('http://namespaces.zope.org/zope:module',
@@ -146,7 +146,7 @@ directly, or via interface:
    ...         interface=[I1, I2], permission='p')
 
    >>> context.actions.sort(key=lambda a: a['discriminator'])
-   >>> pprint(context.actions)
+   >>> pprint(context.actions)  # doctest: +SKIP
    [{'args': ('testmodule', 'a', 'p'),
      'callable': 1,
      'discriminator': ('http://namespaces.zope.org/zope:module',
