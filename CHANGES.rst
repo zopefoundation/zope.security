@@ -4,10 +4,10 @@ Change log
 8.5 (unreleased)
 ----------------
 
-
 - Add support for Python 3.15.
 
 - Drop support for Python 3.10.
+
 
 8.4 (2026-08-20)
 ----------------
