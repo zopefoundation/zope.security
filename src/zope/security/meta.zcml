@@ -12,7 +12,7 @@
       name="securityPolicy"
       namespace="http://namespaces.zope.org/zope"
       schema=".zcml.ISecurityPolicyDirective"
-      handler=".zcml.securityPolicy" 
+      handler=".zcml.securityPolicy"
       />
 
   <meta:directive
