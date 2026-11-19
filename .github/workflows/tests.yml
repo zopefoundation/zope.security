@@ -220,7 +220,11 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: zope.security-${{ runner.os }}-${{ matrix.python-version }}.whl
-          path: dist/*arm64.whl
+          # PyPy builds a pure Python wheel if it does not build the C
+          # extension. It is needed by the test job but never published.
+          path: |
+            dist/*arm64.whl
+            dist/*none-any.whl
       - name: Upload zope.security wheel (Windows)
         if: startsWith(runner.os, 'Windows')
         uses: actions/upload-artifact@v7
